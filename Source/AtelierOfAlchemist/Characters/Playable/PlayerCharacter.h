@@ -25,6 +25,8 @@ private:
 public:
 	APlayerCharacter();
 
+	USpringArmComponent* GetSpringArm() { return CameraBoom; };
+
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };
