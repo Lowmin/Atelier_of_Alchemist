@@ -53,6 +53,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	float ZoomInterpSpeed = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Move")
+	float CharacterRotationInterpSpeed = 10.0f;
+
+	FVector2D LastMovementInput;
+
 protected:
 	// 조작 관련
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
@@ -77,4 +82,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	void UpdateCameraLook(float DeltaTime);
+	void UpdateCameraZoom(float DeltaTime);
+	void UpdateCharacterRotate(float DeltaTime);
 };

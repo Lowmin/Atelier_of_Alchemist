@@ -14,17 +14,19 @@ APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	// 캐릭터는 컨트롤러의 Yaw 회전을 따라가지 않음 (수동 제어)
 	bUseControllerRotationYaw = false;
+	// 캐릭터는 이동 방향으로 자동 회전하지 않음 (수동 제어)
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 800.f;
-	SpringArm->bUsePawnControlRotation = false;
+	// 스프링 암은 컨트롤러의 회전을 따라가도록 반드시 true로 설정해야 합니다.
+	SpringArm->bUsePawnControlRotation = true;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
-
-	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -58,10 +60,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (Controller != nullptr)
 	{
-		const FRotator CurrentRotation = Controller->GetControlRotation();
-		const FRotator TargetRotation = FRotator(CameraPitch, CameraYaw, 0.0f);
-		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, CameraInterpSpeed);
-		Controller->SetControlRotation(NewRotation);
+		// 카메라 관련
+		UpdateCameraLook(DeltaTime);
+		UpdateCameraZoom(DeltaTime);
+
+		// 캐릭터 이동 관련
+		UpdateCharacterRotate(DeltaTime);
 	}
 }
 
@@ -74,14 +78,60 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 	CameraPitch = FMath::Clamp(CameraPitch, -75.0f, 75.0f);
 }
 
+void APlayerCharacter::UpdateCameraLook(float DeltaTime)
+{
+	const FRotator CurrentRotation = Controller->GetControlRotation();
+	const FRotator TargetRotation = FRotator(CameraPitch, CameraYaw, 0.0f);
+	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, CameraInterpSpeed);
+
+	Controller->SetControlRotation(NewRotation);
+}
+
 void APlayerCharacter::Zoom(const FInputActionValue& Value)
 {
 	const float ZoomVector = Value.Get<float>();
-	TargetSpringArmLength += ZoomVector * ZoomRate * GetWorld()->GetDeltaSeconds();
+
+	TargetSpringArmLength += ZoomVector * ZoomRate;
 	TargetSpringArmLength = FMath::Clamp(TargetSpringArmLength, MinSpringArmLength, MaxSpringArmLength);
+}
+
+void APlayerCharacter::UpdateCameraZoom(float DeltaTime)
+{
+	if (SpringArm)
+	{
+		float CurrentSpringArmLength = SpringArm->TargetArmLength;
+		float NewSpringArmLength = FMath::FInterpTo(CurrentSpringArmLength, TargetSpringArmLength, DeltaTime, ZoomInterpSpeed);
+
+		SpringArm->TargetArmLength = NewSpringArmLength;
+	}
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
+	const FVector2D MoveVector = Value.Get<FVector2D>();
 
+	if (Controller != nullptr)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(ForwardDirection, MoveVector.Y);
+		AddMovementInput(RightDirection, MoveVector.X);
+	}
+}
+
+void APlayerCharacter::UpdateCharacterRotate(float DeltaTime)
+{
+	const FVector CurrentVelocity = GetCharacterMovement()->GetLastUpdateVelocity();
+
+	if (!CurrentVelocity.IsNearlyZero())
+	{
+		const FRotator TargetRotation = CurrentVelocity.Rotation();
+
+		FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, CharacterRotationInterpSpeed);
+		SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
+	}
 }
