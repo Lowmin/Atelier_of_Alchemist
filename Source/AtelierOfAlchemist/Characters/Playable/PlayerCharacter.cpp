@@ -14,15 +14,12 @@ APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 캐릭터는 컨트롤러의 Yaw 회전을 따라가지 않음 (수동 제어)
 	bUseControllerRotationYaw = false;
-	// 캐릭터는 이동 방향으로 자동 회전하지 않음 (수동 제어)
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 800.f;
-	// 스프링 암은 컨트롤러의 회전을 따라가도록 반드시 true로 설정해야 합니다.
 	SpringArm->bUsePawnControlRotation = true;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
