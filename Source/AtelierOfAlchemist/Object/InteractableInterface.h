@@ -23,10 +23,10 @@ class ATELIEROFALCHEMIST_API IInteractableInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
-	void BeginOverlap();
+	void BeginFocus();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
-	void EndOverlap();
+	void EndFocus();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
 	void Interact(APlayerCharacter* Interactor);
