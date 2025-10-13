@@ -19,7 +19,7 @@ APlayerCharacter::APlayerCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 800.f;
+	SpringArm->TargetArmLength = 400.f;
 	SpringArm->bUsePawnControlRotation = true;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -54,6 +54,19 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Spd
+	float CurrentSpeed = GetCharacterMovement()->GetLastUpdateVelocity().Size();
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,                    
+			0.0f,                   
+			FColor::Yellow,          
+			FString::Printf(TEXT("Current Speed: %.2f"), CurrentSpeed)
+		);
+	}
 
 	if (Controller != nullptr)
 	{

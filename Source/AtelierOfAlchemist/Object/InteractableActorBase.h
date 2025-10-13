@@ -10,8 +10,8 @@
 class USphereComponent;
 class APlayerCharacter;
 
-UCLASS()
-class ATELIEROFALCHEMIST_API AInteractableActorBase : public AActor
+UCLASS(Abstract)
+class ATELIEROFALCHEMIST_API AInteractableActorBase : public AActor, public IInteractableInterface
 {
 	GENERATED_BODY()
 	
@@ -22,6 +22,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Mesh;
@@ -29,13 +30,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> ObjectSensor;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
+	void OnPlayerEnter(APlayerCharacter* PlayerCharacter);
+	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
+	void OnPlayerLeave(APlayerCharacter* PlayerCharacter);
+	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter);
+
+private:
 	UFUNCTION()
-	virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	virtual void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:	
-	virtual void Interact_Implementation(APlayerCharacter* Interactor) override PURE_VIRTUAL(AInteractableActorBase::Interact_Implementation, );
+	virtual void Interact_Implementation(APlayerCharacter* Interactor) override PURE_VIRTUAL(AInteractableActorBase::Interact_Implementation);
 
 };

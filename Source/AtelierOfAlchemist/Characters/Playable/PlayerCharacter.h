@@ -59,7 +59,7 @@ private:
 	FVector2D LastMovementInput;
 
 protected:
-	// 조작 관련
+	// 조작 입력
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
 	UInputMappingContext* IMC_Default;
 
@@ -71,6 +71,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
 	UInputAction* IA_Move;
+
 	// 조작 함수
 	void Look(const FInputActionValue& Value);
 	void Zoom(const FInputActionValue& Value);

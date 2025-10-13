@@ -2,26 +2,58 @@
 
 
 #include "InteractableActorBase.h"
+#include "../Characters/Playable/PlayerCharacter.h"
+#include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
 
-// Sets default values
 AInteractableActorBase::AInteractableActorBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	RootComponent = Mesh;
 
+	ObjectSensor = CreateDefaultSubobject<USphereComponent>(TEXT("ObjectSensor"));
+	ObjectSensor->SetupAttachment(RootComponent);
+	ObjectSensor->SetSphereRadius(300.0f);
 }
 
-// Called when the game starts or when spawned
 void AInteractableActorBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	ObjectSensor->OnComponentBeginOverlap.AddDynamic(this, &AInteractableActorBase::OnBeginOverlap);
+	ObjectSensor->OnComponentEndOverlap.AddDynamic(this, &AInteractableActorBase::OnEndOverlap);
 }
 
-// Called every frame
 void AInteractableActorBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void AInteractableActorBase::OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter)
+{
+
+}
+
+void AInteractableActorBase::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter)
+{
+
+}
+
+void AInteractableActorBase::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor))
+	{
+		OnPlayerEnter(PlayerCharacter);
+	}
+}
+
+void AInteractableActorBase::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor))
+	{
+		OnPlayerLeave(PlayerCharacter);
+	}
 }
 
