@@ -145,3 +145,18 @@ void APlayerCharacter::UpdateCharacterRotate(float DeltaTime)
 		SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
 	}
 }
+
+void APlayerCharacter::SetInteractObject(AActor* InteractObject)
+{
+	CurrentInteractObject = InteractObject;
+	OnInteract.Broadcast(InteractObject);
+}
+
+void APlayerCharacter::ClearInteractObject(AActor* InteractObject)
+{
+	if (CurrentInteractObject == InteractObject)
+	{
+		CurrentInteractObject = nullptr;
+		OnInteract.Broadcast(nullptr);
+	}
+}

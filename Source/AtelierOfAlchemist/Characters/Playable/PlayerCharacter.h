@@ -10,6 +10,9 @@ class UInputMappingContext;
 class UInputComponent;
 class UInputAction;
 struct FInputActionValue;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject);
+
 /**
  * 
  */
@@ -60,16 +63,16 @@ private:
 
 protected:
 	// 조작 입력
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
-	UInputMappingContext* IMC_Default;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> IMC_Default;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Look;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Zoom;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPirvateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Move;
 
 	// 조작 함수
@@ -86,4 +89,12 @@ private:
 	void UpdateCameraLook(float DeltaTime);
 	void UpdateCameraZoom(float DeltaTime);
 	void UpdateCharacterRotate(float DeltaTime);
+
+public:
+	TObjectPtr<AActor> CurrentInteractObject;
+	void SetInteractObject(AActor* InteractObject);
+	void ClearInteractObject(AActor* InteractObject);
+
+	UPROPERTY()
+	FOnInteract OnInteract;
 };

@@ -9,12 +9,15 @@
 AInteractableActorBase::AInteractableActorBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	TObjectPtr<USceneComponent> Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = Root;
+
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = Mesh;
+	Mesh->SetupAttachment(RootComponent);
 
 	ObjectSensor = CreateDefaultSubobject<USphereComponent>(TEXT("ObjectSensor"));
-	ObjectSensor->SetupAttachment(RootComponent);
-	ObjectSensor->SetSphereRadius(300.0f);
+	ObjectSensor->SetupAttachment(Mesh);
+	ObjectSensor->SetSphereRadius(600.0f);
 }
 
 void AInteractableActorBase::BeginPlay()
