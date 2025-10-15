@@ -5,20 +5,51 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
+#include "../Characters/Playable/PlayerCharacter.h"
 
-void UPlayerStatusSimple::UpdatePlayerStatusSimple(TSoftObjectPtr<UTexture2D> CharacterImage, float MaxHP, float CurHP)
+
+void UPlayerStatusSimple::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->OnHealthChanged.AddDynamic(this, &UPlayerStatusSimple::OnHealthChangedHandler);
+
+		OnHealthChangedHandler(PlayerCharacter->GetCurHealth(), PlayerCharacter->GetMaxHealth());
+	}
+}
+
+void UPlayerStatusSimple::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	CurrentPercent = FMath::Lerp(CurrentPercent, TargetPercent, 0.1f);
+	if (HPBar)
+	{
+		HPBar->SetPercent(CurrentPercent);
+	}
+}
+
+void UPlayerStatusSimple::SetStatus(TSoftObjectPtr<UTexture2D> CharacterImage, float CurrentHealth, float MaxHealth)
 {
 	if (PlayerImage)
 	{
 		PlayerImage->SetBrushFromTexture(CharacterImage.LoadSynchronous());
 	}
 
-	if (HPBar && MaxHP > 0)
+	OnHealthChangedHandler(CurrentHealth, MaxHealth);
+}
+
+void UPlayerStatusSimple::OnHealthChangedHandler(float CurrentHealth, float MaxHealth)
+{
+	if (MaxHealth > 0)
 	{
-		HPBar->SetPercent(CurHP / MaxHP);
+		TargetPercent = CurrentHealth / MaxHealth;
 	}
 	else
 	{
-		HPBar->SetPercent(0.0f);
+		TargetPercent = 0;
 	}
 }

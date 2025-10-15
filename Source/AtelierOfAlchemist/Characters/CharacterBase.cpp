@@ -22,7 +22,8 @@ void ACharacterBase::BeginPlay()
 
 void ACharacterBase::TakeDamage(float Damage)
 {
-	CurHealth -= Damage;
+	CurHealth = FMath::Clamp(CurHealth - Damage, 0, MaxHealth);
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(
@@ -33,7 +34,7 @@ void ACharacterBase::TakeDamage(float Damage)
 		);
 	}
 
-	FOnHealthChanged.
+	OnHealthChanged.Broadcast(CurHealth, MaxHealth);
 }
 
 void ACharacterBase::Attack()

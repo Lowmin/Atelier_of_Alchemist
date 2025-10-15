@@ -18,12 +18,22 @@ class ATELIEROFALCHEMIST_API UPlayerStatusSimple : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void UpdatePlayerStatusSimple(TSoftObjectPtr<UTexture2D> CharacterImage, float MaxHP, float CurHP);
+	void SetStatus(TSoftObjectPtr<UTexture2D> CharacterImage, float CurrentHealth, float MaxHealth);
 
 protected:
-	UPROPERTY(meta = (BindWidget))
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UImage> PlayerImage;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UProgressBar> HPBar;
+
+	UFUNCTION()
+	void OnHealthChangedHandler(float CurrentHealth, float MaxHealth);
+
+private:
+	float TargetPercent{};
+	float CurrentPercent{};
 };
