@@ -9,6 +9,9 @@
 ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	MaxHealth = 100.0f;
+	CurHealth = MaxHealth;
 }
 
 void ACharacterBase::BeginPlay()
@@ -17,9 +20,20 @@ void ACharacterBase::BeginPlay()
 	
 }
 
-void ACharacterBase::TakeDamage()
+void ACharacterBase::TakeDamage(float Damage)
 {
+	CurHealth -= Damage;
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			5.0f,
+			FColor::Yellow,
+			FString::Printf(TEXT("Current JP: %.2f"), CurHealth)
+		);
+	}
 
+	FOnHealthChanged.
 }
 
 void ACharacterBase::Attack()

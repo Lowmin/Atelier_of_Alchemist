@@ -22,8 +22,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	float SpeedMultiply{};
 
-	bool bIsEffect = false;
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
 	TObjectPtr<UNiagaraComponent> NiagaraEffect;

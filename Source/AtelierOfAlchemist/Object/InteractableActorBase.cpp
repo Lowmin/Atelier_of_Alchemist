@@ -17,12 +17,14 @@ AInteractableActorBase::AInteractableActorBase()
 
 	ObjectSensor = CreateDefaultSubobject<USphereComponent>(TEXT("ObjectSensor"));
 	ObjectSensor->SetupAttachment(Mesh);
-	ObjectSensor->SetSphereRadius(600.0f);
+	ObjectSensor->SetSphereRadius(100.0f);
 }
 
 void AInteractableActorBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("%s BeginPlay Called"), *GetName()); // BeginPlay 호출 횟수 확인
 
 	ObjectSensor->OnComponentBeginOverlap.AddDynamic(this, &AInteractableActorBase::OnBeginOverlap);
 	ObjectSensor->OnComponentEndOverlap.AddDynamic(this, &AInteractableActorBase::OnEndOverlap);
@@ -53,6 +55,7 @@ void AInteractableActorBase::OnBeginOverlap(UPrimitiveComponent* OverlappedCompo
 
 void AInteractableActorBase::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnEndOverlap - OtherActor: %s, OtherComp: %s"), *OtherActor->GetName(), *OtherComp->GetName());
 
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor))
 	{

@@ -9,6 +9,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
+
 UCLASS()
 class ATELIEROFALCHEMIST_API ACharacterBase : public ACharacter
 {
@@ -37,7 +39,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TakeDamage();
 	virtual void Attack();
 	virtual void Die();
 
@@ -49,6 +50,11 @@ public:
 	float GetMaxHealth();
 	float GetAttackPower();
 	float GetDefense();
+
+	virtual void TakeDamage(float Damage);
+
+	UPROPERTY(BlueprintAssignable, Category = "Stats")
+	FOnHealthChanged OnHealthChanged;
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
