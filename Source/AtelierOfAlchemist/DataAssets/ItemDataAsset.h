@@ -15,6 +15,17 @@ enum class EItemAttribute : uint8
 	EIA_Wind	UMETA(DisplayName = "바람"),
 	EIA_Earth	UMETA(DisplayName = "땅")
 };
+
+UENUM(BlueprintType)
+enum class EItemGrade : uint8
+{
+	EIG_S	UMETA(DisplayName = "S"),
+	EIG_A	UMETA(DisplayName = "A"),
+	EIG_B	UMETA(DisplayName = "B"),
+	EIG_C	UMETA(DisplayName = "C"),
+	EIG_D	UMETA(DisplayName = "D"),
+	EIG_E	UMETA(DisplayName = "E")
+};
 /**
  * 
  */
@@ -37,6 +48,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	EItemAttribute ItemAttribute;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	EItemGrade ItemGrade;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSoftObjectPtr<UTexture2D> ItemIcon;

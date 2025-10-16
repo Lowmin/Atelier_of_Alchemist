@@ -21,7 +21,7 @@ public:
 
 	const TArray<FName>& GetPartyMemberID() const { return arrPartyMemberID; }
 
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable)
 	FOnPartyUpdate OnPartyUpdate;
 
 protected:

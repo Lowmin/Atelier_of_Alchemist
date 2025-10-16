@@ -11,7 +11,7 @@ ACharacterBase::ACharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MaxHealth = 100.0f;
-	CurHealth = MaxHealth;
+	CurrentHealth = MaxHealth;
 }
 
 void ACharacterBase::BeginPlay()
@@ -22,7 +22,7 @@ void ACharacterBase::BeginPlay()
 
 void ACharacterBase::TakeDamage(float Damage)
 {
-	CurHealth = FMath::Clamp(CurHealth - Damage, 0, MaxHealth);
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
 
 	if (GEngine)
 	{
@@ -30,11 +30,11 @@ void ACharacterBase::TakeDamage(float Damage)
 			-1,
 			5.0f,
 			FColor::Yellow,
-			FString::Printf(TEXT("Current JP: %.2f"), CurHealth)
+			FString::Printf(TEXT("Current JP: %.2f"), CurrentHealth)
 		);
 	}
 
-	OnHealthChanged.Broadcast(CurHealth, MaxHealth);
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void ACharacterBase::Attack()
@@ -60,7 +60,7 @@ int32 ACharacterBase::GetLevel()
 
 float ACharacterBase::GetCurHealth()
 {
-	return CurHealth;
+	return CurrentHealth;
 }
 
 float ACharacterBase::GetMaxHealth()

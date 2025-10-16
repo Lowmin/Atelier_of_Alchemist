@@ -16,14 +16,14 @@ class ATELIEROFALCHEMIST_API ACharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
+protected:
 
 	// ½ºÅÈ °ü·Ã
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	int32 Level{};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-	float CurHealth{};
+	float CurrentHealth{};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	float MaxHealth{};

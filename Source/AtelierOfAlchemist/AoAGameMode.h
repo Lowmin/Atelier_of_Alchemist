@@ -17,4 +17,7 @@ class ATELIEROFALCHEMIST_API AAoAGameMode : public AGameModeBase
 public:
 	AAoAGameMode();
 
+protected:
+	virtual void BeginPlay() override;
+
 };

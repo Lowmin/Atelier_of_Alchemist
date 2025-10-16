@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
+#include "../../DataAssets/CharacterDataAsset.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -41,6 +42,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (CharacterDataAsset)
+	{
+		MaxHealth = CharacterDataAsset->BaseMaxHealth;
+		CurrentHealth = MaxHealth;
+		AttackPower = CharacterDataAsset->BaseAttackPower;
+
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	}
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{

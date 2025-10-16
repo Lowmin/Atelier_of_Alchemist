@@ -4,6 +4,9 @@
 #include "AoAGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "AoAPlayerController.h"
+#include "Engine/AssetManager.h"
+#include "DataAssets/CharacterDataAsset.h"
+#include "AoAGameInstance.h"
 
 AAoAGameMode::AAoAGameMode()
 {
@@ -15,4 +18,14 @@ AAoAGameMode::AAoAGameMode()
 	}
 
 	PlayerControllerClass = AAoAPlayerController::StaticClass();
+}
+
+void AAoAGameMode::BeginPlay()
+{
+    Super::BeginPlay();
+
+	UAoAGameInstance* GameInstance = GetGameInstance<UAoAGameInstance>();
+	if (GameInstance == nullptr) return;
+
+	GameInstance->AddPartyMember("DA_Reina");
 }

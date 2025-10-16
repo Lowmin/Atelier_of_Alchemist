@@ -9,6 +9,7 @@
 class UInputMappingContext;
 class UInputComponent;
 class UInputAction;
+class UCharacterDataAsset;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject);
@@ -79,6 +80,10 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Zoom(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
+
+	// 캐릭터 데이터 에셋
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
+	TObjectPtr<UCharacterDataAsset> CharacterDataAsset;
 
 public:
 	APlayerCharacter();
