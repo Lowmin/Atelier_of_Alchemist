@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "PartyStatusInMenu.generated.h"
 
+class UImage;
+class UTextBlock;
 /**
  * 
  */
@@ -18,11 +20,11 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UTexture2D> Image;
+	TObjectPtr<UImage> Image;
 
 	UPROPERTY(BLueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<FText> Health;
+	TObjectPtr<UTextBlock> Health;
 
 	UPROPERTY(BLueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<FText> Level;
+	TObjectPtr<UTextBlock> Level;
 };

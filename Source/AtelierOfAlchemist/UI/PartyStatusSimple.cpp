@@ -23,7 +23,6 @@ void UPartyStatusSimple::NativeConstruct()
 
 void UPartyStatusSimple::UpdatePartyList()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Update Start."))
 
 	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if (GameInstance == nullptr || PartyListContainer == nullptr) return;
@@ -31,8 +30,6 @@ void UPartyStatusSimple::UpdatePartyList()
 	PartyListContainer->ClearChildren();
 
 	const TArray<FName>& arrPartyMemberID = GameInstance->GetPartyMemberID();
-
-    UE_LOG(LogTemp, Warning, TEXT("--- RefreshPartyList CALLED with %d members ---"), arrPartyMemberID.Num());
 
     for (const FName& MemberID : arrPartyMemberID)
     {
@@ -49,7 +46,5 @@ void UPartyStatusSimple::UpdatePartyList()
                 PartyListContainer->AddChild(NewWidget);
             }
         }
-        else UE_LOG(LogTemp, Warning, TEXT("16415514514451"));
-
     }
 }
