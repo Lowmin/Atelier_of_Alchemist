@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
+#include "../DataAssets/CharacterDataAsset.h"
 #include "../Characters/Playable/PlayerCharacter.h"
 
 
@@ -52,4 +53,28 @@ void UPlayerStatusSimple::OnHealthChangedHandler(float CurrentHealth, float MaxH
 	{
 		TargetPercent = 0;
 	}
+}
+
+void UPlayerStatusSimple::InitWidget(APlayerCharacter* PlayerCharacter)
+{
+	if (PlayerCharacter == nullptr)
+	{
+		SetVisibility(ESlateVisibility::Collapsed);
+		UE_LOG(LogTemp, Warning, TEXT("error"))
+		return;
+	}
+
+	TargetCharacter = PlayerCharacter;
+
+	PlayerCharacter->OnHealthChanged.AddDynamic(this, &UPlayerStatusSimple::OnHealthChangedHandler);
+
+	if (UCharacterDataAsset* CharacterData = PlayerCharacter->GetCharacterData())
+	{
+		if (PlayerImage && CharacterData->CharacterImage.IsValid())
+		{
+			PlayerImage->SetBrushFromTexture(CharacterData->CharacterImage.LoadSynchronous());
+		}
+	}
+
+	OnHealthChangedHandler(PlayerCharacter->GetCurHealth(), PlayerCharacter->GetMaxHealth());
 }

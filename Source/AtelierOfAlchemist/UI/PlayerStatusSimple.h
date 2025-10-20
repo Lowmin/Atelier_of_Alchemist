@@ -9,6 +9,7 @@
 class UImage;
 class UTextBlock;
 class UProgressBar;
+class APlayerCharacter;
 /**
  * 
  */
@@ -19,6 +20,7 @@ class ATELIEROFALCHEMIST_API UPlayerStatusSimple : public UUserWidget
 	
 public:
 	void SetStatus(TSoftObjectPtr<UTexture2D> CharacterImage, float CurrentHealth, float MaxHealth);
+	void InitWidget(APlayerCharacter* PlayerCharacter);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -36,4 +38,6 @@ protected:
 private:
 	float TargetPercent{};
 	float CurrentPercent{};
+
+	TWeakObjectPtr<APlayerCharacter> TargetCharacter;
 };

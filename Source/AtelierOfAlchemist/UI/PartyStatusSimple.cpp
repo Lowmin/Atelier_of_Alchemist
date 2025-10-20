@@ -6,6 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/VerticalBox.h"
+#include "PlayerStatusSimple.h"
 #include "../DataAssets/CharacterDataAsset.h"
 
 void UPartyStatusSimple::NativeConstruct()
@@ -23,9 +24,13 @@ void UPartyStatusSimple::NativeConstruct()
 
 void UPartyStatusSimple::UpdatePartyList()
 {
-
 	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	if (GameInstance == nullptr || PartyListContainer == nullptr) return;
+	if (GameInstance == nullptr || PartyListContainer == nullptr) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PartyStatus error"))
+
+		return;
+	}
 
 	PartyListContainer->ClearChildren();
 
@@ -33,18 +38,17 @@ void UPartyStatusSimple::UpdatePartyList()
 
     for (const FName& MemberID : arrPartyMemberID)
     {
-        FPrimaryAssetId AssetId("Character", MemberID);
-        UCharacterDataAsset* CharData = Cast<UCharacterDataAsset>(UAssetManager::Get().GetPrimaryAssetObject(AssetId));
+        APlayerCharacter* FindCharacter = GameInstance->GetPlayerCharacterByID(MemberID);
 
-        if (CharData)
+        if (PlayerStatusWidgetClass)
         {
-            if (PlayerStatusWidgetClass)
-            {
-                UPlayerStatusSimple* NewWidget = CreateWidget<UPlayerStatusSimple>(this, PlayerStatusWidgetClass);
-
-                NewWidget->SetStatus(CharData->CharacterImage, CharData->BaseMaxHealth, CharData->BaseMaxHealth);
-                PartyListContainer->AddChild(NewWidget);
-            }
+			UPlayerStatusSimple* NewWidget = CreateWidget<UPlayerStatusSimple>(this, PlayerStatusWidgetClass);
+			if (NewWidget)
+			{
+				NewWidget->InitWidget(FindCharacter);
+				PartyListContainer->AddChild(NewWidget);
+				UE_LOG(LogTemp, Warning, TEXT("Widget Init."))
+			}
         }
     }
 }

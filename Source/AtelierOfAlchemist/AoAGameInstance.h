@@ -6,6 +6,8 @@
 #include "Engine/GameInstance.h"
 #include "AoAGameInstance.generated.h"
 
+class APlayerCharacter;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPartyUpdate);
 /**
  * 
@@ -18,6 +20,9 @@ class ATELIEROFALCHEMIST_API UAoAGameInstance : public UGameInstance
 public:
 	void AddPartyMember(FName MemberID);
 	void RemovePartyMember(FName MemberID);
+	void RegisterPlayerCharacter(FName CharacterID, APlayerCharacter* PlayerCharacter);
+	void UnregisterPlayerCharacter(FName CharacterID);
+	APlayerCharacter* GetPlayerCharacterByID(FName CharacterID);
 
 	const TArray<FName>& GetPartyMemberID() const { return arrPartyMemberID; }
 
@@ -27,4 +32,7 @@ public:
 protected:
 	UPROPERTY()
 	TArray<FName> arrPartyMemberID;
+
+	UPROPERTY()
+	TMap<FName, TObjectPtr<APlayerCharacter>> SpawnCharaters;
 };

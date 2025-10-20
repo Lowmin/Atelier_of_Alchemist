@@ -99,6 +99,7 @@ public:
 	TObjectPtr<AActor> CurrentInteractObject;
 	void SetInteractObject(AActor* InteractObject);
 	void ClearInteractObject(AActor* InteractObject);
+	UCharacterDataAsset* GetCharacterData() { return CharacterDataAsset; }
 
 	UPROPERTY()
 	FOnInteract OnInteract;
