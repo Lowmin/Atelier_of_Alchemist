@@ -28,4 +28,5 @@ void AAoAGameMode::BeginPlay()
 	if (GameInstance == nullptr) return;
 
 	GameInstance->AddPartyMember("DA_Reina");
+	GameInstance->AddPartyMember("DA_Sato");
 }

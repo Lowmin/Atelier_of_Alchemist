@@ -21,11 +21,6 @@ void ASpeedBuffObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerChar
 {
 	PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed *= SpeedMultiply;
 	PlayerCharacter->TakeDamage(10.0f);
-	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(GetGameInstance());
-	if (GameInstance)
-	{
-		GameInstance->AddPartyMember(FName("DA_Sato"));
-	}
 }
 
 void ASpeedBuffObject::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter)

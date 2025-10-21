@@ -4,40 +4,38 @@
 #include "AoAGameInstance.h"
 #include "Characters/Playable/PlayerCharacter.h"
 
-void UAoAGameInstance::AddPartyMember(FName MemberID)
+void UAoAGameInstance::Init()
 {
-	arrPartyMemberID.AddUnique(MemberID);
+	Super::Init();
+
+	if (GuildMemberIDs.IsEmpty())
+	{
+		if (!DefaultMemberID.IsNone())
+		{
+			AddGuildMember(DefaultMemberID);
+			AddPartyMember(DefaultMemberID);
+			AddGuildMember("DA_Sato");
+			AddPartyMember("DA_Sato");
+		}
+	}
+}
+
+void UAoAGameInstance::AddGuildMember(FName CharacterID)
+{
+	GuildMemberIDs.AddUnique(CharacterID);
+}
+
+void UAoAGameInstance::AddPartyMember(FName CharacterID)
+{
+	if (PartyMemberIDs.Num() < 4 && GuildMemberIDs.Contains(CharacterID))
+	{
+		PartyMemberIDs.AddUnique(CharacterID);
+		OnPartyUpdate.Broadcast();
+	}
+}
+
+void UAoAGameInstance::RemovePartyMember(FName CharacterID)
+{
+	PartyMemberIDs.Remove(CharacterID);
 	OnPartyUpdate.Broadcast();
-}
-
-void UAoAGameInstance::RemovePartyMember(FName MemberID)
-{
-	arrPartyMemberID.Remove(MemberID);
-	OnPartyUpdate.Broadcast();
-}
-
-void UAoAGameInstance::RegisterPlayerCharacter(FName CharacterID, APlayerCharacter* PlayerCharacter)
-{
-	if (!CharacterID.IsNone() && PlayerCharacter)
-	{
-		SpawnCharaters.Add(CharacterID, PlayerCharacter);
-	}
-}
-
-void UAoAGameInstance::UnregisterPlayerCharacter(FName CharacterID)
-{
-	if (!CharacterID.IsNone())
-	{
-		SpawnCharaters.Remove(CharacterID);
-	}
-}
-
-APlayerCharacter* UAoAGameInstance::GetPlayerCharacterByID(FName CharacterID)
-{
-	if (SpawnCharaters.Contains(CharacterID))
-	{
-		return SpawnCharaters[CharacterID];
-	}
-
-	return nullptr;
 }
