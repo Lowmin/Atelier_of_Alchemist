@@ -4,83 +4,66 @@
 #include "CharacterBase.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "StatComponent.h"
 
-// Sets default values
 ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	MaxHealth = 100.0f;
-	CurrentHealth = MaxHealth;
+	StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 }
 
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ACharacterBase::TakeDamage(float Damage)
 {
-	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
-
-	if (GEngine)
+	if (StatComponent)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			5.0f,
-			FColor::Yellow,
-			FString::Printf(TEXT("Current JP: %.2f"), CurrentHealth)
-		);
+		StatComponent->TakeDamage(Damage);
 	}
-
-	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
+int32 ACharacterBase::GetLevel()
+{
+	return StatComponent ? StatComponent->GetLevel() : 1;
+}
+
+float ACharacterBase::GetCurHealth()
+{
+	return StatComponent ? StatComponent->GetCurrentHealth() : 0.0f;
+}
+
+float ACharacterBase::GetMaxHealth()
+{
+	return StatComponent ? StatComponent->GetMaxHealth() : 0.0f;
+}
+
+float ACharacterBase::GetAttackPower()
+{
+	return StatComponent ? StatComponent->GetAttackPower() : 0.0f;
+}
+
+float ACharacterBase::GetDefense()
+{
+	return StatComponent ? StatComponent->GetDefense() : 0.0f;
+}
 void ACharacterBase::Attack()
 {
-
 }
 
 void ACharacterBase::Die()
 {
-
 }
 
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-int32 ACharacterBase::GetLevel()
-{
-	return Level;
-}
-
-float ACharacterBase::GetCurHealth()
-{
-	return CurrentHealth;
-}
-
-float ACharacterBase::GetMaxHealth()
-{
-	return MaxHealth;
-}
-
-float ACharacterBase::GetAttackPower()
-{
-	return AttackPower;
-}
-
-float ACharacterBase::GetDefense()
-{
-	return Defense;
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
-

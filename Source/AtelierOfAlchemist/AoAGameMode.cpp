@@ -24,9 +24,4 @@ void AAoAGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-	UAoAGameInstance* GameInstance = GetGameInstance<UAoAGameInstance>();
-	if (GameInstance == nullptr) return;
-
-	GameInstance->AddPartyMember("DA_Reina");
-	GameInstance->AddPartyMember("DA_Sato");
 }

@@ -7,7 +7,7 @@
 #include "PartyMemberList.generated.h"
 
 class UVerticalBox;
-class UAoAGameInstance;
+class UGuildMemberManagerSubsystem;
 class UPartyMemberSlot;
 class APlayerCharacter;
 
@@ -25,8 +25,6 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	void BuildCharacterLookups();
-
 	UFUNCTION()
 	void RefreshPartyList();
 
@@ -40,5 +38,5 @@ protected:
 	TObjectPtr<UVerticalBox> PartyList;
 
 	UPROPERTY()
-	TObjectPtr<UAoAGameInstance> GameInstance;
+	TObjectPtr<UGuildMemberManagerSubsystem> GuildMemberManager;
 };

@@ -10,6 +10,10 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
 #include "../../DataAssets/CharacterDataAsset.h"
+#include "../../PlayerRuntimeData.h"
+#include "Engine/GameInstance.h"
+#include "../../GuildMemberManagerSubsystem.h"
+#include "../StatComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -43,21 +47,36 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CharacterDataAsset)
-	{
-		MaxHealth = CharacterDataAsset->BaseMaxHealth;
-		CurrentHealth = MaxHealth;
-		AttackPower = CharacterDataAsset->BaseAttackPower;
-
-		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
-	}
-
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(IMC_Default, 0);
 		}
+	}
+
+	UStatComponent* MyStatComp = GetStatComponent();
+
+	UCharacterDataAsset* MyDataAsset = GetCharacterData();
+
+	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
+
+	if (MyStatComp && MyDataAsset && GuildManager)
+	{
+		UPlayerRuntimeData* MyRuntimeData = GuildManager->GetPlayerRuntimeData(MyDataAsset->GetFName());
+
+		if (MyRuntimeData)
+		{
+			MyStatComp->Initialize(MyRuntimeData);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerCharacter '%s' could not find its RuntimeData in GuildManager!"), *GetName());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter '%s' failed to initialize components! StatComp, DataAsset, or GuildManager is missing."), *GetName());
 	}
 }
 

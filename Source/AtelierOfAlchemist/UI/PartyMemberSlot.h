@@ -10,6 +10,7 @@ class UImage;
 class UProgressBar;
 class APlayerCharacter;
 class UCharacterDataAsset;
+class UPlayerRuntimeData;
 /**
  * 
  */
@@ -19,9 +20,12 @@ class ATELIEROFALCHEMIST_API UPartyMemberSlot : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void InitializeSlot(APlayerCharacter* TargetCharacter);
+	void InitializeSlot(UPlayerRuntimeData* NewPlayerRuntimeData);
 
 protected:
+	UPROPERTY()
+	TWeakObjectPtr<UPlayerRuntimeData> PlayerRuntimeData;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> CharacterImage;
 
@@ -32,6 +36,9 @@ protected:
 	void OnHealthChange(float CurrentHealth, float MaxHealth);
 
 	virtual void NativeDestruct() override;
+
+	UPROPERTY(BlueprintReadOnly)
+	float Percent{};
 
 private:
 	TWeakObjectPtr<APlayerCharacter> WidgetPlayerCharacter;

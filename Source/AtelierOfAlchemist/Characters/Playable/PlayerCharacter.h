@@ -10,6 +10,8 @@ class UInputMappingContext;
 class UInputComponent;
 class UInputAction;
 class UCharacterDataAsset;
+class USpringArmComponent;
+class UCameraComponent;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject);

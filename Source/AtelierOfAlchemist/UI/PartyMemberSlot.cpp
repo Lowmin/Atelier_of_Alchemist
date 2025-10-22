@@ -4,51 +4,56 @@
 #include "PartyMemberSlot.h"
 #include "../Characters/Playable/PlayerCharacter.h"
 #include "../DataAssets/CharacterDataAsset.h"
+#include "../PlayerRuntimeData.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 
-void UPartyMemberSlot::InitializeSlot(APlayerCharacter* TargetCharacter)
+void UPartyMemberSlot::InitializeSlot(UPlayerRuntimeData* NewPlayerRuntimeData)
 {
-	if (!TargetCharacter)
+	UE_LOG(LogTemp, Warning, TEXT("InitializeSlot."));
+
+	if (!NewPlayerRuntimeData || !NewPlayerRuntimeData->GetCharacterDataAsset())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TargetCharacter is not found."));
+		SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
-
-	WidgetPlayerCharacter = TargetCharacter;
-	UCharacterDataAsset* CharacterDataAsset = TargetCharacter->GetCharacterData();
-
-
-	if (WidgetPlayerCharacter.IsValid())
+	if (PlayerRuntimeData.IsValid())
 	{
-		WidgetPlayerCharacter->OnHealthChanged.RemoveDynamic(this, &UPartyMemberSlot::OnHealthChange);
+		UE_LOG(LogTemp, Warning, TEXT("RuntimeData Found."));
+		PlayerRuntimeData->OnHealthChanged.RemoveDynamic(this, &UPartyMemberSlot::OnHealthChange);
 	}
 
-	if (CharacterDataAsset == nullptr)
+	PlayerRuntimeData = NewPlayerRuntimeData;
+	UCharacterDataAsset* StaticData = NewPlayerRuntimeData->GetCharacterDataAsset();
+
+	if (CharacterImage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DataAsset is not found."));
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("CharImage Found."));
+		CharacterImage->SetBrushFromSoftTexture(StaticData->CharacterImage);
 	}
 
-	CharacterImage->SetBrushFromSoftTexture(CharacterDataAsset->CharacterImage);
-	TargetCharacter->OnHealthChanged.AddDynamic(this, &UPartyMemberSlot::OnHealthChange);
-	OnHealthChange(TargetCharacter->GetCurHealth(), TargetCharacter->GetMaxHealth());
+	PlayerRuntimeData->OnHealthChanged.AddDynamic(this, &UPartyMemberSlot::OnHealthChange);
+
+	OnHealthChange(PlayerRuntimeData->GetCurrentHealth(), PlayerRuntimeData->GetMaxHealth());
+
+	SetVisibility(ESlateVisibility::Visible);
 }
 
 void UPartyMemberSlot::OnHealthChange(float CurrentHealth, float MaxHealth)
 {
 	if (HealthBar)
 	{
-		float Percent = (MaxHealth > 0) ? (CurrentHealth / MaxHealth) : 0.0f;
+		UE_LOG(LogTemp, Warning, TEXT("Health Change"));
+		Percent = (MaxHealth > 0) ? (CurrentHealth / MaxHealth) : 0.0f;
 		HealthBar->SetPercent(Percent);
 	}
 }
 
 void UPartyMemberSlot::NativeDestruct()
 {
-	if (WidgetPlayerCharacter.IsValid())
+	if (PlayerRuntimeData.IsValid())
 	{
-		WidgetPlayerCharacter->OnHealthChanged.RemoveDynamic(this, &UPartyMemberSlot::OnHealthChange);
+		PlayerRuntimeData->OnHealthChanged.RemoveDynamic(this, &UPartyMemberSlot::OnHealthChange);
 	}
 
 	Super::NativeDestruct();

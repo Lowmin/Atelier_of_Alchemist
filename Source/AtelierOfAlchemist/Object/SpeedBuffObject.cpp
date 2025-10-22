@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
 #include "../AoAGameInstance.h"
+#include "../GuildMemberManagerSubsystem.h"
 
 ASpeedBuffObject::ASpeedBuffObject()
 {
@@ -21,6 +22,12 @@ void ASpeedBuffObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerChar
 {
 	PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed *= SpeedMultiply;
 	PlayerCharacter->TakeDamage(10.0f);
+
+	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
+	if (GuildManager)
+	{
+		GuildManager->ApplyDamageToAllPartyMembers(20.0f);
+	}
 }
 
 void ASpeedBuffObject::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter)

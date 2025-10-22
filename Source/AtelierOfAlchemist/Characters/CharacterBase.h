@@ -6,10 +6,7 @@
 #include "GameFramework/Character.h"
 #include "CharacterBase.generated.h"
 
-class USpringArmComponent;
-class UCameraComponent;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
+class UStatComponent;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API ACharacterBase : public ACharacter
@@ -17,22 +14,8 @@ class ATELIEROFALCHEMIST_API ACharacterBase : public ACharacter
 	GENERATED_BODY()
 
 protected:
-
-	// ½ºÅÈ °ü·Ã
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-	int32 Level{};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-	float CurrentHealth{};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-	float MaxHealth{};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-	float AttackPower{};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-	float Defense{};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStatComponent> StatComponent;
 
 public:
 	ACharacterBase();
@@ -42,21 +25,19 @@ protected:
 	virtual void Attack();
 	virtual void Die();
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
-	
+
 	int32 GetLevel();
 	float GetCurHealth();
 	float GetMaxHealth();
 	float GetAttackPower();
 	float GetDefense();
 
-	virtual void TakeDamage(float Damage);
-
-	UPROPERTY(BlueprintAssignable, Category = "Stats")
-	FOnHealthChanged OnHealthChanged;
+	void TakeDamage(float Damage);
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	FORCEINLINE UStatComponent* GetStatComponent() const { return StatComponent; }
 };

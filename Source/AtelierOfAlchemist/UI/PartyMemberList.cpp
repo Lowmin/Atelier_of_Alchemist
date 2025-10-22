@@ -8,14 +8,15 @@
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Playable/PlayerCharacter.h"
 #include "../DataAssets/CharacterDataAsset.h"
+#include "../GuildMemberManagerSubsystem.h"
 
 void UPartyMemberList::NativeConstruct()
 {
-	GameInstance = GetGameInstance<UAoAGameInstance>();
+	GuildMemberManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
 	
-	if (GameInstance)
+	if (GuildMemberManager)
 	{
-		GameInstance->OnPartyUpdate.AddDynamic(this, &UPartyMemberList::RefreshPartyList);
+		GuildMemberManager->OnPartyUpdate.AddDynamic(this, &UPartyMemberList::RefreshPartyList);
 		RefreshPartyList();
 	}
 
@@ -24,50 +25,35 @@ void UPartyMemberList::NativeConstruct()
 
 void UPartyMemberList::NativeDestruct()
 {
-	if (GameInstance)
+	if (GuildMemberManager)
 	{
-		GameInstance->OnPartyUpdate.RemoveDynamic(this, &UPartyMemberList::RefreshPartyList);
+		GuildMemberManager->OnPartyUpdate.RemoveDynamic(this, &UPartyMemberList::RefreshPartyList);
 	}
 
 	Super::NativeDestruct();
-}
-
-void UPartyMemberList::BuildCharacterLookups()
-{
-	PlayerCharacterMap.Empty();
-
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
-
-	for (AActor* Actor : FoundActors)
-	{
-		APlayerCharacter* PC = Cast<APlayerCharacter>(Actor);
-		if (PC && !PC->GetCharacterData()->GetFName().IsNone())
-		{
-			PlayerCharacterMap.Add(PC->GetCharacterData()->GetFName(), PC);
-		}
-	}
 }
 
 void UPartyMemberList::RefreshPartyList()
 {
 	PartyList->ClearChildren();
 
-	const TArray<FName>& PartyMemberIDs = GameInstance->GetPartyMemberIDs();
-
-	BuildCharacterLookups();
+	const TArray<FName>& PartyMemberIDs = GuildMemberManager->GetPartyMemberIDs();
 
 	for (const FName& CharacterID : PartyMemberIDs)
 	{
-		APlayerCharacter* PlayerCharacter = PlayerCharacterMap.FindRef(CharacterID);
-		UPartyMemberSlot* PartyMemberSlot = CreateWidget<UPartyMemberSlot>(this, BP_PartyMemberSlot);
-
 		UE_LOG(LogTemp, Warning, TEXT("%s UI Init."), *CharacterID.ToString());
+		UPlayerRuntimeData* CharData = GuildMemberManager->GetPlayerRuntimeData(CharacterID);
 
-		if (PartyMemberSlot)
+		if (CharData)
 		{
-			PartyMemberSlot->InitializeSlot(PlayerCharacter);
-			PartyList->AddChild(PartyMemberSlot);
+			UE_LOG(LogTemp, Warning, TEXT("CharData Found."));
+			UPartyMemberSlot* PartyMemberSlot = CreateWidget<UPartyMemberSlot>(this, BP_PartyMemberSlot);
+			if (PartyMemberSlot)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("PartyMemberSlot Found."));
+				PartyMemberSlot->InitializeSlot(CharData);
+				PartyList->AddChild(PartyMemberSlot);
+			}
 		}
 	}
 }
