@@ -4,4 +4,5 @@
 #include "AoAGameInstance.h"
 #include "Characters/Playable/PlayerCharacter.h"
 #include "GuildMemberManagerSubsystem.h"
+#include "InventoryManagerSubsystem.h"
 

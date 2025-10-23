@@ -9,6 +9,7 @@
 /**
  * 
  */
+class UItemDataAsset;
 class UNiagaraComponent;
 
 UCLASS()
@@ -25,6 +26,9 @@ private:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
 	TObjectPtr<UNiagaraComponent> NiagaraEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	TObjectPtr<UItemDataAsset> ItemData;
 
 public:
 	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter) override;

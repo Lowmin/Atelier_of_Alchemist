@@ -8,6 +8,7 @@
 
 class UImage;
 class UTextBlock;
+struct FInventorySlotStruct;
 /**
  * 
  */
@@ -17,7 +18,7 @@ class ATELIEROFALCHEMIST_API UInventorySlot : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	//void InitializeSlot();
+	void UpdateSlot(const FInventorySlotStruct& SlotData);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

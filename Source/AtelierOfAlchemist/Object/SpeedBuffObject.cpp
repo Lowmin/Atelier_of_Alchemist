@@ -8,6 +8,8 @@
 #include "NiagaraComponent.h"
 #include "../AoAGameInstance.h"
 #include "../GuildMemberManagerSubsystem.h"
+#include "../InventoryManagerSubsystem.h"
+#include "../DataAssets/ItemDataAsset.h"
 
 ASpeedBuffObject::ASpeedBuffObject()
 {
@@ -27,6 +29,11 @@ void ASpeedBuffObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerChar
 	if (GuildManager)
 	{
 		GuildManager->ApplyDamageToAllPartyMembers(20.0f);
+	}
+	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
+	if (InventoryManager)
+	{
+		InventoryManager->AddItem(ItemData, EItemGrade::EIG_B, 5);
 	}
 }
 
