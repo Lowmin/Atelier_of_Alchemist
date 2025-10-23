@@ -14,6 +14,7 @@
 #include "Engine/GameInstance.h"
 #include "../../GuildMemberManagerSubsystem.h"
 #include "../StatComponent.h"
+#include "../../Object/InteractableInterface.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -40,6 +41,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Triggered, this, &APlayerCharacter::Zoom);
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		EnhancedInputComponent->BindAction(IA_Collect, ETriggerEvent::Triggered, this, &APlayerCharacter::CollectItem);
 	}
 }
 
@@ -159,6 +161,17 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MoveVector.Y);
 		AddMovementInput(RightDirection, MoveVector.X);
+	}
+}
+
+void APlayerCharacter::CollectItem()
+{
+	if (CurrentInteractObject)
+	{
+		if (CurrentInteractObject->Implements<UInteractableInterface>())
+		{
+			IInteractableInterface::Execute_Interact(CurrentInteractObject, this);
+		}
 	}
 }
 

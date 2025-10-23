@@ -15,6 +15,7 @@ class UCameraComponent;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCollectedItem, AAcotr*, InteractObject);
 
 /**
  * 
@@ -78,10 +79,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Move;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Collect;
+
 	// 조작 함수
 	void Look(const FInputActionValue& Value);
 	void Zoom(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
+	void CollectItem();
 
 	// 캐릭터 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
