@@ -15,7 +15,7 @@ class UCameraComponent;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCollectedItem, AAcotr*, InteractObject);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCollectedItem, AAcotr*, InteractObject);
 
 /**
  * 
