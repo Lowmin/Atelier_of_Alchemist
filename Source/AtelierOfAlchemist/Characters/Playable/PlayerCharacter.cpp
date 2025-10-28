@@ -71,14 +71,6 @@ void APlayerCharacter::BeginPlay()
 		{
 			MyStatComp->Initialize(MyRuntimeData);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("PlayerCharacter '%s' could not find its RuntimeData in GuildManager!"), *GetName());
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter '%s' failed to initialize components! StatComp, DataAsset, or GuildManager is missing."), *GetName());
 	}
 }
 

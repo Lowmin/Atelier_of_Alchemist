@@ -41,7 +41,7 @@ void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 
 	if (Interactor && InventoryManager)
 	{
-		InventoryManager->AddItem(DroppedItemAsset, RandomGrade(), 1);
+		InventoryManager->AddItem(DroppedItemAsset, RandomGrade(), Quantity);
 		Destroy();
 	}
 }

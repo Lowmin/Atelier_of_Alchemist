@@ -27,4 +27,8 @@ protected:
 
 	UFUNCTION()
 	void OnInteract(AActor* InteractObject);
+
+public:
+	UFUNCTION(BlueprintPure, Category = "UI")
+	UMainUI* GetMainUIInstance() const { return MainUIInstance; }
 };

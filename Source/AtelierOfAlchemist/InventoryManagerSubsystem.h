@@ -34,5 +34,5 @@ protected:
 	TArray<FInventorySlotStruct> InventorySlot;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
-	int32 MaxInventorySlot = 30;
+	int32 MaxInventorySlot = 32;
 };

@@ -11,6 +11,7 @@
  */
 class UInputMappingContext;
 class UInputAction;
+class UMainUI;
 struct FInputActionValue;
 
 UCLASS()
@@ -25,6 +26,17 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_ToggleInventory;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UMainUI> WBP_MainUI;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UMainUI> MainUIClass;
+
+	void ToggleInventory();
 
 private:
 };

@@ -32,4 +32,7 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UInventoryManagerSubsystem> InventoryManager;
+
+public:
+	UWidgetAnimation* GetAnimation(FName AnimationName) const;
 };
