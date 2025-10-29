@@ -6,9 +6,13 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "../DataAssets/ItemDataAsset.h"
+#include "Inventory/InventoryItemInfo.h"
+#include "Inventory/Inventory.h"
 
 void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData)
 {
+	ItemSlotData = SlotData;
+
 	if (SlotData.ItemData.IsNull() || SlotData.Quantity == 0)
 	{
 		if (ItemImage)		ItemImage->SetVisibility(ESlateVisibility::Hidden);
@@ -26,14 +30,52 @@ void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData)
 		}
 		if (ItemQuantity)
 		{
-			ItemQuantity->SetText(FText::AsNumber(SlotData.Quantity));
+			FText Quantity = FText::AsNumber(SlotData.Quantity);
+			FFormatNamedArguments Args;
+			Args.Add(TEXT("Quantity"), Quantity);
+			FText QuantityFormat = FText::FromString(TEXT("x{Quantity}"));
+			FText QuantityText = FText::Format(QuantityFormat, Args);
+
+			ItemQuantity->SetText(QuantityText);
 			ItemQuantity->SetVisibility(ESlateVisibility::Visible);
 		}
 		if (ItemGrade)
 		{
-			FText GradeText = UEnum::GetDisplayValueAsText(SlotData.Grade);
-			ItemGrade->SetText(GradeText);
+			FText Grade = UEnum::GetDisplayValueAsText(SlotData.Grade);
+
+			ItemGrade->SetText(Grade);
 			ItemGrade->SetVisibility(ESlateVisibility::Visible);
 		}
+	}
+}
+
+void UInventorySlot::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	UInventory* Inventory = Cast<UInventory>(GetOuter());
+
+	if (Inventory)
+	{
+		ItemInfo = Inventory->GetItemInfoWidget();
+		ItemInfo->UpdateInfo(ItemSlotData);
+	}
+}
+
+void UInventorySlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (ItemInfo)
+	{
+		ItemInfo->UpdateInfo(ItemSlotData);
+	}
+}
+
+void UInventorySlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+
+	if (ItemInfo)
+	{
+		ItemInfo->ClearInfo();
 	}
 }

@@ -9,6 +9,7 @@
 class UInventoryManagerSubsystem;
 class UInventorySlot;
 class UGridPanel;
+class UInventoryItemInfo;
 /**
  * 
  */
@@ -24,6 +25,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UInventorySlot> InventorySlotClass;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UInventoryItemInfo> ItemInfoWidget;
+
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
@@ -35,4 +39,5 @@ protected:
 
 public:
 	UWidgetAnimation* GetAnimation(FName AnimationName) const;
+	UInventoryItemInfo* GetItemInfoWidget() const { return ItemInfoWidget; }
 };

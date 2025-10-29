@@ -2,4 +2,62 @@
 
 
 #include "InventoryItemInfo.h"
+#include "InventorySlotStruct.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
 
+void UInventoryItemInfo::UpdateInfo(const FInventorySlotStruct& SlotData)
+{
+	if (SlotData.ItemData.IsNull())
+	{
+		ClearInfo();
+		return;
+	}
+
+	UItemDataAsset* ItemAsset = SlotData.ItemData.LoadSynchronous();
+	if (ItemAsset == nullptr)
+	{
+		ClearInfo();
+		return;
+	}
+
+	if (ItemImage)
+	{
+		ItemImage->SetBrushFromSoftTexture(ItemAsset->ItemIcon);
+		ItemImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	if (ItemName)
+	{
+		ItemName->SetText(ItemAsset->ItemName);
+		ItemName->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	if (ItemQuantity)
+	{
+		ItemQuantity->SetText(FText::AsNumber(SlotData.Quantity));
+		ItemQuantity->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	if (ItemGrade)
+	{
+		FText GradeText = UEnum::GetDisplayValueAsText(SlotData.Grade);
+		ItemGrade->SetText(GradeText);
+		ItemGrade->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+	
+	if (ItemDescription)
+	{
+		ItemDescription->SetText(ItemAsset->ItemDescription);
+		ItemDescription->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+}
+
+void UInventoryItemInfo::ClearInfo()
+{
+	if (ItemImage) ItemImage->SetVisibility(ESlateVisibility::Collapsed);
+	if (ItemName) ItemName->SetVisibility(ESlateVisibility::Collapsed);
+	if (ItemQuantity) ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
+	if (ItemGrade) ItemGrade->SetVisibility(ESlateVisibility::Collapsed);
+	if (ItemDescription) ItemDescription->SetVisibility(ESlateVisibility::Collapsed);
+}

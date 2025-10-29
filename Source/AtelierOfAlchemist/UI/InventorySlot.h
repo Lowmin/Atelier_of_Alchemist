@@ -8,6 +8,7 @@
 
 class UImage;
 class UTextBlock;
+class UInventoryItemInfo;
 struct FInventorySlotStruct;
 /**
  * 
@@ -29,4 +30,14 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemQuantity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
+	FInventorySlotStruct ItemSlotData;
+
+	UPROPERTY()
+	TObjectPtr<UInventoryItemInfo> ItemInfo;
+
+	virtual void NativeConstruct() override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 };

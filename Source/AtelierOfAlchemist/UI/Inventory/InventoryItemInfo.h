@@ -3,20 +3,32 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Inventory.h"
+#include "Blueprint/UserWidget.h"
 #include "InventoryItemInfo.generated.h"
 
 class UTextBlock;
 class UImage;
+class UItemDataAsset;
+struct FInventorySlotStruct;
 /**
  * 
  */
 UCLASS()
-class ATELIEROFALCHEMIST_API UInventoryItemInfo : public UInventory
+class ATELIEROFALCHEMIST_API UInventoryItemInfo : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void UpdateInfo(const FInventorySlotStruct& SlotData);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void ClearInfo();
+
 protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ItemImage;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemName;
 
@@ -27,5 +39,5 @@ protected:
 	TObjectPtr<UTextBlock> ItemGrade;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UImage> ItemImage;
+	TObjectPtr<UTextBlock> ItemDescription;
 };
