@@ -18,14 +18,6 @@ void ACharacterBase::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ACharacterBase::TakeDamage(float Damage)
-{
-	if (StatComponent)
-	{
-		StatComponent->TakeDamage(Damage);
-	}
-}
-
 int32 ACharacterBase::GetLevel()
 {
 	return StatComponent ? StatComponent->GetLevel() : 1;
@@ -50,6 +42,19 @@ float ACharacterBase::GetDefense()
 {
 	return StatComponent ? StatComponent->GetDefense() : 0.0f;
 }
+
+float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (StatComponent)
+	{
+		StatComponent->TakeDamage(DamageAmount);
+	}
+
+	return Damage;
+}
+
 void ACharacterBase::Attack()
 {
 }

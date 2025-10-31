@@ -34,7 +34,7 @@ public:
 	float GetAttackPower();
 	float GetDefense();
 
-	void TakeDamage(float Damage);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

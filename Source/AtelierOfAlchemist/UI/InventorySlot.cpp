@@ -8,6 +8,7 @@
 #include "../DataAssets/ItemDataAsset.h"
 #include "Inventory/InventoryItemInfo.h"
 #include "Inventory/Inventory.h"
+#include "Blueprint/UserWidget.h"
 
 void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData)
 {
@@ -49,16 +50,11 @@ void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData)
 	}
 }
 
-void UInventorySlot::NativeConstruct()
+void UInventorySlot::SetOwningInventory(UInventory* OwningInventory)
 {
-	Super::NativeConstruct();
-
-	UInventory* Inventory = Cast<UInventory>(GetOuter());
-
-	if (Inventory)
+	if (OwningInventory)
 	{
-		ItemInfo = Inventory->GetItemInfoWidget();
-		ItemInfo->UpdateInfo(ItemSlotData);
+		ItemInfo = OwningInventory->GetItemInfoWidget();
 	}
 }
 

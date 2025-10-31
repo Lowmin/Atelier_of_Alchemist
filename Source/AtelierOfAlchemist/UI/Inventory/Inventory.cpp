@@ -48,6 +48,8 @@ void UInventory::UpdateInventory()
 		{
 			NewSlotWidget->UpdateSlot(SlotData);
 
+			NewSlotWidget->SetOwningInventory(this);
+
 			const int32 Row = i / Columns;
 			const int32 Column = i % Columns;
 			InventoryGrid->AddChildToGrid(NewSlotWidget, Row, Column);
@@ -60,27 +62,21 @@ UWidgetAnimation* UInventory::GetAnimation(FName AnimationName) const
 	UWidgetBlueprintGeneratedClass* WidgetClass = GetWidgetTreeOwningClass();
 	if (!WidgetClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("GetAnimationByName: WidgetClass is NULL for %s"), *GetNameSafe(this));
 		return nullptr;
 	}
 
 	TArray<UWidgetAnimation*> Animations = WidgetClass->Animations;
-	UE_LOG(LogTemp, Log, TEXT("Searching for animation '%s' in widget %s. Found %d animations total:"),
-		*AnimationName.ToString(), *GetNameSafe(this), Animations.Num());
 
 	for (UWidgetAnimation* Animation : Animations)
 	{
 		if (Animation)
 		{
-			UE_LOG(LogTemp, Log, TEXT("  - Checking animation: %s"), *Animation->GetFName().ToString());
 
 			if (Animation->GetFName() == AnimationName)
 			{
-				UE_LOG(LogTemp, Log, TEXT("    -> MATCH FOUND!"));
 				return Animation;
 			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("GetAnimationByName: Animation '%s' NOT FOUND in %s!"), *AnimationName.ToString(), *GetNameSafe(this));
 	return nullptr;
 }

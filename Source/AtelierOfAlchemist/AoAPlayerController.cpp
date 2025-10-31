@@ -47,25 +47,31 @@ void AAoAPlayerController::ToggleInventory()
     UInventory* WBP_Inventory = MainUI->WBP_Inventory;
     if (!WBP_Inventory) return;
 
+    if (bIsInventoryAnimPlay) return;
+
     if (WBP_Inventory->IsVisible())
     {
         UWidgetAnimation* FadeOutAnim = WBP_Inventory->GetAnimation(TEXT("FadeOut_Inst"));
         if (FadeOutAnim)
         {
+            bIsInventoryAnimPlay = true;
+
+            float AnimDuration = FadeOutAnim->GetEndTime();
             WBP_Inventory->PlayAnimation(FadeOutAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 
             FTimerHandle TimerHandle;
-            GetWorldTimerManager().SetTimer(TimerHandle, [WBP_Inventory]() {
+
+            GetWorldTimerManager().SetTimer(TimerHandle, [this, WBP_Inventory]() {
                 if (WBP_Inventory)
                 {
                     WBP_Inventory->SetVisibility(ESlateVisibility::Collapsed);
                 }
-                }, FadeOutAnim->GetEndTime(), false);
+                bIsInventoryAnimPlay = false;
+                }, AnimDuration, false);
         }
         else
         {
             WBP_Inventory->SetVisibility(ESlateVisibility::Collapsed);
-            UE_LOG(LogTemp, Warning, TEXT("NO ANIM"));
         }
 
         SetShowMouseCursor(false);
@@ -77,11 +83,15 @@ void AAoAPlayerController::ToggleInventory()
         UWidgetAnimation* FadeInAnim = WBP_Inventory->GetAnimation(TEXT("FadeIn_Inst"));
         if (FadeInAnim)
         {
+            bIsInventoryAnimPlay = true;
+
+            float AnimDuration = FadeInAnim->GetEndTime();
             WBP_Inventory->PlayAnimation(FadeInAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("NO ANIM"));
+
+            FTimerHandle TimerHandle;
+            GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+                bIsInventoryAnimPlay = false;
+                }, AnimDuration, false);
         }
 
         SetShowMouseCursor(true);

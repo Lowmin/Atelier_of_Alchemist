@@ -39,4 +39,5 @@ protected:
 	void ToggleInventory();
 
 private:
+	bool bIsInventoryAnimPlay = false;
 };

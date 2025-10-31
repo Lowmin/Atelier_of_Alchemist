@@ -7,6 +7,7 @@ UStatComponent::UStatComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	LinkedRuntimeData = nullptr;
 	StaticData = nullptr;
+	CurrentHealth = 0.0f;
 }
 
 void UStatComponent::Initialize(UPlayerRuntimeData* InRuntimeData)
@@ -18,11 +19,26 @@ void UStatComponent::Initialize(UPlayerRuntimeData* InRuntimeData)
 	}
 }
 
+void UStatComponent::InitializeFromEnemy(UCharacterDataAsset* InDataAsset)
+{
+	StaticData = InDataAsset;
+
+	if (StaticData)
+	{
+		CurrentHealth = StaticData->BaseMaxHealth;
+	}
+}
+
 void UStatComponent::TakeDamage(float DamageAmount)
 {
 	if (LinkedRuntimeData)
 	{
 		LinkedRuntimeData->ApplyDamage(DamageAmount);
+	}
+	else
+	{
+		CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
+		OnTakeDamage.Broadcast(CurrentHealth, GetMaxHealth());
 	}
 }
 
@@ -33,12 +49,13 @@ int32 UStatComponent::GetLevel() const
 
 float UStatComponent::GetCurrentHealth() const
 {
-	return LinkedRuntimeData ? LinkedRuntimeData->GetCurrentHealth() : 0.0f;
+	if (LinkedRuntimeData) return LinkedRuntimeData ? LinkedRuntimeData->GetCurrentHealth() : 0.0f;
+	else return CurrentHealth;
 }
 
 float UStatComponent::GetMaxHealth() const
 {
-	return LinkedRuntimeData ? LinkedRuntimeData->GetMaxHealth() : 0.0f;
+	return StaticData ? StaticData->BaseMaxHealth : 0.0f;
 }
 
 float UStatComponent::GetAttackPower() const

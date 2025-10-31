@@ -35,4 +35,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int32 MaxInventorySlot = 32;
+
+	void InventorySort();
 };

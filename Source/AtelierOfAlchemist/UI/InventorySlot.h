@@ -9,6 +9,7 @@
 class UImage;
 class UTextBlock;
 class UInventoryItemInfo;
+class UInventory;
 struct FInventorySlotStruct;
 /**
  * 
@@ -20,6 +21,7 @@ class ATELIEROFALCHEMIST_API UInventorySlot : public UUserWidget
 	
 public:
 	void UpdateSlot(const FInventorySlotStruct& SlotData);
+	void SetOwningInventory(UInventory* OwningInventory);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -37,7 +39,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UInventoryItemInfo> ItemInfo;
 
-	virtual void NativeConstruct() override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 };

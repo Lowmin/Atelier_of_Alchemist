@@ -42,8 +42,7 @@ bool UInventoryManagerSubsystem::AddItem(UItemDataAsset* ItemDataAsset, EItemGra
 
 				if (AddAmount == 0)
 				{
-					OnInventoryUpdated.Broadcast();
-					UE_LOG(LogTemp, Warning, TEXT("zxzvcxzvczxvcxz"));
+					InventorySort();
 					return true;
 				}
 			}
@@ -66,8 +65,7 @@ bool UInventoryManagerSubsystem::AddItem(UItemDataAsset* ItemDataAsset, EItemGra
 
 				if (AddAmount == 0)
 				{
-					OnInventoryUpdated.Broadcast();
-					UE_LOG(LogTemp, Warning, TEXT("dasfasfasfasdf"));
+					InventorySort();
 					return true;
 				}
 			}
@@ -75,7 +73,33 @@ bool UInventoryManagerSubsystem::AddItem(UItemDataAsset* ItemDataAsset, EItemGra
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Inventory is Full."));
-	OnInventoryUpdated.Broadcast();
+	InventorySort();
 
 	return false;
+}
+
+void UInventoryManagerSubsystem::InventorySort()
+{
+	InventorySlot.Sort([](const FInventorySlotStruct& A, const FInventorySlotStruct& B)
+		{
+			if (A.ItemData.IsNull()) return false;
+			if (B.ItemData.IsNull()) return true;
+
+			UItemDataAsset* ItemDataA = A.ItemData.LoadSynchronous();
+			UItemDataAsset* ItemDataB = B.ItemData.LoadSynchronous();
+
+			if (ItemDataA == nullptr) return false;
+			if (ItemDataB == nullptr) return true;
+
+			if (ItemDataA->ItemName.CompareTo(ItemDataB->ItemName) != 0)
+				return ItemDataA->ItemName.CompareTo(ItemDataB->ItemName) < 0;
+
+			if (A.Grade != B.Grade)
+			return static_cast<int32>(A.Grade) < static_cast<int32>(B.Grade);
+
+			return A.Quantity > B.Quantity;
+		}
+	);
+
+	OnInventoryUpdated.Broadcast();
 }

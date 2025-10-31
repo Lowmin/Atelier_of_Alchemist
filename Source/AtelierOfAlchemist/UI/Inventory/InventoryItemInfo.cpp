@@ -55,9 +55,33 @@ void UInventoryItemInfo::UpdateInfo(const FInventorySlotStruct& SlotData)
 
 void UInventoryItemInfo::ClearInfo()
 {
-	if (ItemImage) ItemImage->SetVisibility(ESlateVisibility::Collapsed);
-	if (ItemName) ItemName->SetVisibility(ESlateVisibility::Collapsed);
-	if (ItemQuantity) ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
-	if (ItemGrade) ItemGrade->SetVisibility(ESlateVisibility::Collapsed);
-	if (ItemDescription) ItemDescription->SetVisibility(ESlateVisibility::Collapsed);
+	if (ItemImage)
+	{
+		ItemImage->SetBrushFromSoftTexture(nullptr);
+		ItemImage->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ItemName)
+	{
+		ItemName->SetText(FText());
+		ItemName->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ItemQuantity)
+	{
+		ItemQuantity->SetText(FText());
+		ItemQuantity->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ItemGrade)
+	{
+		ItemGrade->SetText(FText());
+		ItemGrade->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ItemDescription)
+	{
+		ItemDescription->SetText(FText());
+		ItemDescription->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

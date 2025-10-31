@@ -23,7 +23,6 @@ ASpeedBuffObject::ASpeedBuffObject()
 void ASpeedBuffObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter)
 {
 	PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed *= SpeedMultiply;
-	PlayerCharacter->TakeDamage(10.0f);
 
 	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
 	if (GuildManager)
