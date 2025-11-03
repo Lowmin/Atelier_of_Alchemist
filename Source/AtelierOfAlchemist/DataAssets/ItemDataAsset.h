@@ -26,6 +26,34 @@ enum class EItemGrade : uint8
 	EIG_D	UMETA(DisplayName = "D"),
 	EIG_E	UMETA(DisplayName = "E")
 };
+
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	EIT_Potion	UMETA(DisplayName = "Potion"),
+	EIT_Boom	UMETA(DisplayName = "Boom"),
+	EIT_Equip	UMETA(DisplayName = "Equip"),
+	EIT_Ingredient	UMETA(DisplayName = "Ingredient")
+};
+
+UENUM(BlueprintType)
+enum class EPotionEffectType : uint8
+{
+	PET_None			UMETA(DisplayName = "효과 없음"),
+	PET_InstantHeal		UMETA(DisplayName = "즉시 회복"),
+	PET_HealOverTime	UMETA(DisplayName = "지속 회복"),
+	PET_AttackBuff		UMETA(DisplayName = "공격력 버프"),
+	PET_DefenseBuff		UMETA(DisplayName = "방어력 버프")
+};
+
+UENUM(BlueprintType)
+enum class EEquipPart : uint8
+{
+	PET_Weapon			UMETA(DisplayName = "무기"),
+	PET_Head			UMETA(DisplayName = "머리"),
+	PET_Body			UMETA(DisplayName = "몸"),
+	PET_Shoes			UMETA(DisplayName = "신발")
+};
 /**
  * 
  */
@@ -56,5 +84,42 @@ public:
 	TSoftObjectPtr<UTexture2D> ItemIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	EItemType ItemType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	int32 MaxStackSize = 99;
+
+	// ItemType::EIT_Equip 설정
+	// 부위
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
+	EEquipPart Part;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
+	float EquipMaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
+	float EquipAttackPower;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
+	float EquipDefense;
+
+	// 레벨 제한
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
+	int32 LevelLimit;
+
+	// ItemType::EIT_Boom 설정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boom", meta = (EditCondition = "ItemType == EItemType::EIT_Boom"))
+	float Damage;
+
+	// ItemType::EIT_Potion 설정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
+	EPotionEffectType PotionType;
+
+	// 체력 회복, 공격력 등 효과의 수치
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
+	float Amount;
+
+	// 지속 시간 (즉시 회복의 효과를 갖고 있는 PET_InstantHeal 의 경우 영향 없음)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
+	float Duration;
 };

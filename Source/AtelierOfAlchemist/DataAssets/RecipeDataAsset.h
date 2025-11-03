@@ -22,7 +22,12 @@ public:
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
-	TSoftObjectPtr<UItemDataAsset> BaseItem;
+	TSoftObjectPtr<UItemDataAsset> ResultItem;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
+	int32 ResultQuantity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
+	TMap<TSoftObjectPtr<UItemDataAsset>, int32> Ingredient;	// 필요한 아이템과 개수
 	
 };
