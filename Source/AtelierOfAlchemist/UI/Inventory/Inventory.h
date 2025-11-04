@@ -11,13 +11,13 @@ class UInventorySlot;
 class UGridPanel;
 class UInventoryItemInfo;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API UInventory : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UGridPanel> InventoryGrid;

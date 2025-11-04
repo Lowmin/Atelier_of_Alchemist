@@ -14,6 +14,7 @@ AInteractableActorBase::AInteractableActorBase()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
+	Mesh->SetCollisionProfileName("Object", true);
 
 	ObjectSensor = CreateDefaultSubobject<USphereComponent>(TEXT("ObjectSensor"));
 	ObjectSensor->SetupAttachment(Mesh);
