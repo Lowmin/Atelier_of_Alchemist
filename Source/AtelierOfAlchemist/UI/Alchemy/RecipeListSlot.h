@@ -8,6 +8,7 @@
 
 class UImage;
 class UTextBlock;
+class URecipeDataAsset;
 /**
  * 
  */
@@ -22,4 +23,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> ResultItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UTextBlock> ResultItemQuantity;
+
+	void UpdateSlot(const TSoftObjectPtr<URecipeDataAsset> RecipeDataAsset);
 };

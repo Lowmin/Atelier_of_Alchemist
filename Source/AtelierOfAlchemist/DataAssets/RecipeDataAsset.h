@@ -29,5 +29,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
 	TMap<TSoftObjectPtr<UItemDataAsset>, int32> Ingredient;	// 필요한 아이템과 개수
-	
+
 };

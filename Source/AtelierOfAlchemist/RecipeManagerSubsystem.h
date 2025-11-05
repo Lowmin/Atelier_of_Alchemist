@@ -18,15 +18,15 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	bool AddRecipe(URecipeDataAsset* RecipeDataAsset);
-	const TArray<TSoftObjectPtr<URecipeDataAsset>> GetUnlockedRecipes() { return AvailableRecipeList; };
+	const TArray<TSoftObjectPtr<URecipeDataAsset>> GetUnlockedRecipes() { return UnlockedRecipeList; };
+	bool GetAllRecipeId(TArray<FPrimaryAssetId>& RecipeId) const;
+
+	UFUNCTION(BlueprintPure, Category = "Recipe")
+	TSoftObjectPtr<URecipeDataAsset> GetRecipeFromId(const FPrimaryAssetId& RecipeId) const;
 
 
 protected:
 	UPROPERTY(SaveGame)
-	TArray<TSoftObjectPtr<URecipeDataAsset>> AvailableRecipeList;
-
-	// 게임 진행 시 레시피 목록을 전부 불러와야하므로 TObjectPtr 사용
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<URecipeDataAsset>> AllRecipeList;
+	TArray<TSoftObjectPtr<URecipeDataAsset>> UnlockedRecipeList;
 
 };
