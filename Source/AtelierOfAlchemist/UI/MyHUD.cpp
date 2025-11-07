@@ -32,12 +32,11 @@ void AMyHUD::OnInteract(AActor* InteractObject)
 	{
 		if (InteractObject)
 		{
-			if (ACollectingObject* CollectObject = Cast<ACollectingObject>(InteractObject))
+			if (InteractObject->Implements<UInteractableInterface>())
 			{
-				if (UItemDataAsset* ItemData = CollectObject->GetItemData())
-				{
-					MainUIInstance->ShowInteractWidget(ItemData->ItemIcon, ItemData->ItemName);
-				}
+				FText InteractText = IInteractableInterface::Execute_GetInteractText(InteractObject);
+				TSoftObjectPtr<UTexture2D> InteractIcon = IInteractableInterface::Execute_GetInteractIcon(InteractObject);
+				MainUIInstance->ShowInteractWidget(InteractIcon, InteractText);
 			}
 		}
 		else

@@ -48,6 +48,8 @@ void AInteractableActorBase::OnPlayerLeave_Implementation(APlayerCharacter* Play
 
 void AInteractableActorBase::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnBeginOverlap - OtherActor: %s, OtherComp: %s"), *OtherActor->GetName(), *OtherComp->GetName());
+
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor))
 	{
 		OnPlayerEnter(PlayerCharacter);
@@ -62,5 +64,15 @@ void AInteractableActorBase::OnEndOverlap(UPrimitiveComponent* OverlappedCompone
 	{
 		OnPlayerLeave(PlayerCharacter);
 	}
+}
+
+FText AInteractableActorBase::GetInteractText_Implementation() const
+{
+	return DefaultInteractText;
+}
+
+TSoftObjectPtr<UTexture2D> AInteractableActorBase::GetInteractIcon_Implementation() const
+{
+	return DefaultInteractIcon;
 }
 

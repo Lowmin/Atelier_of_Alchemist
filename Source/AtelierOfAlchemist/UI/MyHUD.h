@@ -9,13 +9,13 @@
 class UMainUI;
 class AActor;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
-	
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -39,11 +39,24 @@ void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 {
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
 
-	if (Interactor && InventoryManager)
+	if (Interactor && InventoryManager && DroppedItemAsset)
 	{
 		InventoryManager->AddItem(DroppedItemAsset, RandomGrade(), Quantity);
+		Interactor->ClearInteractObject(this);
 		Destroy();
 	}
+}
+
+FText ACollectingObject::GetInteractText_Implementation() const
+{
+	if (DroppedItemAsset) return DroppedItemAsset->ItemName;
+	return Super::GetInteractText_Implementation();
+}
+
+TSoftObjectPtr<UTexture2D> ACollectingObject::GetInteractIcon_Implementation() const
+{
+	if (DroppedItemAsset) return DroppedItemAsset->ItemIcon;
+	return Super::GetInteractIcon_Implementation();
 }
 
 EItemGrade ACollectingObject::RandomGrade()

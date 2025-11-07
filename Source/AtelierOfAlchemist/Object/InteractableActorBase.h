@@ -41,6 +41,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
 	TSubclassOf<UUserWidget> InteractWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	TSoftObjectPtr<UTexture2D> DefaultInteractIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	FText DefaultInteractText;
+
 private:
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -50,5 +56,7 @@ private:
 
 public:
 	virtual void Interact_Implementation(APlayerCharacter* Interactor) override PURE_VIRTUAL(AInteractableActorBase::Interact_Implementation);
+	virtual FText GetInteractText_Implementation() const override;
+	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;
 
 };

@@ -7,11 +7,14 @@
 #include "AlchemyKiln.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API AAlchemyKiln : public AInteractableActorBase
 {
 	GENERATED_BODY()
-	
+
+	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter) override;
+
+	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter) override;
 };
