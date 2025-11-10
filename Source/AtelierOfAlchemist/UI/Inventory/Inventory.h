@@ -10,6 +10,7 @@ class UInventoryManagerSubsystem;
 class UInventorySlot;
 class UGridPanel;
 class UInventoryItemInfo;
+class UWidgetAnimation;
 /**
  *
  */
@@ -17,6 +18,10 @@ UCLASS()
 class ATELIEROFALCHEMIST_API UInventory : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	void Show();
+	void Hide();
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -28,6 +33,14 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UInventoryItemInfo> ItemInfoWidget;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> FadeInAnim;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> FadeOutAnim;
+
+	bool bIsAnimating = false;
+
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
@@ -38,6 +51,5 @@ protected:
 	TObjectPtr<UInventoryManagerSubsystem> InventoryManager;
 
 public:
-	UWidgetAnimation* GetAnimation(FName AnimationName) const;
 	UInventoryItemInfo* GetItemInfoWidget() const { return ItemInfoWidget; }
 };

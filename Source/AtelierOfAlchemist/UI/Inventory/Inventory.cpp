@@ -57,26 +57,27 @@ void UInventory::UpdateInventory()
 	}
 }
 
-UWidgetAnimation* UInventory::GetAnimation(FName AnimationName) const
+void UInventory::Show()
 {
-	UWidgetBlueprintGeneratedClass* WidgetClass = GetWidgetTreeOwningClass();
-	if (!WidgetClass)
+	if (bIsAnimating || IsVisible()) return;
+
+	if (FadeInAnim)
 	{
-		return nullptr;
+		bIsAnimating = true;
+		float AnimDuration = FadeInAnim->GetEndTime();
+
+		SetVisibility(ESlateVisibility::Visible);
+		PlayAnimation(FadeInAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]() { bIsAnimating = false; }, AnimDuration, false);
 	}
-
-	TArray<UWidgetAnimation*> Animations = WidgetClass->Animations;
-
-	for (UWidgetAnimation* Animation : Animations)
+	else
 	{
-		if (Animation)
-		{
-
-			if (Animation->GetFName() == AnimationName)
-			{
-				return Animation;
-			}
-		}
+		SetVisibility(ESlateVisibility::Visible);
 	}
-	return nullptr;
+}
+
+void UInventory::Hide()
+{
+	if (bIsAnimating || !IsVisible()) return;
 }

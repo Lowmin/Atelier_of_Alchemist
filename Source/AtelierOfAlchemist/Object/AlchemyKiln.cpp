@@ -11,7 +11,6 @@ void AAlchemyKiln::OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacte
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->SetInteractObject(this);
-		UE_LOG(LogTemp, Warning, TEXT("ÀÌ¾ßÈ£"));
 	}
 }
 
@@ -23,4 +22,12 @@ void AAlchemyKiln::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacte
 	{
 		PlayerCharacter->ClearInteractObject(this);
 	}
+}
+
+void AAlchemyKiln::Interact_Implementation(APlayerCharacter* Interactor)
+{
+	Super::Interact_Implementation(Interactor);
+
+	if ()
+
 }

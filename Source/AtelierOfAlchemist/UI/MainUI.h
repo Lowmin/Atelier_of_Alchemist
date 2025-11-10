@@ -9,13 +9,13 @@
 
 class UInteractObjectWidget;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API UMainUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UInteractObjectWidget> InteractObjectWidget;

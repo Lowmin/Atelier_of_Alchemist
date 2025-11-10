@@ -9,13 +9,13 @@
 class UImage;
 class UTextBlock;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API UInteractObjectWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	void UpdateWidgetInfo(TSoftObjectPtr<UTexture2D> ItemIcon, const FText& ItemName);
 

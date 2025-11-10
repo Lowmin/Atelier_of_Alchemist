@@ -84,9 +84,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(
-			-1,                    
-			0.0f,                   
-			FColor::Yellow,          
+			-1,
+			0.0f,
+			FColor::Yellow,
 			FString::Printf(TEXT("Current Speed: %.2f"), CurrentSpeed)
 		);
 	}
