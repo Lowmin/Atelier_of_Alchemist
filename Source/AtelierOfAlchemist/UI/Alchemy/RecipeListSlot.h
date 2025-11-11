@@ -10,7 +10,7 @@ class UImage;
 class UTextBlock;
 class URecipeDataAsset;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API URecipeListSlot : public UUserWidget
@@ -23,9 +23,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> ResultItemName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UTextBlock> ResultItemQuantity;
 
 	void UpdateSlot(const TSoftObjectPtr<URecipeDataAsset> RecipeDataAsset);
 };

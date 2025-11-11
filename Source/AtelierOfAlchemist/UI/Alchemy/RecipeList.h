@@ -27,14 +27,16 @@ protected:
 	UFUNCTION()
 	void UpdateRecipeList();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UGridPanel> RecipeGrid;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<URecipeListSlot> RecipeListSlot;
 
 	UPROPERTY()
 	TObjectPtr<URecipeManagerSubsystem> RecipeManager;
 
 public:
+	void Show();
+	void Hide();
 };

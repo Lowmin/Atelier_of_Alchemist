@@ -7,7 +7,7 @@
 #include "AoAPlayerController.generated.h"
 
 /**
- * 
+ *
  */
 class UInputMappingContext;
 class UInputAction;
@@ -18,7 +18,7 @@ UCLASS()
 class ATELIEROFALCHEMIST_API AAoAPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
 	AAoAPlayerController();
 

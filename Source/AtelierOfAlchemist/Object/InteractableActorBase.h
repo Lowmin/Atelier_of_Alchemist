@@ -38,13 +38,21 @@ protected:
 	void OnPlayerLeave(APlayerCharacter* PlayerCharacter);
 	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
-	TSubclassOf<UUserWidget> InteractWidgetClass;
+	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PromptWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> PromptWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSoftObjectPtr<UTexture2D> DefaultInteractIcon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> MainWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	FText DefaultInteractText;
 
 private:
@@ -55,7 +63,6 @@ private:
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
-	virtual void Interact_Implementation(APlayerCharacter* Interactor) override PURE_VIRTUAL(AInteractableActorBase::Interact_Implementation);
 	virtual FText GetInteractText_Implementation() const override;
 	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;
 

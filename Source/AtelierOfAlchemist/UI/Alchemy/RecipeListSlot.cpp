@@ -29,6 +29,4 @@ void URecipeListSlot::UpdateSlot(const TSoftObjectPtr<URecipeDataAsset> RecipeDa
 	FFormatNamedArguments Args;
 	Args.Add(TEXT("Quantity"), Quantity);
 	FText FinalQuantityText = FText::Format(FormatPattern, Args);
-
-	ResultItemQuantity->SetText(FinalQuantityText);
 }

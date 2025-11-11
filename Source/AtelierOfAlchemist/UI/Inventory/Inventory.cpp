@@ -80,4 +80,20 @@ void UInventory::Show()
 void UInventory::Hide()
 {
 	if (bIsAnimating || !IsVisible()) return;
+
+	if (FadeOutAnim)
+	{
+		bIsAnimating = true;
+		float AnimDuration = FadeOutAnim->GetEndTime();
+
+		PlayAnimation(FadeOutAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle,
+			[this]() { SetVisibility(ESlateVisibility::Collapsed); bIsAnimating = false; },
+			AnimDuration, false);
+	}
+	else
+	{
+		SetVisibility(ESlateVisibility::Collapsed);
+	}
 }

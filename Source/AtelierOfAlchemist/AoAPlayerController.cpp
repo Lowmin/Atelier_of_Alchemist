@@ -38,4 +38,25 @@ void AAoAPlayerController::SetupInputComponent()
 
 void AAoAPlayerController::ToggleInventory()
 {
+    AMyHUD* AoAMyHUD = Cast<AMyHUD>(GetHUD());
+    if (!AoAMyHUD) return;
+
+    UMainUI* AoAMainUI = AoAMyHUD->GetMainUIInstance();
+    if (!AoAMainUI) return;
+
+    UInventory* WBP_Inventory = AoAMainUI->WBP_Inventory;
+    if (!WBP_Inventory) return;
+
+    if (WBP_Inventory->IsVisible())
+    {
+        WBP_Inventory->Hide();
+        SetShowMouseCursor(false);
+        SetInputMode(FInputModeGameOnly());
+    }
+    else
+    {
+        WBP_Inventory->Show();
+        SetShowMouseCursor(true);
+        SetInputMode(FInputModeGameAndUI());
+    }
 }

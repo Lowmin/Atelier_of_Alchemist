@@ -43,3 +43,13 @@ void URecipeList::UpdateRecipeList()
 		}*/
 	}
 }
+
+void URecipeList::Show()
+{
+	SetVisibility(ESlateVisibility::Visible);
+}
+
+void URecipeList::Hide()
+{
+	SetVisibility(ESlateVisibility::Collapsed);
+}
