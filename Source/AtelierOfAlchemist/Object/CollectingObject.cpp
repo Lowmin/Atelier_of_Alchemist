@@ -19,22 +19,6 @@ ACollectingObject::ACollectingObject()
 	MaxGrade = EItemGrade::EIG_E;
 }
 
-void ACollectingObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter)
-{
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->SetInteractObject(this);
-	}
-}
-
-void ACollectingObject::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter)
-{
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->ClearInteractObject(this);
-	}
-}
-
 void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 {
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();

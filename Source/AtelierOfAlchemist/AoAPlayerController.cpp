@@ -60,3 +60,34 @@ void AAoAPlayerController::ToggleInventory()
         SetInputMode(FInputModeGameAndUI());
     }
 }
+
+void AAoAPlayerController::OpenObjectUI(TSubclassOf<UUserWidget> WidgetClass)
+{
+    if (CurrentOpenWidget)
+    {
+        CloseObjectUI();
+    }
+
+    if (WidgetClass)
+    {
+        CurrentOpenWidget = CreateWidget<UUserWidget>(this, WidgetClass);
+        if (CurrentOpenWidget)
+        {
+            CurrentOpenWidget->AddToViewport();
+            SetShowMouseCursor(true);
+            SetInputMode(FInputModeGameAndUI());
+        }
+    }
+}
+
+void AAoAPlayerController::CloseObjectUI()
+{
+    if (CurrentOpenWidget)
+    {
+        CurrentOpenWidget->RemoveFromParent();
+        CurrentOpenWidget = nullptr;
+    }
+
+    SetShowMouseCursor(false);
+    SetInputMode(FInputModeGameOnly());
+}

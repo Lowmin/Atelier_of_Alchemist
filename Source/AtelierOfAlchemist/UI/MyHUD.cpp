@@ -19,29 +19,4 @@ void AMyHUD::BeginPlay()
 			MainUIInstance->AddToViewport();
 		}
 	}
-
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPawn()))
-	{
-		PlayerCharacter->OnInteract.AddDynamic(this, &AMyHUD::OnInteract);
-	}
-}
-
-void AMyHUD::OnInteract(AActor* InteractObject)
-{
-	if (MainUIInstance)
-	{
-		if (InteractObject)
-		{
-			if (InteractObject->Implements<UInteractableInterface>())
-			{
-				FText InteractText = IInteractableInterface::Execute_GetInteractText(InteractObject);
-				TSoftObjectPtr<UTexture2D> InteractIcon = IInteractableInterface::Execute_GetInteractIcon(InteractObject);
-				MainUIInstance->ShowInteractWidget(InteractIcon, InteractText);
-			}
-		}
-		else
-		{
-			MainUIInstance->HideInteractWidget();
-		}
-	}
 }

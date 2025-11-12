@@ -20,8 +20,6 @@ public:
 	ACollectingObject();
 
 protected:
-	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter) override;
-	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter) override;
 	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
 	virtual FText GetInteractText_Implementation() const override;
 	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;

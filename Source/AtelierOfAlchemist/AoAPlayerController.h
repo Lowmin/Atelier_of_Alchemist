@@ -12,6 +12,8 @@
 class UInputMappingContext;
 class UInputAction;
 class UMainUI;
+class UUserWidget;
+
 struct FInputActionValue;
 
 UCLASS()
@@ -21,6 +23,9 @@ class ATELIEROFALCHEMIST_API AAoAPlayerController : public APlayerController
 
 public:
 	AAoAPlayerController();
+
+	void OpenObjectUI(TSubclassOf<UUserWidget> WidgetClass);
+	void CloseObjectUI();
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,8 +41,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UMainUI> MainUIClass;
 
+	UPROPERTY(VisibleInstanceOnly, Category = "UI")
+	TObjectPtr<UUserWidget> CurrentOpenWidget;
+
 	void ToggleInventory();
 
 private:
 	bool bIsInventoryAnimPlay = false;
+
 };
