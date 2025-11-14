@@ -5,6 +5,7 @@
 #include "../Characters/Playable/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 #include "../AoAPlayerController.h"
+#include "../UI/InteractObjectWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "DrawDebugHelpers.h"
 
@@ -46,12 +47,17 @@ void AInteractableActorBase::OnPlayerEnter_Implementation(APlayerCharacter* Play
 		{
 			if (APlayerController* PC = PlayerCharacter->GetController<APlayerController>())
 			{
-				PromptWidgetInstance = CreateWidget<UUserWidget>(PC, PromptWidgetClass);
+				PromptWidgetInstance = CreateWidget<UInteractObjectWidget>(PC, PromptWidgetClass);
 			}
 		}
 
 		if (PromptWidgetInstance && !PromptWidgetInstance->IsInViewport())
 		{
+			FText Text = IInteractableInterface::Execute_GetInteractText(this);
+			TSoftObjectPtr<UTexture2D> Icon = IInteractableInterface::Execute_GetInteractIcon(this);
+
+			// 2. 프롬프트 UI에 이 정보를 전달
+			PromptWidgetInstance->UpdateWidgetInfo(Icon, Text);
 			PromptWidgetInstance->AddToViewport();
 		}
 	}

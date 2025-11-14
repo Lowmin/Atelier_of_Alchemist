@@ -18,13 +18,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCollectedItem, AAcotr*, InteractObject);
 
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API APlayerCharacter : public APartyMemberBase
 {
 	GENERATED_BODY()
-	
+
 private:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

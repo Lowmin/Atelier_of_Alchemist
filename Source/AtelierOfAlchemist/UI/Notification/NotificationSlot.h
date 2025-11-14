@@ -10,13 +10,13 @@ struct FNotificationData;
 class UImage;
 class UTextBlock;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API UNotificationSlot : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	void Initialize(const FNotificationData& Data);
 

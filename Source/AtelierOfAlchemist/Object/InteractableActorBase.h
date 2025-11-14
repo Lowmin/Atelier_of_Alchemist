@@ -9,6 +9,7 @@
 
 class USphereComponent;
 class APlayerCharacter;
+class UInteractObjectWidget;
 
 UCLASS(Abstract)
 class ATELIEROFALCHEMIST_API AInteractableActorBase : public AActor, public IInteractableInterface
@@ -41,10 +42,10 @@ protected:
 	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UUserWidget> PromptWidgetClass;
+	TSubclassOf<UInteractObjectWidget> PromptWidgetClass;
 
 	UPROPERTY()
-	TObjectPtr<UUserWidget> PromptWidgetInstance;
+	TObjectPtr<UInteractObjectWidget> PromptWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSoftObjectPtr<UTexture2D> DefaultInteractIcon;
