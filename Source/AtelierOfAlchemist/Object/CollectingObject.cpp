@@ -21,13 +21,26 @@ ACollectingObject::ACollectingObject()
 
 void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 {
+	UE_LOG(LogTemp, Error, TEXT("ACollectingObject::Interact EXECUTED!"));
+
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
 
 	if (Interactor && InventoryManager && DroppedItemAsset)
 	{
-		InventoryManager->AddItem(DroppedItemAsset, RandomGrade(), Quantity);
-		Interactor->ClearInteractObject(this);
+		UE_LOG(LogTemp, Error, TEXT("ACollectingObject: Check PASSED. Adding item and destroying..."));
+
+		InventoryManager->AddItem(this, DroppedItemAsset, RandomGrade(), Quantity);
+
+		OnPlayerLeave_Implementation(Interactor);
+
 		Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ACollectingObject: Check FAILED! One or more components are NULL:"));
+		UE_LOG(LogTemp, Error, TEXT("  - Interactor: %s"), Interactor ? TEXT("Valid") : TEXT("NULL"));
+		UE_LOG(LogTemp, Error, TEXT("  - InventoryManager: %s"), InventoryManager ? TEXT("Valid") : TEXT("NULL"));
+		UE_LOG(LogTemp, Error, TEXT("  - DroppedItemAsset: %s"), DroppedItemAsset ? TEXT("Valid") : TEXT("NULL"));
 	}
 }
 

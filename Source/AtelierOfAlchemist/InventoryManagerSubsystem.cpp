@@ -2,6 +2,8 @@
 
 
 #include "InventoryManagerSubsystem.h"
+#include "UI/Notification/NotificationData.h"
+#include "NotificationManagerSubsystem.h"
 
 void UInventoryManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -13,38 +15,25 @@ void UInventoryManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	{
 		InventorySlot.SetNum(MaxInventorySlot);
 	}
-
-	AddItem(DefaultItemDataAsset, EItemGrade::EIG_A, 5);
 }
 
-bool UInventoryManagerSubsystem::AddItem(UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount)
+bool UInventoryManagerSubsystem::AddItem(const UObject* WorldContextObject, UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount)
 {
-	if (!ItemDataAsset || Amount <= 0) return false;
+	if (!ItemDataAsset || Amount <= 0 || !WorldContextObject) return false;
 
 	int32 MaxStack = ItemDataAsset->MaxStackSize;
 	int32 AddAmount = Amount;
+	bool bSuccess = false;
 
 	if (MaxStack > 1)
 	{
 		for (int32 i = 0; i < InventorySlot.Num(); ++i)
 		{
-			FInventorySlotStruct& Slot = InventorySlot[i];
-
-			if (Slot.ItemData == ItemDataAsset && Slot.Grade == ItemGrade && Slot.Quantity < MaxStack)
+			// ...
+			if (AddAmount == 0)
 			{
-				// 해당 칸에 겹칠 수 있는 남은 아이템 수량을 계산
-				int32 RemainQuantity = MaxStack - Slot.Quantity;
-				// 이 칸에 더할 아이템 갯수를 남은 양과 더해야 할 양 둘 중 작은 수로 저장
-				int32 AddThisSlot = FMath::Min(RemainQuantity, AddAmount);
-
-				Slot.Quantity += AddThisSlot;
-				AddAmount -= AddThisSlot;
-
-				if (AddAmount == 0)
-				{
-					InventorySort();
-					return true;
-				}
+				bSuccess = true;
+				break;
 			}
 		}
 	}
@@ -52,30 +41,43 @@ bool UInventoryManagerSubsystem::AddItem(UItemDataAsset* ItemDataAsset, EItemGra
 	{
 		for (int32 i = 0; i < InventorySlot.Num(); ++i)
 		{
-			FInventorySlotStruct& Slot = InventorySlot[i];
-
-			if (Slot.ItemData.IsNull())
+			// ...
+			if (AddAmount == 0)
 			{
-				int32 AddThisSlot = FMath::Min(MaxStack, AddAmount);
-
-				Slot.ItemData = ItemDataAsset;
-				Slot.Grade = ItemGrade;
-				Slot.Quantity += AddThisSlot;
-				AddAmount -= AddThisSlot;
-
-				if (AddAmount == 0)
-				{
-					InventorySort();
-					return true;
-				}
+				bSuccess = true;
+				break;
 			}
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Inventory is Full."));
 	InventorySort();
 
-	return false;
+	UNotificationManagerSubsystem* NotifManager = nullptr;
+	if (ULocalPlayer* LocalPlayer = GEngine->GetFirstLocalPlayerController(WorldContextObject->GetWorld())->GetLocalPlayer())
+	{
+		NotifManager = LocalPlayer->GetSubsystem<UNotificationManagerSubsystem>();
+	}
+
+	if (NotifManager)
+	{
+		FNotificationData Data;
+		if (bSuccess)
+		{
+			FFormatNamedArguments Args;
+			Args.Add(TEXT("ItemName"), ItemDataAsset->ItemName);
+			Data.Message = FText::Format(FText::FromString(TEXT("{ItemName}")), Args);
+			Data.Icon = ItemDataAsset->ItemIcon;
+			Data.Type = ENotificationType::Success;
+		}
+		else
+		{
+			Data.Message = FText::FromString(TEXT("인벤토리"));
+			Data.Type = ENotificationType::Warning;
+		}
+		NotifManager->ShowNotification(Data);
+	}
+
+	return bSuccess;
 }
 
 void UInventoryManagerSubsystem::InventorySort()

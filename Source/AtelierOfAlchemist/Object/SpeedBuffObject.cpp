@@ -32,7 +32,7 @@ void ASpeedBuffObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerChar
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
 	if (InventoryManager)
 	{
-		InventoryManager->AddItem(ItemData, EItemGrade::EIG_B, 5);
+		InventoryManager->AddItem(this, ItemData, EItemGrade::EIG_B, 5);
 	}
 }
 

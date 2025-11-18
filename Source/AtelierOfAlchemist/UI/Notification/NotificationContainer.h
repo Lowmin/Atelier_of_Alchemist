@@ -9,13 +9,13 @@
 struct FNotificationData;
 class UNotificationSlot;
 /**
- * 
+ *
  */
 UCLASS()
 class ATELIEROFALCHEMIST_API UNotificationContainer : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	void AddNotification(const FNotificationData& Data);
 

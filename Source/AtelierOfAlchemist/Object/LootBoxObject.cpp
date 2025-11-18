@@ -20,7 +20,7 @@ void ALootBoxObject::Interact_Implementation(APlayerCharacter* Interactor)
 				if (LootItem.ItemData.IsNull()) continue;
 
 				UItemDataAsset* Item = LootItem.ItemData.LoadSynchronous();
-				bool isSuccess = InventoryManager->AddItem(Item, LootItem.ItemGrade, LootItem.Quantity);
+				bool isSuccess = InventoryManager->AddItem(this, Item, LootItem.ItemGrade, LootItem.Quantity);
 
 				if (isSuccess)
 				{

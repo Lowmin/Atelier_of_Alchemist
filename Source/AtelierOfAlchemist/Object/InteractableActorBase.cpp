@@ -43,6 +43,8 @@ void AInteractableActorBase::OnPlayerEnter_Implementation(APlayerCharacter* Play
 {
 	if (PlayerCharacter && PromptWidgetClass)
 	{
+		PlayerCharacter->SetInteractObject(this);
+
 		if (!PromptWidgetInstance)
 		{
 			if (APlayerController* PC = PlayerCharacter->GetController<APlayerController>())

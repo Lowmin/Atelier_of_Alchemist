@@ -22,8 +22,8 @@ class ATELIEROFALCHEMIST_API UInventoryManagerSubsystem : public UGameInstanceSu
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItem(UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount = 1);
+	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
+	bool AddItem(const UObject* WorldContextObject, UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount = 1);
 
 	const TArray<FInventorySlotStruct>& GetInventorySlot() const { return InventorySlot; };
 
