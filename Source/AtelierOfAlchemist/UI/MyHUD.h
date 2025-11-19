@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "Notification/NotificationData.h"
 #include "MyHUD.generated.h"
 
 class UMainUI;
 class AActor;
+class UNotificationContainer;
 /**
  *
  */
@@ -25,7 +27,15 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UMainUI> MainUIInstance;
 
+	UPROPERTY(EditAnywhere, Category = "Notification")
+	TSubclassOf<UNotificationContainer> NotificationContainerClass;
+
+	UPROPERTY()
+	TObjectPtr<UNotificationContainer> NotificationContainer;
+
 public:
 	UFUNCTION(BlueprintPure, Category = "UI")
 	UMainUI* GetMainUIInstance() const { return MainUIInstance; }
+
+	void ShowNotification(const FNotificationData& Data);
 };
