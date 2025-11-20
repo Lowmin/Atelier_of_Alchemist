@@ -85,14 +85,12 @@ bool UInventoryManagerSubsystem::AddItem(const UObject* WorldContextObject, UIte
 
 				if (bAddedAny)
 				{
-					// 성공 알림: "[아이템이름] 획득"
 					FFormatNamedArguments Args;
 					Args.Add(TEXT("ItemName"), ItemDataAsset->ItemName);
 					Data.Message = FText::Format(FText::FromString(TEXT("{ItemName}")), Args);
 					Data.Icon = ItemDataAsset->ItemIcon;
-					Data.Type = ENotificationType::Success; // (성공 타입이 있다면)
+					Data.Type = ENotificationType::Item;
 
-					// 만약 인벤토리가 꽉 차서 일부만 먹었다면 경고를 띄울 수도 있습니다.
 					if (AddAmount > 0)
 					{
 						// (선택) "일부만 획득했습니다" 같은 처리 가능
@@ -100,18 +98,15 @@ bool UInventoryManagerSubsystem::AddItem(const UObject* WorldContextObject, UIte
 				}
 				else
 				{
-					// 실패 알림: "인벤토리가 가득 찼습니다."
 					Data.Message = FText::FromString(TEXT("인벤토리가 가득 찼습니다."));
 					Data.Type = ENotificationType::Warning;
 				}
 
-				// HUD에게 알림 요청
 				MyHUD->ShowNotification(Data);
 			}
 		}
 	}
 
-	// 하나라도 추가되었으면 true 반환
 	return bAddedAny;
 }
 

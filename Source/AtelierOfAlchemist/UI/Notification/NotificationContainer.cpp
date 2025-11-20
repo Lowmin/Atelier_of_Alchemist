@@ -7,7 +7,15 @@
 
 void UNotificationContainer::AddNotification(const FNotificationData& Data)
 {
-	if (!NotificationSlot) return;
+	if (!NotificationSlot)
+	{
+		return;
+	}
+
+	if (!NotificationBox)
+	{
+		return;
+	}
 
 	UNotificationSlot* NewSlot = CreateWidget<UNotificationSlot>(this, NotificationSlot);
 	if (NewSlot)

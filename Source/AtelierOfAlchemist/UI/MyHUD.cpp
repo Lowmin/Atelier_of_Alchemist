@@ -23,11 +23,9 @@ void AMyHUD::BeginPlay()
 
 	if (NotificationContainerClass)
 	{
-		// PlayerController를 Owner로 생성
 		NotificationContainer = CreateWidget<UNotificationContainer>(GetOwningPlayerController(), NotificationContainerClass);
 		if (NotificationContainer)
 		{
-			// Z-Order를 높게(예: 10) 설정해서 다른 UI보다 위에 뜨게 함
 			NotificationContainer->AddToViewport(10);
 		}
 	}

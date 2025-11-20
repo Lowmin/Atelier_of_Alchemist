@@ -10,6 +10,7 @@
 void UNotificationSlot::Initialize(const FNotificationData& Data)
 {
 	NotificationText->SetText(Data.Message);
+	NotificationText->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	if (Data.Icon.IsNull())
 	{
@@ -27,7 +28,7 @@ void UNotificationSlot::Initialize(const FNotificationData& Data)
 
 void UNotificationSlot::OnFadeOutFinished()
 {
-	float AnimDuration = 1.0f;
+	float AnimDuration = 0.1f;
 
 	if (FadeOutAnim)
 	{

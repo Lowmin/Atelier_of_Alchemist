@@ -31,10 +31,24 @@ class ATELIEROFALCHEMIST_API ALootBoxObject : public AInteractableActorBase
 {
 	GENERATED_BODY()
 
+	ALootBoxObject();
+
 	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
+
+public:
+	UPROPERTY(BlueprintReadOnly)
+	bool IsOpened{};
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", SaveGame)
 	TArray<FLootItem> ItemList;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> LootBoxMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<UAnimationAsset> OpenAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<UAnimationAsset> OpenedAnimation;
 };
