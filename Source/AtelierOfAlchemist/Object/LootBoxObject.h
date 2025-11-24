@@ -8,6 +8,7 @@
 #include "LootBoxObject.generated.h"
 
 class UItemDataAsset;
+class URecipeDataAsset;
 
 USTRUCT(BlueprintType)
 struct FLootItem
@@ -40,6 +41,9 @@ public:
 	bool IsOpened{};
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe", SaveGame)
+	TObjectPtr<URecipeDataAsset> Recipe;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", SaveGame)
 	TArray<FLootItem> ItemList;
 

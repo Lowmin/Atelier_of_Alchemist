@@ -3,6 +3,7 @@
 
 #include "RecipeList.h"
 #include "../../RecipeManagerSubsystem.h"
+#include "../../DataAssets/RecipeDataAsset.h"
 #include "Components/GridPanel.h"
 
 void URecipeList::NativeConstruct()
@@ -29,6 +30,9 @@ void URecipeList::UpdateRecipeList()
 	RecipeManager->GetAllRecipeId(AllRecipeId);
 
 	const TArray<TSoftObjectPtr<URecipeDataAsset>>& UnlockedRecipe = RecipeManager->GetUnlockedRecipes();
+
+	const int32 Columns = 15;
+	int32 CurrentIndex = 0;
 
 	for (const FPrimaryAssetId& RecipeId : AllRecipeId)
 	{

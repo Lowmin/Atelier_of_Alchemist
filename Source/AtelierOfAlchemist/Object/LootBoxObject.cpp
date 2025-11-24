@@ -3,6 +3,7 @@
 
 #include "LootBoxObject.h"
 #include "../InventoryManagerSubsystem.h"
+#include "../RecipeManagerSubsystem.h"
 #include "Components/SphereComponent.h"
 #include "Animation/AnimationAsset.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -43,6 +44,16 @@ void ALootBoxObject::Interact_Implementation(APlayerCharacter* Interactor)
 					ObjectSensor->DestroyComponent();
 				}
 			}
+		}
+	}
+
+	if (Recipe != nullptr)
+	{
+		URecipeManagerSubsystem* RecipeManager = GetGameInstance()->GetSubsystem<URecipeManagerSubsystem>();
+
+		if (RecipeManager)
+		{
+			RecipeManager->AddRecipe(Recipe);
 		}
 	}
 }
