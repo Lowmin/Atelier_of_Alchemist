@@ -24,5 +24,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> ResultItemName;
 
-	void UpdateSlot(const TSoftObjectPtr<URecipeDataAsset> RecipeDataAsset);
+	void UpdateSlot(const TSoftObjectPtr<URecipeDataAsset>& RecipeDataAsset, bool bIsUnlocked);
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TObjectPtr<UMaterialInterface> GrayscaleMaterialBase;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GrayscaleDMI;
+
+	bool bIsSlotUnlocked = false;
 };

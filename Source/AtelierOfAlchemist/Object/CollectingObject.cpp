@@ -25,7 +25,6 @@ void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 
 	if (Interactor && InventoryManager && DroppedItemAsset)
 	{
-
 		InventoryManager->AddItem(this, DroppedItemAsset, RandomGrade(), Quantity);
 
 		OnPlayerLeave_Implementation(Interactor);

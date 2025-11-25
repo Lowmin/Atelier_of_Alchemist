@@ -4,6 +4,7 @@
 #include "LootBoxObject.h"
 #include "../InventoryManagerSubsystem.h"
 #include "../RecipeManagerSubsystem.h"
+#include "../DataAssets/RecipeDataAsset.h"
 #include "Components/SphereComponent.h"
 #include "Animation/AnimationAsset.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -24,36 +25,57 @@ ALootBoxObject::ALootBoxObject()
 void ALootBoxObject::Interact_Implementation(APlayerCharacter* Interactor)
 {
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
-	
-	if (InventoryManager)
+	URecipeManagerSubsystem* RecipeManager = GetGameInstance()->GetSubsystem<URecipeManagerSubsystem>(); // ¹Ì¸® °¡Á®¿È
+
+	if (InventoryManager && ItemList.Num() > 0)
 	{
-		if (ItemList.Num() > 0)
+		for (int i = ItemList.Num() - 1; i >= 0; --i)
 		{
-			for (int i = ItemList.Num() - 1; i >= 0; --i)
+			const FLootItem& LootItem = ItemList[i]; 
+
+			if (LootItem.ItemData.IsNull()) continue;
+
+			UItemDataAsset* Item = LootItem.ItemData.LoadSynchronous();
+			if (!Item) continue;
+
+			bool bSuccess = InventoryManager->AddItem(this, Item, LootItem.ItemGrade, LootItem.Quantity);
+
+			if (bSuccess)
 			{
-				const FLootItem& LootItem = ItemList[i];
+				ItemList.RemoveAt(i);
+			}
+		}
+	}
 
-				if (LootItem.ItemData.IsNull()) continue;
+	if (!Recipe.IsNull())
+	{
+		if (RecipeManager)
+		{
+			URecipeDataAsset* LoadedRecipe = Recipe.LoadSynchronous();
 
-				UItemDataAsset* Item = LootItem.ItemData.LoadSynchronous();
-				IsOpened = InventoryManager->AddItem(this, Item, LootItem.ItemGrade, LootItem.Quantity);
+			if (LoadedRecipe)
+			{
+				bool bLearned = RecipeManager->AddRecipe(LoadedRecipe);
 
-				if (IsOpened)
+				if (bLearned)
 				{
-					ItemList.RemoveAt(i);
-					ObjectSensor->DestroyComponent();
+					Recipe = nullptr;
 				}
 			}
 		}
 	}
 
-	if (Recipe != nullptr)
-	{
-		URecipeManagerSubsystem* RecipeManager = GetGameInstance()->GetSubsystem<URecipeManagerSubsystem>();
+	bool bIsItemEmpty = (ItemList.Num() == 0);
+	bool bIsRecipeEmpty = Recipe.IsNull();
 
-		if (RecipeManager)
+	if (bIsItemEmpty && bIsRecipeEmpty)
+	{
+		OnPlayerLeave_Implementation(Interactor);
+
+		if (ObjectSensor)
 		{
-			RecipeManager->AddRecipe(Recipe);
+			ObjectSensor->DestroyComponent();
 		}
+
 	}
 }

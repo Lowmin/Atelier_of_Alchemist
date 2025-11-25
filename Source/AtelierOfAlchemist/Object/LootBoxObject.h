@@ -42,7 +42,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe", SaveGame)
-	TObjectPtr<URecipeDataAsset> Recipe;
+	TSoftObjectPtr<URecipeDataAsset> Recipe;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", SaveGame)
 	TArray<FLootItem> ItemList;

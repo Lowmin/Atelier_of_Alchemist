@@ -14,14 +14,18 @@ bool URecipeManagerSubsystem::AddRecipe(URecipeDataAsset* RecipeDataAsset)
 {
 	if (!RecipeDataAsset) return false;
 
-	TSoftObjectPtr<URecipeDataAsset> RecipeDataPtr = RecipeDataPtr;
+	TSoftObjectPtr<URecipeDataAsset> RecipeDataPtr = RecipeDataAsset;
 
-	if (UnlockedRecipeList.AddUnique(RecipeDataPtr) != INDEX_NONE)
+	if (UnlockedRecipeList.Contains(RecipeDataPtr))
 	{
-		return true;
+		UE_LOG(LogTemp, Warning, TEXT("AddRecipe: Already learned %s"), *RecipeDataAsset->GetName());
+		return false;
 	}
 
-	return false;
+	UnlockedRecipeList.Add(RecipeDataPtr);
+
+	UE_LOG(LogTemp, Warning, TEXT("AddRecipe: Success! %s"), *RecipeDataAsset->GetName());
+	return true;
 }
 
 bool URecipeManagerSubsystem::GetAllRecipeId(TArray<FPrimaryAssetId>& RecipeId) const
