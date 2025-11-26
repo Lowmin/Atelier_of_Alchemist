@@ -50,15 +50,13 @@ void URecipeList::UpdateRecipeList()
 	UE_LOG(LogTemp, Warning, TEXT("UI Update: Total %d Recipes, Unlocked %d Recipes"), AllRecipeId.Num(), UnlockedIDs.Num());
 	// -------------------------------------------------------------
 
-	const int32 Columns = 5; // (15는 너무 많을 수 있으니 5 정도로 조정 추천)
+	const int32 Columns = 5;
 	int32 CurrentIndex = 0;
 
 	for (const FPrimaryAssetId& RecipeId : AllRecipeId)
 	{
-		// 3. ID를 이용해 위젯 생성에 필요한 SoftPtr 생성
 		TSoftObjectPtr<URecipeDataAsset> RecipePtr = RecipeManager->GetRecipeFromId(RecipeId);
 
-		// 4. [핵심 수정] 이제 ID로 비교합니다. (정확함)
 		bool bIsUnlocked = UnlockedIDs.Contains(RecipeId);
 
 		URecipeListSlot* NewSlotWidget = CreateWidget<URecipeListSlot>(this, RecipeListSlot);
@@ -66,6 +64,7 @@ void URecipeList::UpdateRecipeList()
 		if (NewSlotWidget)
 		{
 			NewSlotWidget->UpdateSlot(RecipePtr, bIsUnlocked);
+			NewSlotWidget->OnSlotClicked.AddDynamic(this, &URecipeList::OnSlotClicked);
 
 			int32 Row = CurrentIndex / Columns;
 			int32 Column = CurrentIndex % Columns;
@@ -75,6 +74,11 @@ void URecipeList::UpdateRecipeList()
 			CurrentIndex++;
 		}
 	}
+}
+
+void URecipeList::OnSlotClicked(TSoftObjectPtr<URecipeDataAsset> RecipePtr)
+{
+	OnRecipeSelected.Broadcast(RecipePtr);
 }
 
 void URecipeList::Show()

@@ -6,12 +6,14 @@
 #include "Blueprint/UserWidget.h"
 #include "RecipeList.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSelected, TSoftObjectPtr<URecipeDataAsset>, RecipePtr);
 
 class UImage;
 class UTextBlock;
 class UGridPanel;
 class URecipeListSlot;
 class URecipeManagerSubsystem;
+class URecipeDataAsset;
 /**
  *
  */
@@ -36,7 +38,13 @@ protected:
 	UPROPERTY()
 	TObjectPtr<URecipeManagerSubsystem> RecipeManager;
 
+	UFUNCTION()
+	void OnSlotClicked(TSoftObjectPtr<URecipeDataAsset> RecipePtr);
+
 public:
 	void Show();
 	void Hide();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRecipeSelected OnRecipeSelected;
 };

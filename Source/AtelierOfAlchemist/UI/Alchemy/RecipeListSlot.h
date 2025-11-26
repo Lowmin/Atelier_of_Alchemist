@@ -6,9 +6,12 @@
 #include "Blueprint/UserWidget.h"
 #include "RecipeListSlot.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSlotClicked, TSoftObjectPtr<URecipeDataAsset>, RecipePtr);
+
 class UImage;
 class UTextBlock;
 class URecipeDataAsset;
+class UButton;
 /**
  *
  */
@@ -17,7 +20,16 @@ class ATELIEROFALCHEMIST_API URecipeListSlot : public UUserWidget
 {
 	GENERATED_BODY()
 
+protected:
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void OnButtonClicked();
+
 public:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SlotButton;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UImage> ResultItemImage;
 
@@ -32,5 +44,10 @@ public:
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> GrayscaleDMI;
 
+	TSoftObjectPtr<URecipeDataAsset> CachedRecipePtr;
+
 	bool bIsSlotUnlocked = false;
+
+	FOnRecipeSlotClicked OnSlotClicked;
+
 };

@@ -28,6 +28,6 @@ public:
 	int32 ResultQuantity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
-	TMap<TSoftObjectPtr<UItemDataAsset>, int32> Ingredient;	// 필요한 아이템과 개수
+	TMap<TSoftObjectPtr<UItemDataAsset>, int32> Ingredients;	// 필요한 아이템과 개수
 
 };

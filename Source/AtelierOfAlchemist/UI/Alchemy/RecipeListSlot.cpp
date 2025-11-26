@@ -7,6 +7,25 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Components/Button.h"
+
+void URecipeListSlot::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (SlotButton)
+	{
+		SlotButton->OnClicked.AddDynamic(this, &URecipeListSlot::OnButtonClicked);
+	}
+}
+
+void URecipeListSlot::OnButtonClicked()
+{
+	if (!CachedRecipePtr.IsNull())
+	{
+		OnSlotClicked.Broadcast(CachedRecipePtr);
+	}
+}
 
 void URecipeListSlot::UpdateSlot(const TSoftObjectPtr<URecipeDataAsset>& RecipeDataAsset, bool bIsUnlocked)
 {
@@ -61,4 +80,6 @@ void URecipeListSlot::UpdateSlot(const TSoftObjectPtr<URecipeDataAsset>& RecipeD
 
 		ResultItemImage->SetVisibility(ESlateVisibility::Visible);
 	}
+
+	CachedRecipePtr = RecipeDataAsset;
 }
