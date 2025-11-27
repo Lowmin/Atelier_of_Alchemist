@@ -3,7 +3,19 @@
 
 #include "BattleManagerSubsystem.h"
 
+void UBattleManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	FieldToBattleMapName.Add(FName("Test"), FName("Map_Battle_Test"));
+}
+
 FName UBattleManagerSubsystem::GetBattleLevelName(FName CurrentFieldLevelName) const
 {
-	return FName();
+	if (FieldToBattleMapName.Contains(CurrentFieldLevelName))
+	{
+		return FieldToBattleMapName[CurrentFieldLevelName];
+	}
+
+	return FName("Test");
 }

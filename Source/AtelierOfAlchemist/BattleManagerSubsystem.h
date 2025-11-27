@@ -15,6 +15,8 @@ class ATELIEROFALCHEMIST_API UBattleManagerSubsystem : public UGameInstanceSubsy
 	GENERATED_BODY()
 	
 public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 	UPROPERTY(BlueprintReadWrite, Category = "Battle")
 	FName TargetSymbolName{};
 

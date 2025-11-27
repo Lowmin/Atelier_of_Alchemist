@@ -7,7 +7,7 @@
 #include "EnemySymbol.generated.h"
 
 class USphereComponent;
-class UStaticMeshComponent;
+class USkeletalMeshComponent;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API AEnemySymbol : public AActor
@@ -24,7 +24,7 @@ protected:
 	TObjectPtr<USphereComponent> DetectionSphere;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> Mesh;
+	TObjectPtr<USkeletalMeshComponent> Mesh;
 
 	UPROPERTY(EditAnywhere, Category = "Battle")
 	FName EnemyID;
