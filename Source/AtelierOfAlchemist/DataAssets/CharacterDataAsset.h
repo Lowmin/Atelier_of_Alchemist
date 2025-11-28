@@ -37,5 +37,8 @@ public:
 	float BaseDefensePower = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
+	float BaseSpeed = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	TSoftClassPtr<APlayerCharacter> BP_Character;
 };

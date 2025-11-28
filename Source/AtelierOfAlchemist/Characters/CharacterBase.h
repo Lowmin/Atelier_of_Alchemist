@@ -33,6 +33,7 @@ public:
 	float GetMaxHealth();
 	float GetAttackPower();
 	float GetDefense();
+	float GetSpeed();
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 

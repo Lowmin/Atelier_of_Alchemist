@@ -67,3 +67,8 @@ float UStatComponent::GetDefense() const
 {
 	return StaticData ? StaticData->BaseDefensePower : 0.0f;
 }
+
+float UStatComponent::GetSpeed() const
+{
+	return StaticData ? StaticData->BaseSpeed : 0.0f;
+}

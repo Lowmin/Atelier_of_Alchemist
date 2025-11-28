@@ -43,6 +43,11 @@ float ACharacterBase::GetDefense()
 	return StatComponent ? StatComponent->GetDefense() : 0.0f;
 }
 
+float ACharacterBase::GetSpeed()
+{
+	return StatComponent ? StatComponent->GetSpeed() : 0.0f;
+}
+
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
