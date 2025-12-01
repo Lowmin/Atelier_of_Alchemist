@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "BattleGameMode.generated.h"
 
+class UBattleUI;
 /**
  * 
  */
@@ -17,7 +18,25 @@ class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 public:
 	virtual void BeginPlay() override;
 
+	void PlayerAction(int32 ActionIndex);
+	void Undo();
+
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UBattleUI> BattleUIClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TObjectPtr<UBattleUI> BattleUIInstance;
+
 	void PartySpawn();
 	void EnemySpawn();
+
+	void Attack();
+	void OpenSkillUI();
+	void UseSkill();
+	void RunAway();
+
+	void StartBattle();
+	void StartNextTurn();
+	void ExecuteEnemyTurn();
 };

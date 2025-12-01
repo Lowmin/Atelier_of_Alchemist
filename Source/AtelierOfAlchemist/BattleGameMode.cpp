@@ -9,12 +9,28 @@
 #include "DataAssets/CharacterDataAsset.h"
 #include "Characters/Playable/PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "UI/Battle/BattleUI.h"
 
 void ABattleGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
 	PartySpawn();
 	EnemySpawn();
+
+	if (BattleUIClass)
+	{
+		BattleUIInstance = CreateWidget<UBattleUI>(GetWorld(), BattleUIClass);
+		if (BattleUIInstance)
+		{
+			BattleUIInstance->AddToViewport();
+			BattleUIInstance->HideUI();
+		}
+	}
+}
+
+void ABattleGameMode::PlayerAction(int32 ActionIndex)
+{
 }
 
 void ABattleGameMode::PartySpawn()
@@ -63,6 +79,31 @@ void ABattleGameMode::PartySpawn()
 }
 
 void ABattleGameMode::EnemySpawn()
+{
+
+}
+
+void ABattleGameMode::Undo()
+{
+
+}
+
+void ABattleGameMode::Attack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Attack!"));
+}
+
+void ABattleGameMode::OpenSkillUI()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Open Skill List"));
+}
+
+void ABattleGameMode::UseSkill()
+{
+
+}
+
+void ABattleGameMode::RunAway()
 {
 
 }
