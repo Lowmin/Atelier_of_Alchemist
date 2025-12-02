@@ -6,7 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "BattleUI.generated.h"
 
-class UButton;
+class UImage;
+class ABattleGameMode;
 /**
  * 
  */
@@ -23,14 +24,12 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Btn_Attack;
+	TObjectPtr<UImage> Attack;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Btn_Skill;
+	TObjectPtr<UImage> Skill;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Btn_Run;
-
-	UFUNCTION()
-	void OnAttack();
-	void OnSkill();
-	void OnRun();
+	TObjectPtr<UImage> Run;
+	
+	UPROPERTY()
+	TObjectPtr<ABattleGameMode> BattleGameMode;
 };

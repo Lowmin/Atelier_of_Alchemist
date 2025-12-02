@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "BattleGameMode.generated.h"
 
-class UBattleUI;
+class UBattleMainLayout;
 /**
  * 
  */
@@ -19,18 +19,20 @@ public:
 	virtual void BeginPlay() override;
 
 	void PlayerAction(int32 ActionIndex);
+	void SkillSelect(int32 SkillSlotIndex);
 	void Undo();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UBattleUI> BattleUIClass;
+	TSubclassOf<UBattleMainLayout> MainLayoutClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TObjectPtr<UBattleUI> BattleUIInstance;
+	TObjectPtr<UBattleMainLayout> MainLayoutInstance;
 
 	void PartySpawn();
 	void EnemySpawn();
 
+public:
 	void Attack();
 	void OpenSkillUI();
 	void UseSkill();

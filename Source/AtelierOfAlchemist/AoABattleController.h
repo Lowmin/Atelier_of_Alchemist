@@ -8,6 +8,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class ABattleGameMode;
 /**
  * 
  */
@@ -20,13 +21,33 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
+	UPROPERTY()
+	TObjectPtr<ABattleGameMode> BattleGameMode;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> IMC_Battle;
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Select;
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Cancel;
 
-	void Select();
-	void Cancel();
+	// BattleUI 조작
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Attack;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Skill;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Run;
+
+	// SkillList 조작
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Skill_1;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Skill_2;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Skill_3;
+
+	void Input_Attack();
+	void Input_Skill();
+	void Input_Run();
+
+	void Input_Skill_1();
+	void Input_Skill_2();
+	void Input_Skill_3();
 };

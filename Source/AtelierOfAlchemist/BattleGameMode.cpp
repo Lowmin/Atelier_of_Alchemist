@@ -9,28 +9,46 @@
 #include "DataAssets/CharacterDataAsset.h"
 #include "Characters/Playable/PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
-#include "UI/Battle/BattleUI.h"
+#include "UI/Battle/BattleMainLayout.h"
 
 void ABattleGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 스폰
 	PartySpawn();
 	EnemySpawn();
 
-	if (BattleUIClass)
+	// 레이아웃 세팅
+	if (MainLayoutClass)
 	{
-		BattleUIInstance = CreateWidget<UBattleUI>(GetWorld(), BattleUIClass);
-		if (BattleUIInstance)
+		MainLayoutInstance = CreateWidget<UBattleMainLayout>(GetWorld(), MainLayoutClass);
+		if (MainLayoutInstance)
 		{
-			BattleUIInstance->AddToViewport();
-			BattleUIInstance->HideUI();
+			MainLayoutInstance->AddToViewport();
+			MainLayoutInstance->ShowBattleUI();
 		}
 	}
+
+	StartBattle();
 }
 
 void ABattleGameMode::PlayerAction(int32 ActionIndex)
 {
+	switch(ActionIndex)
+	{
+	case 0:
+		Attack();
+	case 1:
+		OpenSkillUI();
+	case 2:
+		RunAway();
+	}
+}
+
+void ABattleGameMode::SkillSelect(int32 SkillSlotIndex)
+{
+
 }
 
 void ABattleGameMode::PartySpawn()
@@ -85,17 +103,19 @@ void ABattleGameMode::EnemySpawn()
 
 void ABattleGameMode::Undo()
 {
-
+	MainLayoutInstance->ShowBattleUI();
 }
 
 void ABattleGameMode::Attack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack!"));
+	MainLayoutInstance->ShowTargetUI();
 }
 
 void ABattleGameMode::OpenSkillUI()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Open Skill List"));
+	MainLayoutInstance->ShowSkillUI();
 }
 
 void ABattleGameMode::UseSkill()
@@ -104,6 +124,21 @@ void ABattleGameMode::UseSkill()
 }
 
 void ABattleGameMode::RunAway()
+{
+
+}
+
+void ABattleGameMode::StartBattle()
+{
+
+}
+
+void ABattleGameMode::StartNextTurn()
+{
+
+}
+
+void ABattleGameMode::ExecuteEnemyTurn()
 {
 
 }
