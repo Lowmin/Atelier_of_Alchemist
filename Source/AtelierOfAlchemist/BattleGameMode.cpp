@@ -39,16 +39,19 @@ void ABattleGameMode::PlayerAction(int32 ActionIndex)
 	{
 	case 0:
 		Attack();
+		break;
 	case 1:
 		OpenSkillUI();
+		break;
 	case 2:
 		RunAway();
+		break;
 	}
 }
 
 void ABattleGameMode::SkillSelect(int32 SkillSlotIndex)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("스킬 %d번 사용!"), SkillSlotIndex);
 }
 
 void ABattleGameMode::PartySpawn()
@@ -118,14 +121,9 @@ void ABattleGameMode::OpenSkillUI()
 	MainLayoutInstance->ShowSkillUI();
 }
 
-void ABattleGameMode::UseSkill()
-{
-
-}
-
 void ABattleGameMode::RunAway()
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("Run"));
 }
 
 void ABattleGameMode::StartBattle()

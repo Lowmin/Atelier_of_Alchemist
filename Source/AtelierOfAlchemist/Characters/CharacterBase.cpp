@@ -64,6 +64,11 @@ void ACharacterBase::Attack()
 {
 }
 
+void ACharacterBase::UseSkill()
+{
+
+}
+
 void ACharacterBase::Die()
 {
 }

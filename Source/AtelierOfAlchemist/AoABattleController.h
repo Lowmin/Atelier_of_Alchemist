@@ -16,6 +16,10 @@ UCLASS()
 class ATELIEROFALCHEMIST_API AAoABattleController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	void SetInputMode_Main();
+	void SetInputMode_Skill();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -24,8 +28,15 @@ protected:
 	UPROPERTY()
 	TObjectPtr<ABattleGameMode> BattleGameMode;
 
+	// InputMappingContext
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	TObjectPtr<UInputMappingContext> IMC_Battle;
+	TObjectPtr<UInputMappingContext> IMC_Battle_Main;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputMappingContext> IMC_Battle_Skill;
+
+	// 공통 조작
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Cancel;
 
 	// BattleUI 조작
 	UPROPERTY(EditDefaultsOnly, Category = "Input")

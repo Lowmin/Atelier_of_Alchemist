@@ -23,6 +23,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
+	virtual void UseSkill();
 	virtual void Die();
 
 public:
