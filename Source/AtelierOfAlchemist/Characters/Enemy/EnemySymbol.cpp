@@ -44,6 +44,7 @@ void AEnemySymbol::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 			FString CurrentLevelString = UGameplayStatics::GetCurrentLevelName(this);
 			FName CurrentLevelName = FName(*CurrentLevelString);
 
+			BattleManager->EnemyPartyData = this->EnemyPartyData;
 			BattleManager->SavedPlayerLocation = OtherActor->GetActorLocation();
 			BattleManager->SavedPlayerRotation = OtherActor->GetActorRotation();
 			BattleManager->SavedFieldLevelName = CurrentLevelName;

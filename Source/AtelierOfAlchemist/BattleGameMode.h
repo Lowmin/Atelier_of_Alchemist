@@ -7,6 +7,7 @@
 #include "BattleGameMode.generated.h"
 
 class UBattleMainLayout;
+class ABattleSpawnPoint;
 /**
  * 
  */
@@ -18,19 +19,26 @@ class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 public:
 	virtual void BeginPlay() override;
 
+	// 입력 처리
 	void PlayerAction(int32 ActionIndex);
 	void SkillSelect(int32 SkillSlotIndex);
 	void Undo();
 
 protected:
+	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UBattleMainLayout> MainLayoutClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TObjectPtr<UBattleMainLayout> MainLayoutInstance;
 
-	void PartySpawn();
+	// 스폰
+	UPROPERTY()
+	TMap<int32, AActor*> EnemySpawnPoints;
+
+	void FindEnemySpawnPoints();
 	void EnemySpawn();
+	void PartySpawn();
 
 public:
 	void Attack();

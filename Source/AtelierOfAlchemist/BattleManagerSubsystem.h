@@ -6,6 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "BattleManagerSubsystem.generated.h"
 
+class UEnemyPartyDataAsset;
 /**
  * 
  */
@@ -31,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Battle")
 	FName GetBattleLevelName(FName CurrentFieldLevelName) const;
+
+	UPROPERTY()
+	TSoftObjectPtr<UEnemyPartyDataAsset> EnemyPartyData;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Battle")

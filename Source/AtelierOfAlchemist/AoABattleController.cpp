@@ -12,7 +12,7 @@ void AAoABattleController::BeginPlay()
 
 	BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
 
-	SetIgnoreLookInput(true);
+	//SetIgnoreLookInput(true);
 	SetIgnoreMoveInput(true);
 	SetShowMouseCursor(false);
 	SetInputMode_Main();

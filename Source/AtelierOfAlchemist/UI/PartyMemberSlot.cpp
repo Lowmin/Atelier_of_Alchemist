@@ -7,6 +7,7 @@
 #include "../PlayerRuntimeData.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
+#include "PlayerStatusSlot.h"
 
 void UPartyMemberSlot::InitializeSlot(UPlayerRuntimeData* NewPlayerRuntimeData)
 {

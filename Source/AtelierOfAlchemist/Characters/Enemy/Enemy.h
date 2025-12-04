@@ -21,6 +21,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
 	TObjectPtr<UCharacterDataAsset> EnemyData;
 };

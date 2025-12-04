@@ -6,7 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "CharacterDataAsset.generated.h"
 
-class APlayerCharacter;
+class ACharacterBase;
 /**
  * 
  */
@@ -40,5 +40,5 @@ public:
 	float BaseSpeed = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
-	TSoftClassPtr<APlayerCharacter> BP_Character;
+	TSoftClassPtr<ACharacterBase> BP_Character;
 };
