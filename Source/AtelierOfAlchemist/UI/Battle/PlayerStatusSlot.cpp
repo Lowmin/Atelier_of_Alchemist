@@ -20,16 +20,26 @@ void UPlayerStatusSlot::InitializeSlot(UPlayerRuntimeData* RuntimeData)
 		CharacterImage->SetBrushFromSoftTexture(CharacterData->CharacterImage);
 		CharacterName->SetText(CharacterData->CharacterName);
 		Speed->SetText(FText::AsNumber(CharacterData->BaseSpeed));
-		HpText->SetText(TEXT("%s / %s", CharacterData->BaseMaxHealth, RuntimeData->GetCurrentHealth));
+
+		RuntimeData->OnHealthChanged.AddDynamic(this, &UPlayerStatusSlot::UpdateUI);
 	}
 }
 
 void UPlayerStatusSlot::UpdateUI(float CurrnetHp, float MaxHp)
 {
-
+	if (HpText)
+	{
+		FString HpString = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrnetHp), FMath::CeilToInt(MaxHp));
+		HpText->SetText(FText::FromString(HpString));
+	}
 }
 
 void UPlayerStatusSlot::NativeDestruct()
 {
+	Super::NativeDestruct();
 
+	if (CachedData)
+	{
+		CachedData->OnHealthChanged.RemoveDynamic(this, &UPlayerStatusSlot::UpdateUI);
+	}
 }
