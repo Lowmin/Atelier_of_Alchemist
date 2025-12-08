@@ -81,3 +81,8 @@ void AAoABattleController::Input_Skill_3()
 {
 	BattleGameMode->SkillSelect(2);
 }
+
+void AAoABattleController::SetBattleCamera()
+{
+	TArray<
+}

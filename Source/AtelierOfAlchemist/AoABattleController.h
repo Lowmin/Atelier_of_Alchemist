@@ -61,4 +61,6 @@ protected:
 	void Input_Skill_1();
 	void Input_Skill_2();
 	void Input_Skill_3();
+
+	void SetBattleCamera();
 };

@@ -25,12 +25,17 @@ void UPlayerStatusSlot::InitializeSlot(UPlayerRuntimeData* RuntimeData)
 	}
 }
 
-void UPlayerStatusSlot::UpdateUI(float CurrnetHp, float MaxHp)
+void UPlayerStatusSlot::UpdateUI(float CurrentHp, float MaxHp)
 {
 	if (HpText)
 	{
-		FString HpString = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrnetHp), FMath::CeilToInt(MaxHp));
+		FString HpString = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrentHp), FMath::CeilToInt(MaxHp));
 		HpText->SetText(FText::FromString(HpString));
+	}
+	if (HpBar)
+	{
+		HpPercent = (MaxHp > 0) ? (CurrentHp / MaxHp) : 0.0f;
+		HpBar->SetPercent(HpPercent);
 	}
 }
 

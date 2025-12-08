@@ -8,6 +8,9 @@
 
 class UWidgetSwitcher;
 class UBattleUI;
+class UPlayerStatusSlot;
+class UPlayerRuntimeData;
+class UHorizontalBox;
 // class USkillListUI;
 /**
  * 
@@ -21,6 +24,7 @@ public:
 	void ShowBattleUI();	// 행동 선택
 	void ShowSkillUI();		// 스킬 리스트
 	void ShowTargetUI();	// 타겟 지정
+	void InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataList);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -28,6 +32,12 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UBattleUI> BattleUI;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPlayerStatusSlot> PlayerStatusSlotClass;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UHorizontalBox> StatusSlotBox;
 
 	/*UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USkillListUI> SkillListMenu;*/

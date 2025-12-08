@@ -19,7 +19,6 @@ class ATELIEROFALCHEMIST_API UPlayerStatusSlot : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
-	void InitializeSlot(UPlayerRuntimeData* RuntimeData);
 
 public:
 	UPROPERTY(meta = (BindWidget))
@@ -40,6 +39,11 @@ public:
 	void UpdateUI(float CurrnetHp, float MaxHp);
 
 	virtual void NativeDestruct() override;
+
+	void InitializeSlot(UPlayerRuntimeData* RuntimeData);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float HpPercent;
 
 	UPROPERTY()
 	TObjectPtr<UPlayerRuntimeData> CachedData;

@@ -39,6 +39,7 @@ protected:
 	void FindEnemySpawnPoints();
 	void EnemySpawn();
 	void PartySpawn();
+	void InitPartyUI();
 
 public:
 	void Attack();

@@ -28,6 +28,7 @@ void ABattleGameMode::BeginPlay()
 		{
 			MainLayoutInstance->AddToViewport();
 			MainLayoutInstance->ShowBattleUI();
+			InitPartyUI();
 		}
 	}
 
@@ -99,6 +100,33 @@ void ABattleGameMode::PartySpawn()
 	}
 }
 
+void ABattleGameMode::InitPartyUI()
+{
+	if (!MainLayoutInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InitPartyUI error! MainLayoutInstance."));
+		return;
+	}
+
+	UGuildMemberManagerSubsystem* GuildMemberManagerSubsystem = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
+	if (!GuildMemberManagerSubsystem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InitPartyUI error! GuildMemberManagerSubsystem."));
+		return;
+	}
+
+	const TArray<FName>& PartyID = GuildMemberManagerSubsystem->GetPartyMemberIDs();
+
+	TArray<UPlayerRuntimeData*> PartyRuntimeData;
+	for (const FName& ID : PartyID)
+	{
+		if (UPlayerRuntimeData* Data = GuildMemberManagerSubsystem->GetPlayerRuntimeData(ID))
+			PartyRuntimeData.Add(Data);
+	}
+
+	MainLayoutInstance->InitStatusSlot(PartyRuntimeData);
+}
+
 void ABattleGameMode::FindEnemySpawnPoints()
 {
 	TArray<AActor*> SpawnPoints;
@@ -128,7 +156,6 @@ void ABattleGameMode::EnemySpawn()
 
 	for (const FEnemySpawnInfo& EnemySpawnInfo : EnemyPartyData->EnemyMembers)
 	{
-		UE_LOG(LogTemp, Error, TEXT("uhaha!"));
 		UCharacterDataAsset* EnemyData = EnemySpawnInfo.EnemyData.LoadSynchronous();
 
 		if (AActor** SpawnPointPtr = EnemySpawnPoints.Find(EnemySpawnInfo.SpawnIndex))
