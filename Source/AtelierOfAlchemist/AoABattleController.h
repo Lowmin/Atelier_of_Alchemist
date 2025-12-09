@@ -20,7 +20,8 @@ class ATELIEROFALCHEMIST_API AAoABattleController : public APlayerController
 public:
 	void SetInputMode_Main();
 	void SetInputMode_Skill();
-	
+	void SetMainCamera();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -61,6 +62,4 @@ protected:
 	void Input_Skill_1();
 	void Input_Skill_2();
 	void Input_Skill_3();
-
-	void SetBattleCamera();
 };

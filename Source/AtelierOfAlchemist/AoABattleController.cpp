@@ -5,6 +5,10 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "BattleGameMode.h"
+#include "Camera/CameraActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "CineCameraActor.h"
+
 
 void AAoABattleController::BeginPlay()
 {
@@ -12,10 +16,11 @@ void AAoABattleController::BeginPlay()
 
 	BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
 
-	//SetIgnoreLookInput(true);
+	SetIgnoreLookInput(true);
 	SetIgnoreMoveInput(true);
 	SetShowMouseCursor(false);
 	SetInputMode_Main();
+	SetMainCamera();
 }
 
 void AAoABattleController::SetupInputComponent()
@@ -52,6 +57,17 @@ void AAoABattleController::SetInputMode_Skill()
 	}
 }
 
+void AAoABattleController::SetMainCamera()
+{
+	AActor* MainCamera = UGameplayStatics::GetActorOfClass(GetWorld(), ACineCameraActor::StaticClass());
+
+	if (MainCamera)
+	{
+		SetViewTargetWithBlend(MainCamera, 0.0f);
+	}
+	else UE_LOG(LogTemp, Warning, TEXT("NO CAMERA!"));
+}
+
 void AAoABattleController::Input_Attack()
 {
 	BattleGameMode->PlayerAction(0);
@@ -80,9 +96,4 @@ void AAoABattleController::Input_Skill_2()
 void AAoABattleController::Input_Skill_3()
 {
 	BattleGameMode->SkillSelect(2);
-}
-
-void AAoABattleController::SetBattleCamera()
-{
-	TArray<
 }

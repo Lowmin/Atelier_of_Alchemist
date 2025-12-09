@@ -8,6 +8,14 @@
 
 class UStatComponent;
 
+UENUM(BlueprintType)
+enum class ECharacterType : uint8
+{
+	Player  UMETA(DisplayName = "Player"),
+	Enemy	UMETA(DisplayName = "Enemy"),
+	NPC		UMETA(DisplayName = "NPC")
+};
+
 UCLASS()
 class ATELIEROFALCHEMIST_API ACharacterBase : public ACharacter
 {
@@ -19,6 +27,9 @@ protected:
 
 public:
 	ACharacterBase();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Battle")
+	ECharacterType Type;
 
 protected:
 	virtual void BeginPlay() override;
