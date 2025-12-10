@@ -16,6 +16,9 @@ void UStatComponent::Initialize(UPlayerRuntimeData* InRuntimeData)
 	if (LinkedRuntimeData)
 	{
 		StaticData = LinkedRuntimeData->GetCharacterDataAsset();
+
+		LinkedRuntimeData->OnHealthChanged.RemoveDynamic(this, &UStatComponent::OnRuntimeDataChanged);
+		LinkedRuntimeData->OnHealthChanged.AddDynamic(this, &UStatComponent::OnRuntimeDataChanged);
 	}
 }
 
@@ -26,6 +29,7 @@ void UStatComponent::InitializeFromEnemy(UCharacterDataAsset* InDataAsset)
 	if (StaticData)
 	{
 		CurrentHealth = StaticData->BaseMaxHealth;
+		OnHealthChanged.Broadcast(CurrentHealth, StaticData->BaseMaxHealth);
 	}
 }
 
@@ -38,7 +42,26 @@ void UStatComponent::TakeDamage(float DamageAmount)
 	else
 	{
 		CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
-		OnTakeDamage.Broadcast(CurrentHealth, GetMaxHealth());
+		OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+	}
+}
+
+void UStatComponent::Heal(float HealAmount)
+{
+	if (LinkedRuntimeData && StaticData)
+	{
+		float CurHp = LinkedRuntimeData->GetCurrentHealth();
+		float MaxHp = StaticData->BaseMaxHealth;
+
+		float AfterHp = FMath::Min(CurHp + HealAmount, MaxHp);
+		LinkedRuntimeData->SetCurrentHealth(AfterHp);
+	}
+	else if (StaticData)
+	{
+		float MaxHp = StaticData->BaseMaxHealth;
+		CurrentHealth = FMath::Min(CurrentHealth + HealAmount, MaxHp);
+
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHp);
 	}
 }
 
@@ -71,4 +94,14 @@ float UStatComponent::GetDefense() const
 float UStatComponent::GetSpeed() const
 {
 	return StaticData ? StaticData->BaseSpeed : 0.0f;
+}
+
+UCharacterDataAsset* UStatComponent::GetCharacterData() const
+{
+	return StaticData;
+}
+
+void UStatComponent::OnRuntimeDataChanged(float NewCurrent, float NewMax)
+{
+	OnHealthChanged.Broadcast(NewCurrent, NewMax);
 }

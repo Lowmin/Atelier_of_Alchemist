@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include <AtelierOfAlchemist/DataAssets/SkillDataAsset.h>
+#include "StatComponent.h"
 #include "CharacterBase.generated.h"
 
-class UStatComponent;
+class USkillListComponent;
+class USkillDataAsset;
+class UCharacterDataAsset;
 
 UENUM(BlueprintType)
 enum class ECharacterType : uint8
@@ -25,6 +29,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStatComponent> StatComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USkillListComponent> SkillComponent;
+
 public:
 	ACharacterBase();
 
@@ -33,9 +40,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Attack();
-	virtual void UseSkill();
-	virtual void Die();
+	virtual void BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ACharacterBase*>& Targets);
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -53,4 +58,5 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	FORCEINLINE UStatComponent* GetStatComponent() const { return StatComponent; }
+	UCharacterDataAsset* GetCharacterData() const { return StatComponent->GetCharacterData(); };
 };

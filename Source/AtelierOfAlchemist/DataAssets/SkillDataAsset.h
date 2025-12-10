@@ -69,4 +69,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	TSoftObjectPtr<UAnimMontage> SkillAnim;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Power")
+	float Power;
 };

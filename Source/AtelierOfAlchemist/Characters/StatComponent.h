@@ -2,12 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "../PlayerRuntimeData.h"
 #include "StatComponent.generated.h"
 
-class UPlayerRuntimeData;
 class UCharacterDataAsset;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTakeDamage, float, CurrnetHealth, float, MaxHealth);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ATELIEROFALCHEMIST_API UStatComponent : public UActorComponent
@@ -21,6 +19,7 @@ public:
 	void InitializeFromEnemy(UCharacterDataAsset* InDataAsset);
 
 	void TakeDamage(float DamageAmount);
+	void Heal(float HealAmount);
 
 	int32 GetLevel() const;
 	float GetCurrentHealth() const;
@@ -28,9 +27,10 @@ public:
 	float GetAttackPower() const;
 	float GetDefense() const;
 	float GetSpeed() const;
+	UCharacterDataAsset* GetCharacterData() const;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnTakeDamage OnTakeDamage;
+	FOnHealthChanged OnHealthChanged;
 
 protected:
 	UPROPERTY()
@@ -40,4 +40,7 @@ protected:
 	TObjectPtr<UCharacterDataAsset> StaticData;
 
 	float CurrentHealth;
+
+	UFUNCTION()
+	void OnRuntimeDataChanged(float NewCurrent, float NewMax);
 };

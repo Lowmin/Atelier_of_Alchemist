@@ -8,6 +8,7 @@
 
 AEnemy::AEnemy()
 {
+	Type = ECharacterType::Enemy;
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 

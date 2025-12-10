@@ -21,3 +21,10 @@ void UPlayerRuntimeData::ApplyDamage(float dmg)
 
 	OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
 }
+
+void UPlayerRuntimeData::SetCurrentHealth(float NewHp)
+{
+	if (CurrentHealth != NewHp)
+		CurrentHealth = NewHp;
+	OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+}

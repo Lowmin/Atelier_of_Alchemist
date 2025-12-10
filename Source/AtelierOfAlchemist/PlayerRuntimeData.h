@@ -22,6 +22,7 @@ public:
 	void ApplyDamage(float dmg);
 
 	UCharacterDataAsset* GetCharacterDataAsset() const { return CharacterDataAsset; };
+	void SetCurrentHealth(float NewHp);
 	float GetCurrentHealth() const { return CurrentHealth; };
 	float GetMaxHealth() const { return MaxHealth; };
 

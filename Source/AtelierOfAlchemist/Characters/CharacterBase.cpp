@@ -4,7 +4,10 @@
 #include "CharacterBase.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "StatComponent.h"
+#include "../DataAssets/SkillDataAsset.h"
+#include "../DataAssets/CharacterDataAsset.h"
 
 ACharacterBase::ACharacterBase()
 {
@@ -16,6 +19,29 @@ ACharacterBase::ACharacterBase()
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ACharacterBase::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ACharacterBase*>& Targets)
+{
+	if (!Skill) return;
+
+	if (UAnimMontage* Montage = Skill->SkillAnim.LoadSynchronous())
+	{
+		PlayAnimMontage(Montage);
+	}
+
+	for (ACharacterBase* Target : Targets)
+	{
+		switch (Skill->EffectType)
+		{
+		case ESkillEffectType::Damage:
+			Target->GetStatComponent()->TakeDamage(Skill->Power);
+			break;
+		case ESkillEffectType::Heal:
+			Target->GetStatComponent()->Heal(Skill->Power);
+			break;
+		}
+	}
 }
 
 int32 ACharacterBase::GetLevel()
@@ -58,19 +84,6 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	return Damage;
-}
-
-void ACharacterBase::Attack()
-{
-}
-
-void ACharacterBase::UseSkill()
-{
-
-}
-
-void ACharacterBase::Die()
-{
 }
 
 void ACharacterBase::Tick(float DeltaTime)
