@@ -6,6 +6,7 @@
 #include "DataAssets/CharacterDataAsset.h"
 #include "DataAssets/EnemyPartyDataAsset.h"
 #include "Characters/Playable/PlayerCharacter.h"
+#include "Characters/CharacterBase.h"
 #include "Characters/Enemy/Enemy.h"
 #include "Components/CapsuleComponent.h"
 #include "UI/Battle/BattleMainLayout.h"
@@ -40,10 +41,10 @@ void ABattleGameMode::PlayerAction(int32 ActionIndex)
 	switch(ActionIndex)
 	{
 	case 0:
-		Attack();
+		OnAttack();
 		break;
 	case 1:
-		OpenSkillUI();
+		OnSkill();
 		break;
 	case 2:
 		RunAway();
@@ -94,7 +95,12 @@ void ABattleGameMode::PartySpawn()
 
 			if (NewUnit)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Spawned Party Member: %s"), *DataAsset->CharacterName.ToString());
+				AllUnits.Add(NewUnit);
+
+				if (UStatComponent* StatComp = NewUnit->GetStatComponent())
+				{
+					StatComp->Initialize(MemberData);
+				}
 			}
 		}
 	}
@@ -173,7 +179,12 @@ void ABattleGameMode::EnemySpawn()
 
 				if (NewEnemy)
 				{
+					AllUnits.Add(NewEnemy);
 
+					if (UStatComponent* StatComp = NewEnemy->GetStatComponent())
+					{
+						StatComp->InitializeFromEnemy(EnemyData);
+					}
 				}
 			}
 		}
@@ -185,16 +196,49 @@ void ABattleGameMode::Undo()
 	MainLayoutInstance->ShowBattleUI();
 }
 
-void ABattleGameMode::Attack()
+void ABattleGameMode::OnAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack!"));
-	MainLayoutInstance->ShowTargetUI();
+	UseSkill(0);
 }
 
-void ABattleGameMode::OpenSkillUI()
+void ABattleGameMode::OnSkill()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Open Skill List"));
 	MainLayoutInstance->ShowSkillUI();
+}
+
+void ABattleGameMode::UseSkill(int32 SkillIndex)
+{
+	USkillDataAsset* SkillData = CurrentUnit->GetSkill(SkillIndex);
+	if (!SkillData)
+	{
+		StartNextTurn();
+		return;
+	}
+
+	TArray<ACharacterBase*> Targets;
+
+	for (ACharacterBase* Unit : AllUnits)
+	{
+		if (Unit && Unit->GetCurHealth() > 0 && Unit->Type == ECharacterType::Enemy)
+		{
+			Targets.Add(Unit);
+		}
+	}
+
+	if (Targets.Num() > 0)
+	{
+		CurrentUnit->BattleAction_UseSkill(SkillData, Targets);
+	}
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ABattleGameMode::StartNextTurn, 1.5f, false);
+}
+
+void ABattleGameMode::OnTarget(ACharacterBase* Target)
+{
+
 }
 
 void ABattleGameMode::RunAway()
@@ -204,15 +248,52 @@ void ABattleGameMode::RunAway()
 
 void ABattleGameMode::StartBattle()
 {
+	CalculateTurn();
+	StartNextTurn();
+}
 
+void ABattleGameMode::CalculateTurn()
+{
+	TurnQueue.Empty();
+
+	for (ACharacterBase* Unit : AllUnits)
+	{
+		if (Unit->GetCurHealth() >= 0)
+		{
+			TurnQueue.Add(Unit);
+		}
+	}
+
+	TurnQueue.Sort([](const ACharacterBase& A, const ACharacterBase& B)
+		{
+			return A.GetSpeed() > B.GetSpeed();
+		});
+
+	UpdateTurnWidget();
 }
 
 void ABattleGameMode::StartNextTurn()
 {
+	if (TurnQueue.IsEmpty())
+	{
+		CalculateTurn();
+	}
 
+
+	CurrentUnit = TurnQueue[0];
+
+	FString Name = CurrentUnit->GetCharacterData()->CharacterName.ToString();
+	UE_LOG(LogTemp, Warning, TEXT("%s turn!"), *Name);
+
+	TurnQueue.RemoveAt(0);
+
+	UpdateTurnWidget();
 }
 
-void ABattleGameMode::ExecuteEnemyTurn()
+void ABattleGameMode::UpdateTurnWidget()
 {
-
+	if (MainLayoutInstance)
+	{
+		MainLayoutInstance->UpdateTurnSlotBar(TurnQueue);
+	}
 }

@@ -1,19 +1,23 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CharacterBase.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "StatComponent.h"
 #include "../DataAssets/SkillDataAsset.h"
-#include "../DataAssets/CharacterDataAsset.h"
+#include "Kismet/GameplayStatics.h"
 
 ACharacterBase::ACharacterBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+}
+
+USkillDataAsset* ACharacterBase::GetSkill(int32 Index) const
+{
+	if (SkillList.IsValidIndex(Index))
+	{
+		return SkillList[Index];
+	}
+
+	return nullptr;
 }
 
 void ACharacterBase::BeginPlay()
@@ -32,66 +36,68 @@ void ACharacterBase::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<
 
 	for (ACharacterBase* Target : Targets)
 	{
-		switch (Skill->EffectType)
+		if (UStatComponent* TargetStat = Target->GetStatComponent())
 		{
-		case ESkillEffectType::Damage:
-			Target->GetStatComponent()->TakeDamage(Skill->Power);
-			break;
-		case ESkillEffectType::Heal:
-			Target->GetStatComponent()->Heal(Skill->Power);
-			break;
+			switch (Skill->EffectType)
+			{
+			case ESkillEffectType::Damage:
+				TargetStat->TakeDamage(Skill->Power);
+				break;
+			case ESkillEffectType::Heal:
+				TargetStat->Heal(Skill->Power);
+				break;
+			}
+			UE_LOG(LogTemp, Log, TEXT("%s used %s on %s"), *GetName(), *Skill->SkillName.ToString(), *Target->GetName());
 		}
 	}
 }
+void ACharacterBase::OnTurnStart()
+{
+	UE_LOG(LogTemp, Log, TEXT("Turn Start: %s"), *GetName());
+}
 
-int32 ACharacterBase::GetLevel()
+int32 ACharacterBase::GetLevel() const
 {
 	return StatComponent ? StatComponent->GetLevel() : 1;
 }
 
-float ACharacterBase::GetCurHealth()
+float ACharacterBase::GetCurHealth() const
 {
 	return StatComponent ? StatComponent->GetCurrentHealth() : 0.0f;
 }
 
-float ACharacterBase::GetMaxHealth()
+float ACharacterBase::GetMaxHealth() const
 {
 	return StatComponent ? StatComponent->GetMaxHealth() : 0.0f;
 }
 
-float ACharacterBase::GetAttackPower()
+float ACharacterBase::GetAttackPower() const
 {
 	return StatComponent ? StatComponent->GetAttackPower() : 0.0f;
 }
 
-float ACharacterBase::GetDefense()
+float ACharacterBase::GetDefense() const
 {
 	return StatComponent ? StatComponent->GetDefense() : 0.0f;
 }
 
-float ACharacterBase::GetSpeed()
+float ACharacterBase::GetSpeed() const
 {
 	return StatComponent ? StatComponent->GetSpeed() : 0.0f;
 }
 
+UCharacterDataAsset* ACharacterBase::GetCharacterData() const
+{
+	return StatComponent ? StatComponent->GetCharacterData() : nullptr;
+}
+
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	if (StatComponent)
 	{
 		StatComponent->TakeDamage(DamageAmount);
 	}
-
 	return Damage;
-}
-
-void ACharacterBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }

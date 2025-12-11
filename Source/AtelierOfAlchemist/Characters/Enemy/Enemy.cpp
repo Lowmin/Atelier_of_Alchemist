@@ -4,10 +4,18 @@
 #include "Enemy.h"
 #include "../StatComponent.h"
 #include "../../DataAssets/CharacterDataAsset.h"
+#include "Components/WidgetComponent.h"
 #include "AIController.h"
 
 AEnemy::AEnemy()
 {
+	StatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatusWidgetComponent"));
+	StatusWidgetComponent->SetupAttachment(GetRootComponent());
+
+	StatusWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	
+	StatusWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+
 	Type = ECharacterType::Enemy;
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
@@ -25,4 +33,9 @@ void AEnemy::BeginPlay()
 	{
 		// AIController->RunBehaviorTree();
 	}
+}
+
+void AEnemy::UpdateStatusWidget(float CurrentHp, float MaxHp)
+{
+
 }

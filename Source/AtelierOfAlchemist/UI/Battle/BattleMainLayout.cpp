@@ -5,6 +5,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/HorizontalBox.h"
 #include "PlayerStatusSlot.h"
+#include "BattleTurnWidget.h"
 #include "../../PlayerRuntimeData.h"
 #include "BattleUI.h"
 
@@ -49,6 +50,14 @@ void UBattleMainLayout::InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataLis
 				NewSlot->UpdateUI(MemberData->GetCurrentHealth(), MemberData->GetMaxHealth());
 			}
 		}
+	}
+}
+
+void UBattleMainLayout::UpdateTurnSlotBar(const TArray<ACharacterBase*>& TurnQueue)
+{
+	if (TurnWidget)
+	{
+		TurnWidget->UpdateTurnOrder(TurnQueue);
 	}
 }
 

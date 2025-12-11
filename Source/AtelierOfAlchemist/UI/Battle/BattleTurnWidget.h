@@ -24,7 +24,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> TurnSlotBox;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UBattleTurnSlot> BattleTurnSlotClass;
 	
 };

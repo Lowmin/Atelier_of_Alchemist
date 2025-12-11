@@ -6,6 +6,7 @@
 #include "../CharacterBase.h"
 #include "Enemy.generated.h"
 
+class UWidgetComponent;
 class UCharacterDataAsset;
 /**
  * 
@@ -21,6 +22,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> StatusWidgetComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
 	TObjectPtr<UCharacterDataAsset> EnemyData;
+
+	UFUNCTION()
+	void UpdateStatusWidget(float CurrentHp, float MaxHp);
 };

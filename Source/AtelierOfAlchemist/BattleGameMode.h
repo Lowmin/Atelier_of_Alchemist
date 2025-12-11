@@ -8,6 +8,7 @@
 
 class UBattleMainLayout;
 class ABattleSpawnPoint;
+class ACharacterBase;
 /**
  * 
  */
@@ -32,6 +33,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TObjectPtr<UBattleMainLayout> MainLayoutInstance;
 
+	// À¯´Ö
+	UPROPERTY()
+	TArray<ACharacterBase*> AllUnits;
+
+	UPROPERTY()
+	TArray<ACharacterBase*> TurnQueue;
+
+	UPROPERTY()
+	TObjectPtr<ACharacterBase> CurrentUnit;
+
 	// ½ºÆù
 	UPROPERTY()
 	TMap<int32, AActor*> EnemySpawnPoints;
@@ -42,12 +53,14 @@ protected:
 	void InitPartyUI();
 
 public:
-	void Attack();
-	void OpenSkillUI();
-	void UseSkill();
+	void OnAttack();
+	void OnSkill();
+	void UseSkill(int32 SkillIndex);
+	void OnTarget(ACharacterBase* Target);
 	void RunAway();
 
 	void StartBattle();
+	void CalculateTurn();
 	void StartNextTurn();
-	void ExecuteEnemyTurn();
+	void UpdateTurnWidget();
 };
