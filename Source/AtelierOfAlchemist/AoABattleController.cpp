@@ -59,11 +59,12 @@ void AAoABattleController::SetInputMode_Skill()
 
 void AAoABattleController::SetMainCamera()
 {
-	AActor* MainCamera = UGameplayStatics::GetActorOfClass(GetWorld(), ACineCameraActor::StaticClass());
+	TArray<AActor*> MainCamera;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "BattleMainCamera", MainCamera);
 
-	if (MainCamera)
+	if (MainCamera.Num() > 0)
 	{
-		SetViewTargetWithBlend(MainCamera, 0.0f);
+		SetViewTargetWithBlend(MainCamera[0], 0.0f);
 	}
 	else UE_LOG(LogTemp, Warning, TEXT("NO CAMERA!"));
 }

@@ -16,11 +16,11 @@ void UEnemyStatusWidget::UpdateHp(float CurrentHp, float MaxHp)
 
 void UEnemyStatusWidget::SetLevel(int32 Level)
 {
-	FString LevelString = FString::Printf(TEXT("Lv.%d"), Level);
+	FString LevelString = FString::Printf(TEXT("%d"), Level);
 	LevelText->SetText(FText::FromString(LevelString));
 }
 
-void UEnemyStatusWidget::SetName(FName Name)
+void UEnemyStatusWidget::SetName(FText Name)
 {
-	NameText->SetText(FText::FromName(Name));
+	NameText->SetText(Name);
 }

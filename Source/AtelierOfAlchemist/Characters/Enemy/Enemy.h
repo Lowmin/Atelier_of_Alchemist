@@ -18,16 +18,17 @@ class ATELIEROFALCHEMIST_API AEnemy : public ACharacterBase
 	
 public:
 	AEnemy();
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> StatusWidgetComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
 	TObjectPtr<UCharacterDataAsset> EnemyData;
 
 	UFUNCTION()
-	void UpdateStatusWidget(float CurrentHp, float MaxHp);
+	void UpdateStatusHp(float CurrentHp, float MaxHp);
 };

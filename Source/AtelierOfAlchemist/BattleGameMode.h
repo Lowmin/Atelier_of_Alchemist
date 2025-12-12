@@ -53,6 +53,8 @@ protected:
 	void InitPartyUI();
 
 public:
+	void StartBattleIntro();
+
 	void OnAttack();
 	void OnSkill();
 	void UseSkill(int32 SkillIndex);

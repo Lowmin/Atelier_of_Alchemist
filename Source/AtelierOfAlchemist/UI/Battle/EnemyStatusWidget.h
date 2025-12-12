@@ -19,7 +19,7 @@ class ATELIEROFALCHEMIST_API UEnemyStatusWidget : public UUserWidget
 public:
 	void UpdateHp(float CurrentHp, float MaxHp);
 	void SetLevel(int32 Level);
-	void SetName(FName Name);
+	void SetName(FText Name);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

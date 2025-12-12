@@ -156,7 +156,7 @@ void ABattleGameMode::EnemySpawn()
 
 	if (!EnemyPartyData)
 	{
-		UE_LOG(LogTemp, Error, TEXT("EnemySpawn: Failed to load EnemyPartyData! Is it set in BattleManager?"));
+		UE_LOG(LogTemp, Error, TEXT("EnemyPartyData does not exist."));
 		return;
 	}
 
@@ -196,15 +196,18 @@ void ABattleGameMode::Undo()
 	MainLayoutInstance->ShowBattleUI();
 }
 
+void ABattleGameMode::StartBattleIntro()
+{
+	TArray<AActor*> BattleCamera;
+}
+
 void ABattleGameMode::OnAttack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attack!"));
 	UseSkill(0);
 }
 
 void ABattleGameMode::OnSkill()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Open Skill List"));
 	MainLayoutInstance->ShowSkillUI();
 }
 
