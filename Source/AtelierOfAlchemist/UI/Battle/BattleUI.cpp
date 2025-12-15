@@ -19,5 +19,5 @@ void UBattleUI::ShowUI()
 
 void UBattleUI::HideUI()
 {
-	SetVisibility(ESlateVisibility::Hidden);
+	SetVisibility(ESlateVisibility::Collapsed);
 }

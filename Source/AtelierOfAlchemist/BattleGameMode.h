@@ -9,6 +9,9 @@
 class UBattleMainLayout;
 class ABattleSpawnPoint;
 class ACharacterBase;
+class UBattleManagerSubsystem;
+class UGuildMemberManagerSubsystem;
+
 /**
  * 
  */
@@ -18,51 +21,56 @@ class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	// --- [Life Cycle] ---
 	virtual void BeginPlay() override;
 
-	// 입력 처리
-	void PlayerAction(int32 ActionIndex);
-	void SkillSelect(int32 SkillSlotIndex);
-	void Undo();
+	// --- [Input Interface] (UI나 컨트롤러에서 호출) ---
+	void ProcessPlayerAction(int32 ActionIndex); // 이름 변경: PlayerAction -> ProcessPlayerAction
+	void ProcessSkillSelection(int32 SkillSlotIndex);
+	void UndoLastAction(); // 이름 변경: Undo -> UndoLastAction
+
+	// --- [Battle Flow Control] ---
+	void StartBattle();
+	void StartNextTurn();
+
+	// 적 AI가 호출하거나 턴 종료 시 호출될 함수
+	void ExecuteEnemyTurn();
 
 protected:
-	// UI
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UBattleMainLayout> MainLayoutClass;
+	void CalculateTurnOrder();
+	void UpdateTurnWidget();
+	void CheckBattleEndCondition();
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TObjectPtr<UBattleMainLayout> MainLayoutInstance;
-
-	// 유닛
-	UPROPERTY()
-	TArray<ACharacterBase*> AllUnits;
-
-	UPROPERTY()
-	TArray<ACharacterBase*> TurnQueue;
-
-	UPROPERTY()
-	TObjectPtr<ACharacterBase> CurrentUnit;
-
-	// 스폰
-	UPROPERTY()
-	TMap<int32, AActor*> EnemySpawnPoints;
+	void ExecuteAttack();
+	void ExecuteSkill(int32 SkillIndex);
+	void ExecuteRunAway();
+	void ShowSkillSelectionUI();
 
 	void FindEnemySpawnPoints();
-	void EnemySpawn();
-	void PartySpawn();
-	void InitPartyUI();
+	void SpawnPlayerParty();
+	void SpawnEnemyParty();
+	void InitializeBattleUI();
 
-public:
-	void StartBattleIntro();
+	UBattleManagerSubsystem* GetBattleManagerSubsystem() const;
+	UGuildMemberManagerSubsystem* GetGuildMemberManagerSubsystem() const;
 
-	void OnAttack();
-	void OnSkill();
-	void UseSkill(int32 SkillIndex);
-	void OnTarget(ACharacterBase* Target);
-	void RunAway();
+protected:
+	// 데이터
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
+	TArray<ACharacterBase*> AllUnits;
 
-	void StartBattle();
-	void CalculateTurn();
-	void StartNextTurn();
-	void UpdateTurnWidget();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
+	TArray<ACharacterBase*> TurnQueue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
+	TObjectPtr<ACharacterBase> CurrentUnit;
+
+	UPROPERTY()
+	TMap<int32, AActor*> EnemySpawnPointMap;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Battle|UI")
+	TSubclassOf<UBattleMainLayout> MainLayoutClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Battle|UI")
+	TObjectPtr<UBattleMainLayout> MainLayoutInstance;
 };

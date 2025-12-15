@@ -9,6 +9,14 @@
 #include "../../PlayerRuntimeData.h"
 #include "BattleUI.h"
 
+void UBattleMainLayout::HideBattleUI()
+{
+	if (BattleUI)
+	{
+		BattleUI->HideUI();
+	}
+}
+
 void UBattleMainLayout::ShowBattleUI()
 {
 	if (MenuSwitcher)

@@ -15,6 +15,7 @@
 #include "../../GuildMemberManagerSubsystem.h"
 #include "../StatComponent.h"
 #include "../../Object/InteractableInterface.h"
+#include "../../BattleManagerSubsystem.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -50,12 +51,40 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UE_LOG(LogTemp, Warning, TEXT("1. Player BeginPlay Started")); // 이게 안 뜨면 1번 문제 (BP Parent Call)
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(IMC_Default, 0);
+		}
+	}
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UBattleManagerSubsystem* BattleManager = GameInstance->GetSubsystem<UBattleManagerSubsystem>())
+		{
+			FVector RestoreLoc;
+			FRotator RestoreRot;
+			UE_LOG(LogTemp, Warning, TEXT("2. Flag Status: %s"), BattleManager->IsBattle ? TEXT("TRUE") : TEXT("FALSE"));
+			if (BattleManager->GetSavedFieldLocation(RestoreLoc, RestoreRot))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("3. Teleporting: %s"), *RestoreLoc.ToString());
+				SetActorLocationAndRotation(RestoreLoc, RestoreRot, false, nullptr, ETeleportType::TeleportPhysics);
+
+				if (APlayerController* PC = Cast<APlayerController>(GetController()))
+				{
+					if (PC->PlayerCameraManager)
+					{
+						PC->PlayerCameraManager->StartCameraFade(1.0f, 0.0f, 1.0f, FLinearColor::Black, false, true);
+					}
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("3. Failed to Teleport (Flag is False)")); // 이게 뜨면 2번 문제 (EnemySymbol)
+			}
 		}
 	}
 

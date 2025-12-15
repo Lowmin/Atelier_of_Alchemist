@@ -10,50 +10,9 @@ ACharacterBase::ACharacterBase()
 	StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 }
 
-USkillDataAsset* ACharacterBase::GetSkill(int32 Index) const
-{
-	if (SkillList.IsValidIndex(Index))
-	{
-		return SkillList[Index];
-	}
-
-	return nullptr;
-}
-
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ACharacterBase::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ACharacterBase*>& Targets)
-{
-	if (!Skill) return;
-
-	if (UAnimMontage* Montage = Skill->SkillAnim.LoadSynchronous())
-	{
-		PlayAnimMontage(Montage);
-	}
-
-	for (ACharacterBase* Target : Targets)
-	{
-		if (UStatComponent* TargetStat = Target->GetStatComponent())
-		{
-			switch (Skill->EffectType)
-			{
-			case ESkillEffectType::Damage:
-				TargetStat->TakeDamage(Skill->Power);
-				break;
-			case ESkillEffectType::Heal:
-				TargetStat->Heal(Skill->Power);
-				break;
-			}
-			UE_LOG(LogTemp, Log, TEXT("%s used %s on %s"), *GetName(), *Skill->SkillName.ToString(), *Target->GetName());
-		}
-	}
-}
-void ACharacterBase::OnTurnStart()
-{
-	UE_LOG(LogTemp, Log, TEXT("Turn Start: %s"), *GetName());
 }
 
 int32 ACharacterBase::GetLevel() const
@@ -89,15 +48,4 @@ float ACharacterBase::GetSpeed() const
 UCharacterDataAsset* ACharacterBase::GetCharacterData() const
 {
 	return StatComponent ? StatComponent->GetCharacterData() : nullptr;
-}
-
-float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	if (StatComponent)
-	{
-		StatComponent->TakeDamage(DamageAmount);
-	}
-	return Damage;
 }

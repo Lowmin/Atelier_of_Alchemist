@@ -29,10 +29,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Battle")
 	ECharacterType Type;
 
-	virtual void BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ACharacterBase*>& Targets);
-
-	virtual void OnTurnStart();
-
+	// 데이터
+	FORCEINLINE UStatComponent* GetStatComponent() const { return StatComponent; }
+	UCharacterDataAsset* GetCharacterData() const;
 	int32 GetLevel() const;
 	float GetCurHealth() const;
 	float GetMaxHealth() const;
@@ -40,23 +39,11 @@ public:
 	float GetDefense() const;
 	float GetSpeed() const;
 
-	FORCEINLINE UStatComponent* GetStatComponent() const { return StatComponent; }
-	UCharacterDataAsset* GetCharacterData() const;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Battle")
-	TArray<USkillDataAsset*> SkillList;
-
-	// [추가] 스킬 가져오는 함수
-	USkillDataAsset* GetSkill(int32 Index) const;
-
 	bool IsPlayerTeam() const { return Type == ECharacterType::Player; }
 
 protected:
 	virtual void BeginPlay() override;
 
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
-protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStatComponent> StatComponent;
 };

@@ -17,6 +17,10 @@ class ATELIEROFALCHEMIST_API UBattleManagerSubsystem : public UGameInstanceSubsy
 	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	void SaveFieldLocation(APawn* PlayerPawn);
+	bool GetSavedFieldLocation(FVector& OutLoc, FRotator& OutRot);
+
+	bool IsBattle = false;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Battle")
 	FName TargetSymbolName{};
