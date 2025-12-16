@@ -3,6 +3,7 @@
 #include "BattleUnit.h"
 #include "Components/WidgetComponent.h"
 #include "../../Characters/StatComponent.h"
+#include "../../DataAssets/SkillDataAsset.h"
 
 ABattleUnit::ABattleUnit()
 {
@@ -18,7 +19,8 @@ USkillDataAsset* ABattleUnit::GetSkill(int32 Index) const
 	{
 		return SkillList[Index];
 	}
-	return false;
+
+	return nullptr;
 }
 
 void ABattleUnit::TurnStart()
@@ -32,7 +34,32 @@ void ABattleUnit::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ABa
 
 	for (ABattleUnit* TargetUnit : Targets)
 	{
+		if (Skill->SkillMontage)
+		{
+			PlayAnimMontage(Skill->SkillMontage);
+		}
+	}
+}
 
+void ABattleUnit::OnAnimNotify_MeleeHit()
+{
+	for (ABattleUnit* Target : CachedTargets)
+	{
+		if (Target && Target->GetCurHealth() > 0)
+		{
+			ApplyDamage(Target, CachedCurrentSkill);
+		}
+	}
+}
+
+void ABattleUnit::OnAnimNotify_ShootProjectile()
+{
+	for (ABattleUnit* Target : CachedTargets)
+	{
+		if (Target && Target->GetCurHealth() > 0)
+		{
+			FTransform SpawnTransform = GetActorTransform();
+		}
 	}
 }
 
@@ -51,5 +78,9 @@ float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	}
 
 	return ActualDamage;
+}
+
+void ABattleUnit::ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill)
+{
 }
 

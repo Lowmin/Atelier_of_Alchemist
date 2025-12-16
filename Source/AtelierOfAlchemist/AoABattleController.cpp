@@ -71,30 +71,30 @@ void AAoABattleController::SetMainCamera()
 
 void AAoABattleController::Input_Attack()
 {
-	BattleGameMode->PlayerAction(0);
+	BattleGameMode->ProcessPlayerAction(0);
 }
 
 void AAoABattleController::Input_Skill()
 {
-	BattleGameMode->PlayerAction(1);
+	BattleGameMode->ProcessPlayerAction(1);
 }
 
 void AAoABattleController::Input_Run()
 {
-	BattleGameMode->PlayerAction(2);
+	BattleGameMode->ProcessPlayerAction(2);
 }
 
 void AAoABattleController::Input_Skill_1()
 {
-	BattleGameMode->SkillSelect(0);
+	BattleGameMode->ProcessSkillSelection(0);
 }
 
 void AAoABattleController::Input_Skill_2()
 {
-	BattleGameMode->SkillSelect(1);
+	BattleGameMode->ProcessSkillSelection(1);
 }
 
 void AAoABattleController::Input_Skill_3()
 {
-	BattleGameMode->SkillSelect(2);
+	BattleGameMode->ProcessSkillSelection(2);
 }

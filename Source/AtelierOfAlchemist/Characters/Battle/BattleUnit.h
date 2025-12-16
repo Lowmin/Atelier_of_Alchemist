@@ -26,9 +26,23 @@ public:
 	virtual void TurnStart();
 	virtual void BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ABattleUnit*>& Targets);
 
+	UFUNCTION(BlueprintCallable)
+	void OnAnimNotify_MeleeHit();
+
+	UFUNCTION(BlueprintCallable)
+	void OnAnimNotify_ShootProjectile();
+
 protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	void ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> HealthBarWidget;
+
+private:
+	UPROPERTY()
+	USkillDataAsset* CachedCurrentSkill;
+
+	UPROPERTY()
+	TArray<ABattleUnit*> CachedTargets;
 };

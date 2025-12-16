@@ -11,6 +11,7 @@ class ABattleSpawnPoint;
 class ACharacterBase;
 class UBattleManagerSubsystem;
 class UGuildMemberManagerSubsystem;
+class ABattleUnit;
 
 /**
  * 
@@ -57,7 +58,7 @@ protected:
 protected:
 	// ตฅภฬลอ
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
-	TArray<ACharacterBase*> AllUnits;
+	TArray<ABattleUnit*> AllUnits;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
 	TArray<ACharacterBase*> TurnQueue;

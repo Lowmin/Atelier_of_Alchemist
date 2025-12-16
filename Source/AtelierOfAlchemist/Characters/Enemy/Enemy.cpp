@@ -53,6 +53,7 @@ void AEnemy::BeginPlay()
 	}
 }
 
+
 void AEnemy::UpdateStatusHp(float CurrentHp, float MaxHp)
 {
 	if (UEnemyStatusWidget* EnemyStatusWidget = Cast<UEnemyStatusWidget>(StatusWidgetComponent->GetUserWidgetObject()))

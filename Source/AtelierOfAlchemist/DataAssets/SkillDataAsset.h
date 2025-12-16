@@ -30,6 +30,13 @@ enum class ESkillEffectType : uint8
 	Debuff		UMETA(DisplayName = "Debuff")
 };
 
+UENUM(BlueprintType)
+enum class ESkillType : uint8
+{
+	Melee       UMETA(DisplayName = "Melee"),
+	Projectile  UMETA(DisplayName = "Projectile")
+};
+
 UCLASS()
 class ATELIEROFALCHEMIST_API USkillDataAsset : public UPrimaryDataAsset
 {
@@ -66,8 +73,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
 	ESkillEffectType EffectType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
+	ESkillType SkillType;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	TSoftObjectPtr<UAnimMontage> SkillAnim;
+	UAnimMontage* SkillMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (EditCondition = "SkillType == ESkillType::Projectile"))
+	TSubclassOf<class AActor> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Power")
 	float Power;

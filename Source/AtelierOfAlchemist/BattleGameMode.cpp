@@ -10,7 +10,7 @@
 #include "Object/BattleSpawnPoint.h"
 
 #include "Characters/CharacterBase.h"
-#include "Characters/BattleUnit.h" 
+#include "Characters/Battle/BattleUnit.h" 
 
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
@@ -105,9 +105,14 @@ void ABattleGameMode::StartNextTurn()
 
 		if (ABattleUnit* BattleUnit = Cast<ABattleUnit>(CurrentUnit))
 		{
-			BattleUnit->OnTurnStart();
+			BattleUnit->TurnStart();
 		}
 	}
+}
+
+void ABattleGameMode::ExecuteEnemyTurn()
+{
+
 }
 
 void ABattleGameMode::UpdateTurnWidget()
@@ -144,8 +149,8 @@ void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
 		return;
 	}
 
-	TArray<ACharacterBase*> Targets;
-	for (ACharacterBase* Unit : AllUnits)
+	TArray<ABattleUnit*> Targets;
+	for (ABattleUnit* Unit : AllUnits)
 	{
 		if (Unit && Unit->GetCurHealth() > 0 && Unit->Type == ECharacterType::Enemy)
 		{
@@ -252,7 +257,7 @@ void ABattleGameMode::SpawnPlayerParty()
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-			ACharacterBase* NewUnit = GetWorld()->SpawnActor<ACharacterBase>(
+			ABattleUnit* NewUnit = GetWorld()->SpawnActor<ABattleUnit>(
 				CharacterClass, SpawnLoc, SpawnPoints[i]->GetActorRotation(), SpawnParams);
 
 			if (NewUnit)
@@ -270,41 +275,51 @@ void ABattleGameMode::SpawnPlayerParty()
 void ABattleGameMode::SpawnEnemyParty()
 {
 	UBattleManagerSubsystem* BattleManager = GetBattleManagerSubsystem();
-	if (!BattleManager || !BattleManager->EnemyPartyData.IsValid()) return;
+
+	if (!BattleManager)
+	{
+		return;
+	}
+
+	if (!BattleManager->EnemyPartyData.IsValid())
+	{
+		return;
+	}
 
 	UEnemyPartyDataAsset* EnemyPartyData = BattleManager->EnemyPartyData.LoadSynchronous();
-	if (!EnemyPartyData) return;
+	if (!EnemyPartyData)
+	{
+		return;
+	}
 
 	for (const FEnemySpawnInfo& Info : EnemyPartyData->EnemyMembers)
 	{
+		// 3. 스폰 포인트 체크
 		AActor** SpawnPointPtr = EnemySpawnPointMap.Find(Info.SpawnIndex);
-		if (!SpawnPointPtr) continue;
 
 		AActor* SpawnPoint = *SpawnPointPtr;
 		UCharacterDataAsset* EnemyData = Info.EnemyData.LoadSynchronous();
-		if (!EnemyData) continue;
 
 		UClass* EnemyClass = EnemyData->BP_Character.LoadSynchronous();
-		if (EnemyClass)
+
+		ACharacter* CDO = Cast<ACharacter>(EnemyClass->GetDefaultObject());
+		float HalfHeight = CDO ? CDO->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 88.0f;
+
+		FVector SpawnLoc = SpawnPoint->GetActorLocation() + FVector(0, 0, HalfHeight + 2.0f);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		ABattleUnit* NewEnemy = GetWorld()->SpawnActor<ABattleUnit>(
+			EnemyClass, SpawnLoc, SpawnPoint->GetActorRotation(), SpawnParams);
+
+		if (NewEnemy)
 		{
-			ACharacter* CDO = Cast<ACharacter>(EnemyClass->GetDefaultObject());
-			float HalfHeight = CDO ? CDO->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 88.0f;
+			AllUnits.Add(NewEnemy);
 
-			FVector SpawnLoc = SpawnPoint->GetActorLocation() + FVector(0, 0, HalfHeight + 2.0f);
-
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-			ACharacterBase* NewEnemy = GetWorld()->SpawnActor<ACharacterBase>(
-				EnemyClass, SpawnLoc, SpawnPoint->GetActorRotation(), SpawnParams);
-
-			if (NewEnemy)
+			if (UStatComponent* StatComp = NewEnemy->GetStatComponent())
 			{
-				AllUnits.Add(NewEnemy);
-				if (UStatComponent* StatComp = NewEnemy->GetStatComponent())
-				{
-					StatComp->InitializeFromEnemy(EnemyData);
-				}
+				StatComp->InitializeFromEnemy(EnemyData);
 			}
 		}
 	}
