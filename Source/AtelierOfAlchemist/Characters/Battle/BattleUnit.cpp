@@ -38,6 +38,17 @@ void ABattleUnit::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ABa
 		{
 			PlayAnimMontage(Skill->SkillMontage);
 		}
+		else
+		{
+			if (Skill->SkillType == ESkillType::Melee)
+			{
+				OnAnimNotify_MeleeHit();
+			}
+			else
+			{
+				OnAnimNotify_ShootProjectile();
+			}
+		}
 	}
 }
 
@@ -54,13 +65,35 @@ void ABattleUnit::OnAnimNotify_MeleeHit()
 
 void ABattleUnit::OnAnimNotify_ShootProjectile()
 {
-	for (ABattleUnit* Target : CachedTargets)
+	// 광역 투사체의 경우
+	if (CachedCurrentSkill->IsGlobalProjectile)
 	{
-		if (Target && Target->GetCurHealth() > 0)
+		FVector CenterLocation = FVector::ZeroVector;
+		int32 Count = 0;
+
+		for (ABattleUnit* Target : CachedTargets)
 		{
-			FTransform SpawnTransform = GetActorTransform();
+			if (Target)
+			{
+				CenterLocation += Target->GetActorLocation();
+				Count++;
+			}
+		}
+		if (Count > 0)
+		{
+			CenterLocation /= Count;
+		}
+		else
+		{
+			CenterLocation = GetActorLocation() + GetActorForwardVector() * 500.0f;
 		}
 	}
+	// 
+}
+
+void ABattleUnit::ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill)
+{
+
 }
 
 float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -82,5 +115,28 @@ float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 
 void ABattleUnit::ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill)
 {
+
+}
+
+FVector ABattleUnit::ProjectileSpawnPoint(FVector TargetPos)
+{
+	FVector ResultLoc = GetActorLocation();
+
+	switch (CachedCurrentSkill->ProjectileSpawnType)
+	{
+	case EProjectileSpawnType::FromCaster:
+		ResultLoc = GetActorLocation() + GetActorForwardVector() * 100.0f;
+		break;
+	case EProjectileSpawnType::FromSky:
+		ResultLoc = TargetPos + FVector(0.0f, 0.0f, 1000.0f);
+		break;
+	case EProjectileSpawnType::AtLocation:
+		ResultLoc = TargetPos;
+		break;
+	default:
+		break;
+	}
+
+	return ResultLoc;
 }
 

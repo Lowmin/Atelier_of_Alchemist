@@ -37,6 +37,16 @@ enum class ESkillType : uint8
 	Projectile  UMETA(DisplayName = "Projectile")
 };
 
+UENUM(BlueprintType)
+enum class EProjectileSpawnType : uint8
+{
+	FromCaster	UMETA(DisplayName = "From Caster"),
+	FromSky		UMETA(DisplayName = "From Sky"),
+	AtLocation	UMETA(DisplayName = "At Target Location")
+};
+
+class ABattleProjectile;
+
 UCLASS()
 class ATELIEROFALCHEMIST_API USkillDataAsset : public UPrimaryDataAsset
 {
@@ -73,14 +83,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
 	ESkillEffectType EffectType;
 
+	// 스킬타입 (근접, 투사체)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	ESkillType SkillType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
+	EProjectileSpawnType ProjectileSpawnType;
+
+	// 투사체의 광역기 여부 (운석 등)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (EditCondition = "SkillType == ESkillType::Projectile"))
+	bool IsGlobalProjectile;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* SkillMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (EditCondition = "SkillType == ESkillType::Projectile"))
-	TSubclassOf<class AActor> ProjectileClass;
+	TSubclassOf<ABattleProjectile> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Power")
 	float Power;

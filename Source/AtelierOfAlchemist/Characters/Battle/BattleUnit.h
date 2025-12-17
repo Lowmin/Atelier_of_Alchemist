@@ -32,9 +32,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnAnimNotify_ShootProjectile();
 
+	void ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill);
+
 protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill);
+	FVector ProjectileSpawnPoint(FVector TargetPos);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> HealthBarWidget;
