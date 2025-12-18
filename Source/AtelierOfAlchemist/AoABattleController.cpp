@@ -8,6 +8,8 @@
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "CineCameraActor.h"
+#include "Characters/Battle/BattleUnit.h"
+#include "DataAssets/SkillDataAsset.h"
 
 
 void AAoABattleController::BeginPlay()
@@ -21,6 +23,7 @@ void AAoABattleController::BeginPlay()
 	SetShowMouseCursor(false);
 	SetInputMode_Main();
 	SetMainCamera();
+	SetInputMode_Main();
 }
 
 void AAoABattleController::SetupInputComponent()
@@ -36,6 +39,12 @@ void AAoABattleController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(IA_Skill_1, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill_1);
 		EnhancedInputComponent->BindAction(IA_Skill_2, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill_2);
 		EnhancedInputComponent->BindAction(IA_Skill_3, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill_3);
+
+		EnhancedInputComponent->BindAction(IA_Left, ETriggerEvent::Started, this, &AAoABattleController::Input_Left);
+		EnhancedInputComponent->BindAction(IA_Right, ETriggerEvent::Started, this, &AAoABattleController::Input_Right);
+		EnhancedInputComponent->BindAction(IA_Confirm, ETriggerEvent::Started, this, &AAoABattleController::Input_Confirm);
+
+		EnhancedInputComponent->BindAction(IA_Cancel, ETriggerEvent::Started, this, &AAoABattleController::Input_Cancel);
 	}
 }
 
@@ -45,6 +54,7 @@ void AAoABattleController::SetInputMode_Main()
 	{
 		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
 		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_Main, 0);
+		IsTargetingMode = false;
 	}
 }
 
@@ -54,6 +64,17 @@ void AAoABattleController::SetInputMode_Skill()
 	{
 		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
 		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_Skill, 0);
+		IsTargetingMode = false;
+	}
+}
+
+void AAoABattleController::SetInputMode_Targeting()
+{
+	if (UEnhancedInputLocalPlayerSubsystem* EnhancedInputLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
+		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_Targeting, 0);
+		IsTargetingMode = true;
 	}
 }
 
@@ -67,6 +88,44 @@ void AAoABattleController::SetMainCamera()
 		SetViewTargetWithBlend(MainCamera[0], 0.0f);
 	}
 	else UE_LOG(LogTemp, Warning, TEXT("NO CAMERA!"));
+}
+
+void AAoABattleController::StartTargetingMode(USkillDataAsset* SelectedSkill)
+{
+	CachedSkill = SelectedSkill;
+	PossibleTargets.Empty();
+
+	TArray<ABattleUnit*> AllUnits = BattleGameMode->GetAllUnits();
+
+	for (ABattleUnit* Unit : AllUnits)
+	{
+		if (Unit->GetCurHealth() <= 0) continue;
+		
+		bool IsAlly = (Unit->Type == ECharacterType::Player);
+
+		switch (CachedSkill->Target)
+		{
+		case ESkillTarget::Enemy:
+			if (!IsAlly) PossibleTargets.Add(Unit);
+			break;
+		case ESkillTarget::Ally:
+			if (IsAlly) PossibleTargets.Add(Unit);
+			break;
+		case ESkillTarget::Self:
+			if (Unit == BattleGameMode->GetCurrentUnit()) PossibleTargets.Add(Unit);
+			break;
+		}
+	}
+
+	if (PossibleTargets.IsEmpty())
+	{
+		Input_Cancel();
+		return;
+	}
+
+	TargetIndex = 0;
+	SetInputMode_Targeting();
+	UpdateTargetWidget();
 }
 
 void AAoABattleController::Input_Attack()
@@ -97,4 +156,29 @@ void AAoABattleController::Input_Skill_2()
 void AAoABattleController::Input_Skill_3()
 {
 	BattleGameMode->ProcessSkillSelection(2);
+}
+
+void AAoABattleController::Input_Left()
+{
+
+}
+
+void AAoABattleController::Input_Right()
+{
+
+}
+
+void AAoABattleController::Input_Confirm()
+{
+
+}
+
+void AAoABattleController::Input_Cancel()
+{
+
+}
+
+void AAoABattleController::UpdateTargetWidget()
+{
+
 }

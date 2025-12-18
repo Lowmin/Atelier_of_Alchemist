@@ -37,6 +37,10 @@ public:
 	// 적 AI가 호출하거나 턴 종료 시 호출될 함수
 	void ExecuteEnemyTurn();
 
+	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; };
+	const TObjectPtr<ACharacterBase>& GetCurrentUnit() const { return CurrentUnit; };
+
+
 protected:
 	void CalculateTurnOrder();
 	void UpdateTurnWidget();

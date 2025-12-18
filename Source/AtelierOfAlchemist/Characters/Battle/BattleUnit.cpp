@@ -4,6 +4,7 @@
 #include "Components/WidgetComponent.h"
 #include "../../Characters/StatComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
+#include "../../Object/BattleProjectile.h"
 
 ABattleUnit::ABattleUnit()
 {
@@ -11,6 +12,13 @@ ABattleUnit::ABattleUnit()
 	HealthBarWidget->SetupAttachment(RootComponent);
 	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarWidget->SetDrawSize(FVector2D(150.0f, 30.0f));
+
+	TargetMarkerWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetMarkerWidget"));
+	TargetMarkerWidget->SetupAttachment(RootComponent);
+	TargetMarkerWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	TargetMarkerWidget->SetDrawSize(FVector2D(50.0f, 50.0f));
+	TargetMarkerWidget->SetVisibility(false);
+	TargetMarkerWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 }
 
 USkillDataAsset* ABattleUnit::GetSkill(int32 Index) const
@@ -71,6 +79,7 @@ void ABattleUnit::OnAnimNotify_ShootProjectile()
 		FVector CenterLocation = FVector::ZeroVector;
 		int32 Count = 0;
 
+		// 광역 타겟의 중간 Location을 구함
 		for (ABattleUnit* Target : CachedTargets)
 		{
 			if (Target)
@@ -79,6 +88,7 @@ void ABattleUnit::OnAnimNotify_ShootProjectile()
 				Count++;
 			}
 		}
+
 		if (Count > 0)
 		{
 			CenterLocation /= Count;
@@ -87,13 +97,55 @@ void ABattleUnit::OnAnimNotify_ShootProjectile()
 		{
 			CenterLocation = GetActorLocation() + GetActorForwardVector() * 500.0f;
 		}
+
+		FVector SpawnLoc = ProjectileSpawnPoint(CenterLocation);
+		FRotator SpawnRot = ProjectileSpawnRotation(CenterLocation, SpawnLoc);
+
+		ABattleProjectile* Projectile = GetWorld()->SpawnActor<ABattleProjectile>
+			(CachedCurrentSkill->ProjectileClass, SpawnLoc, SpawnRot);
+
+		if (Projectile)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("광역 투사체 생성."));
+			Projectile->InitializeGlobal(CachedTargets, CachedCurrentSkill, this, CenterLocation);
+		}
 	}
-	// 
+	// 단일 투사체의 경우
+	else
+	{
+		for (ABattleUnit* Target : CachedTargets)
+		{
+			if (Target)
+			{
+				FVector TargetPos = Target->GetActorLocation();
+
+				FVector SpawnLoc = ProjectileSpawnPoint(TargetPos);
+				FRotator SpawnRot = ProjectileSpawnRotation(TargetPos, SpawnLoc);
+
+				ABattleProjectile* Projectile = GetWorld()->SpawnActor<ABattleProjectile>
+					(CachedCurrentSkill->ProjectileClass, SpawnLoc, SpawnRot);
+
+				if (Projectile)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("단일 투사체 생성."));
+					Projectile->InitializeSingle(Target, CachedCurrentSkill, this);
+				}
+			}
+		}
+	}
 }
 
 void ABattleUnit::ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill)
 {
 
+}
+
+void ABattleUnit::SetTargetSelect(bool IsSelected)
+{
+	if (TargetMarkerWidget)
+	{
+		TargetMarkerWidget->SetVisibility(IsSelected);
+	}
 }
 
 float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -138,5 +190,27 @@ FVector ABattleUnit::ProjectileSpawnPoint(FVector TargetPos)
 	}
 
 	return ResultLoc;
+}
+
+FRotator ABattleUnit::ProjectileSpawnRotation(FVector TargetPos, FVector SpawnLocation)
+{
+	FRotator ResultRot = FRotator::ZeroRotator;
+
+	switch (CachedCurrentSkill->ProjectileSpawnType)
+	{
+	case EProjectileSpawnType::FromCaster:
+		ResultRot = (TargetPos - SpawnLocation).Rotation();
+		break;
+	case EProjectileSpawnType::FromSky:
+		ResultRot = FRotator(-90.0, 0.0f, 0.0f);
+		break;
+	case EProjectileSpawnType::AtLocation:
+		ResultRot = FRotator::ZeroRotator;
+		break;
+	default:
+		break;
+	}
+
+	return FRotator();
 }
 
