@@ -43,9 +43,6 @@ protected:
 	FRotator ProjectileSpawnRotation(FVector TargetPos, FVector SpawnLocation);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UWidgetComponent> HealthBarWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> TargetMarkerWidget;
 
 private:

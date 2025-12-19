@@ -8,11 +8,6 @@
 
 ABattleUnit::ABattleUnit()
 {
-	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	HealthBarWidget->SetupAttachment(RootComponent);
-	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	HealthBarWidget->SetDrawSize(FVector2D(150.0f, 30.0f));
-
 	TargetMarkerWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetMarkerWidget"));
 	TargetMarkerWidget->SetupAttachment(RootComponent);
 	TargetMarkerWidget->SetWidgetSpace(EWidgetSpace::Screen);

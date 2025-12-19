@@ -9,6 +9,12 @@
 AEnemyBattleUnit::AEnemyBattleUnit()
 {
 	Type = ECharacterType::Enemy;
+
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarComponent"));
+	HealthBarWidget->SetupAttachment(RootComponent);
+	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarWidget->SetDrawSize(FVector2D(150.0f, 20.0f));
+	HealthBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
 }
 
 void AEnemyBattleUnit::OnConstruction(const FTransform& Transform)

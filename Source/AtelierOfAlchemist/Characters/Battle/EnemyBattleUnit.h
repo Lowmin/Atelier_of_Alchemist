@@ -6,6 +6,7 @@
 #include "BattleUnit.h"
 #include "EnemyBattleUnit.generated.h"
 
+class UWidgetComponent;
 /**
  * 
  */
@@ -22,6 +23,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> HealthBarWidget;
 
 	UFUNCTION()
 	void UpdateStatusHp(float CurrentHp, float MaxHp);
