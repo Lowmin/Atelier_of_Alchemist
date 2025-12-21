@@ -160,17 +160,58 @@ void AAoABattleController::Input_Skill_3()
 
 void AAoABattleController::Input_Left()
 {
-
+	TargetIndex--;
+	if (TargetIndex < 0)
+	{
+		TargetIndex = PossibleTargets.Num() - 1;
+	}
+	UpdateTargetWidget();
 }
 
 void AAoABattleController::Input_Right()
 {
-
+	TargetIndex++;
+	if (TargetIndex >= 0)
+	{
+		TargetIndex = 0;
+	}
+	UpdateTargetWidget();
 }
 
 void AAoABattleController::Input_Confirm()
 {
+	TArray<ABattleUnit*> FinalTargets;
 
+	if (CachedSkill->Scope == ESkillScope::All)
+	{
+		FinalTargets = PossibleTargets;
+	}
+	else
+	{
+		if (PossibleTargets.IsValidIndex(TargetIndex))
+		{
+			FinalTargets.Add(PossibleTargets[TargetIndex]);
+		}
+	}
+
+	for (ABattleUnit* Unit : PossibleTargets)
+	{
+		if (Unit) Unit->SetTargetSelect(false);
+	}
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->ClearAllMappings();
+	}
+
+	if (BattleGameMode && BattleGameMode->GetCurrentUnit())
+	{
+		BattleGameMode->GetCurrentUnit()->BattleAction_UseSkill(CachedSkill, FinalTargets);
+	}
+
+	IsTargetingMode = false;
+	CachedSkill = nullptr;
+	PossibleTargets.Empty();
 }
 
 void AAoABattleController::Input_Cancel()
@@ -180,5 +221,23 @@ void AAoABattleController::Input_Cancel()
 
 void AAoABattleController::UpdateTargetWidget()
 {
+	for (ABattleUnit* Unit : PossibleTargets)
+	{
+		if (Unit) Unit->SetTargetSelect(false);
+	}
 
+	if (CachedSkill && CachedSkill->Scope == ESkillScope::All)
+	{
+		for (ABattleUnit* Unit : PossibleTargets)
+		{
+			if (Unit) Unit->SetTargetSelect(true);
+		}
+	}
+	else
+	{
+		if (PossibleTargets.IsValidIndex(TargetIndex))
+		{
+			PossibleTargets[TargetIndex]->SetTargetSelect(true);
+		}
+	}
 }

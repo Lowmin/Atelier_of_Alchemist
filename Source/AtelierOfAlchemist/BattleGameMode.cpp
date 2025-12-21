@@ -2,6 +2,7 @@
 
 #include "BattleManagerSubsystem.h"
 #include "GuildMemberManagerSubsystem.h"
+#include "AoABattleController.h"
 
 #include "DataAssets/CharacterDataAsset.h"
 #include "DataAssets/EnemyPartyDataAsset.h"
@@ -44,6 +45,7 @@ void ABattleGameMode::ProcessPlayerAction(int32 ActionIndex)
 void ABattleGameMode::ProcessSkillSelection(int32 SkillSlotIndex)
 {
 	UE_LOG(LogTemp, Log, TEXT("Player selected skill slot: %d"), SkillSlotIndex);
+	MainLayoutInstance->HideBattleUI();
 	ExecuteSkill(SkillSlotIndex);
 }
 
@@ -65,7 +67,7 @@ void ABattleGameMode::CalculateTurnOrder()
 {
 	TurnQueue.Empty();
 
-	for (ACharacterBase* Unit : AllUnits)
+	for (ABattleUnit* Unit : AllUnits)
 	{
 		if (Unit && Unit->GetCurHealth() > 0)
 		{
@@ -103,6 +105,16 @@ void ABattleGameMode::StartNextTurn()
 		}
 		UE_LOG(LogTemp, Log, TEXT(">>> Start Turn: %s"), *UnitName);
 
+		if (CurrentUnit->Type == ECharacterType::Player)
+		{
+			if (AAoABattleController* PC = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
+			{
+				if (MainLayoutInstance) MainLayoutInstance->ShowBattleUI();
+
+				PC->SetInputMode_Main();
+			}
+		}
+
 		if (ABattleUnit* BattleUnit = Cast<ABattleUnit>(CurrentUnit))
 		{
 			BattleUnit->TurnStart();
@@ -113,6 +125,12 @@ void ABattleGameMode::StartNextTurn()
 void ABattleGameMode::ExecuteEnemyTurn()
 {
 
+}
+
+void ABattleGameMode::TurnEnd()
+{
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ABattleGameMode::StartNextTurn, 1.0f, false);
 }
 
 void ABattleGameMode::UpdateTurnWidget()
@@ -145,26 +163,21 @@ void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
 	if (!SkillData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid Skill Index or Data"));
-		StartNextTurn();
+		UndoLastAction();
 		return;
 	}
 
-	TArray<ABattleUnit*> Targets;
-	for (ABattleUnit* Unit : AllUnits)
-	{
-		if (Unit && Unit->GetCurHealth() > 0 && Unit->Type == ECharacterType::Enemy)
-		{
-			Targets.Add(Unit);
-		}
-	}
+	MainLayoutInstance->HideBattleUI();
 
-	if (Targets.Num() > 0)
+	AAoABattleController* PC = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController());
+	if (PC)
 	{
-		BattleUnit->BattleAction_UseSkill(SkillData, Targets);
+		PC->StartTargetingMode(SkillData);
 	}
-
-	FTimerHandle Handle;
-	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ABattleGameMode::StartNextTurn, 1.5f, false);
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found for Targeting"));
+	}
 }
 
 void ABattleGameMode::ExecuteRunAway()

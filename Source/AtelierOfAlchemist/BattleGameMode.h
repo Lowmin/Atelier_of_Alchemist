@@ -22,23 +22,19 @@ class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	// --- [Life Cycle] ---
 	virtual void BeginPlay() override;
 
-	// --- [Input Interface] (UI나 컨트롤러에서 호출) ---
-	void ProcessPlayerAction(int32 ActionIndex); // 이름 변경: PlayerAction -> ProcessPlayerAction
+	void ProcessPlayerAction(int32 ActionIndex);
 	void ProcessSkillSelection(int32 SkillSlotIndex);
-	void UndoLastAction(); // 이름 변경: Undo -> UndoLastAction
+	void UndoLastAction();
 
-	// --- [Battle Flow Control] ---
 	void StartBattle();
 	void StartNextTurn();
-
-	// 적 AI가 호출하거나 턴 종료 시 호출될 함수
 	void ExecuteEnemyTurn();
+	void TurnEnd();
 
 	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; };
-	const TObjectPtr<ACharacterBase>& GetCurrentUnit() const { return CurrentUnit; };
+	const TObjectPtr<ABattleUnit>& GetCurrentUnit() const { return CurrentUnit; };
 
 
 protected:
@@ -65,10 +61,10 @@ protected:
 	TArray<ABattleUnit*> AllUnits;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
-	TArray<ACharacterBase*> TurnQueue;
+	TArray<ABattleUnit*> TurnQueue;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
-	TObjectPtr<ACharacterBase> CurrentUnit;
+	TObjectPtr<ABattleUnit> CurrentUnit;
 
 	UPROPERTY()
 	TMap<int32, AActor*> EnemySpawnPointMap;

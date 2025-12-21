@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnAnimNotify_ShootProjectile();
 
+	UFUNCTION(BlueprintCallable)
+	void NotifyTurnEnd();
+
 	void ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill);
 
 	void SetTargetSelect(bool IsSelected);

@@ -12,7 +12,7 @@ class UPlayerStatusSlot;
 class UPlayerRuntimeData;
 class UHorizontalBox;
 class UBattleTurnWidget;
-class ACharacterBase;
+class ABattleUnit;
 // class USkillListUI;
 /**
  * 
@@ -28,7 +28,7 @@ public:
 	void ShowSkillUI();		// 스킬 리스트
 	void ShowTargetUI();	// 타겟 지정
 	void InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataList);
-	void UpdateTurnSlotBar(const TArray<ACharacterBase*>& TurnQueue);
+	void UpdateTurnSlotBar(const TArray<ABattleUnit*>& TurnQueue);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

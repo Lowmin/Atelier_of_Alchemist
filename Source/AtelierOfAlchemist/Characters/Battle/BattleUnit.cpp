@@ -1,3 +1,4 @@
+#include "BattleUnit.h"
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BattleUnit.h"
@@ -5,6 +6,7 @@
 #include "../../Characters/StatComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
 #include "../../Object/BattleProjectile.h"
+#include "../../BattleGameMode.h"
 
 ABattleUnit::ABattleUnit()
 {
@@ -52,6 +54,23 @@ void ABattleUnit::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ABa
 				OnAnimNotify_ShootProjectile();
 			}
 		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[BattleUnit] Skill Action Started!"));
+
+	if (Skill && Skill->SkillMontage)
+	{
+		float Duration = PlayAnimMontage(Skill->SkillMontage);
+
+		float WaitTime = (Duration > 0.0f) ? Duration : 1.0f;
+
+		FTimerHandle TurnEndHandle;
+		GetWorld()->GetTimerManager().SetTimer(TurnEndHandle, this, &ABattleUnit::NotifyTurnEnd, WaitTime, false);
+	}
+	else
+	{
+		FTimerHandle TurnEndHandle;
+		GetWorld()->GetTimerManager().SetTimer(TurnEndHandle, this, &ABattleUnit::NotifyTurnEnd, 1.0f, false);
 	}
 }
 
@@ -127,6 +146,14 @@ void ABattleUnit::OnAnimNotify_ShootProjectile()
 				}
 			}
 		}
+	}
+}
+
+void ABattleUnit::NotifyTurnEnd()
+{
+	if (ABattleGameMode* GM = GetWorld()->GetAuthGameMode<ABattleGameMode>())
+	{
+		GM->TurnEnd();
 	}
 }
 

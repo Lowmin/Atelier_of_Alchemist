@@ -7,7 +7,7 @@
 #include "BattleTurnWidget.generated.h"
 
 class UBattleTurnSlot;
-class ACharacterBase;
+class ABattleUnit;
 class UVerticalBox;
 
 /**
@@ -18,7 +18,7 @@ class ATELIEROFALCHEMIST_API UBattleTurnWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void UpdateTurnOrder(const TArray<ACharacterBase*>& TurnQueue);
+	void UpdateTurnOrder(const TArray<ABattleUnit*>& TurnQueue);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

@@ -61,7 +61,7 @@ void UBattleMainLayout::InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataLis
 	}
 }
 
-void UBattleMainLayout::UpdateTurnSlotBar(const TArray<ACharacterBase*>& TurnQueue)
+void UBattleMainLayout::UpdateTurnSlotBar(const TArray<ABattleUnit*>& TurnQueue)
 {
 	if (TurnWidget)
 	{
