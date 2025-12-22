@@ -27,7 +27,9 @@ public:
 	float GetAttackPower() const;
 	float GetDefense() const;
 	float GetSpeed() const;
+
 	UCharacterDataAsset* GetCharacterData() const;
+	UPlayerRuntimeData* GetRuntimeData() const { return LinkedRuntimeData; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;

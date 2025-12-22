@@ -18,8 +18,7 @@ void UPlayerRuntimeData::Initialize(UCharacterDataAsset* NewCharacterDataAsset)
 void UPlayerRuntimeData::ApplyDamage(float dmg)
 {
 	CurrentHealth -= dmg;
-
-	OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void UPlayerRuntimeData::SetCurrentHealth(float NewHp)

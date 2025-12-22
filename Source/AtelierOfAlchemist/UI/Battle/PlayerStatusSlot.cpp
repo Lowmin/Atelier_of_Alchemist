@@ -20,8 +20,12 @@ void UPlayerStatusSlot::InitializeSlot(UPlayerRuntimeData* RuntimeData)
 		CharacterImage->SetBrushFromSoftTexture(CharacterData->CharacterImage);
 		CharacterName->SetText(CharacterData->CharacterName);
 		Speed->SetText(FText::AsNumber(CharacterData->BaseSpeed));
+		UE_LOG(LogTemp, Error, TEXT(">> [UI] Watching Address: %p"), RuntimeData);
 
+		RuntimeData->OnHealthChanged.RemoveDynamic(this, &UPlayerStatusSlot::UpdateUI);
 		RuntimeData->OnHealthChanged.AddDynamic(this, &UPlayerStatusSlot::UpdateUI);
+
+		UpdateUI(RuntimeData->GetCurrentHealth(), RuntimeData->GetMaxHealth());
 	}
 }
 

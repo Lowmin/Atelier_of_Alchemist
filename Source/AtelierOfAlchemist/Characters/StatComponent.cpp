@@ -33,16 +33,22 @@ void UStatComponent::InitializeFromEnemy(UCharacterDataAsset* InDataAsset)
 	}
 }
 
-void UStatComponent::TakeDamage(float DamageAmount)
+void UStatComponent::TakeDamage(float Amount)
 {
 	if (LinkedRuntimeData)
 	{
-		LinkedRuntimeData->ApplyDamage(DamageAmount);
+		UE_LOG(LogTemp, Error, TEXT(">> [HIT] Data Address: %p"), LinkedRuntimeData.Get());
+		UE_LOG(LogTemp, Log, TEXT("Player"));
+		LinkedRuntimeData->ApplyDamage(Amount);
+
+		CurrentHealth = LinkedRuntimeData->GetCurrentHealth();
 	}
 	else
 	{
-		CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
-		OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+		UE_LOG(LogTemp, Log, TEXT("Enemy"));
+
+		CurrentHealth -= Amount;
+		if (OnHealthChanged.IsBound()) OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
 	}
 }
 

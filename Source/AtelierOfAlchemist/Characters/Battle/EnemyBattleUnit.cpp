@@ -5,6 +5,7 @@
 #include "../../BattleGameMode.h"
 #include "Components/WidgetComponent.h"
 #include "../../UI/Battle/EnemyStatusWidget.h"
+#include "../Enemy/EnemyAIController.h"
 
 AEnemyBattleUnit::AEnemyBattleUnit()
 {
@@ -14,7 +15,7 @@ AEnemyBattleUnit::AEnemyBattleUnit()
 	HealthBarWidget->SetupAttachment(RootComponent);
 	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarWidget->SetDrawSize(FVector2D(150.0f, 20.0f));
-	HealthBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+	HealthBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 }
 
 void AEnemyBattleUnit::OnConstruction(const FTransform& Transform)
@@ -31,15 +32,25 @@ void AEnemyBattleUnit::BeginPlay()
 	{
 		StatComponent->OnHealthChanged.AddDynamic(this, &AEnemyBattleUnit::UpdateStatusHp);
 	}
+
+	if (HealthBarWidget)
+	{
+		UEnemyStatusWidget* EnemyWidget = Cast<UEnemyStatusWidget>(HealthBarWidget->GetUserWidgetObject());
+
+		if (EnemyWidget && StatComponent)
+		{
+			EnemyWidget->BindStatComponent(StatComponent);
+		}
+	}
 }
 
 void AEnemyBattleUnit::TurnStart()
 {
 	Super::TurnStart();
 
-	if (ABattleGameMode* BattleGameMode = GetWorld()->GetAuthGameMode<ABattleGameMode>())
+	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 	{
-		BattleGameMode->ExecuteEnemyTurn();
+		EnemyAIController->SetTurnStatus(true);
 	}
 }
 

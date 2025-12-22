@@ -44,7 +44,6 @@ void ABattleGameMode::ProcessPlayerAction(int32 ActionIndex)
 
 void ABattleGameMode::ProcessSkillSelection(int32 SkillSlotIndex)
 {
-	UE_LOG(LogTemp, Log, TEXT("Player selected skill slot: %d"), SkillSlotIndex);
 	MainLayoutInstance->HideBattleUI();
 	ExecuteSkill(SkillSlotIndex);
 }
@@ -107,11 +106,11 @@ void ABattleGameMode::StartNextTurn()
 
 		if (CurrentUnit->Type == ECharacterType::Player)
 		{
-			if (AAoABattleController* PC = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
+			if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
 			{
 				if (MainLayoutInstance) MainLayoutInstance->ShowBattleUI();
 
-				PC->SetInputMode_Main();
+				BattleController->SetInputMode_Main();
 			}
 		}
 
@@ -120,11 +119,6 @@ void ABattleGameMode::StartNextTurn()
 			BattleUnit->TurnStart();
 		}
 	}
-}
-
-void ABattleGameMode::ExecuteEnemyTurn()
-{
-
 }
 
 void ABattleGameMode::TurnEnd()
@@ -162,7 +156,7 @@ void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
 	USkillDataAsset* SkillData = BattleUnit->GetSkill(SkillIndex);
 	if (!SkillData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid Skill Index or Data"));
+		UE_LOG(LogTemp, Warning, TEXT("[BattleGameMode -> ExecuteSkill] No Skill Data."));
 		UndoLastAction();
 		return;
 	}
@@ -176,14 +170,12 @@ void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found for Targeting"));
+		UE_LOG(LogTemp, Error, TEXT("[BattleGameMode -> ExecuteSkill] No BattleController."));
 	}
 }
 
 void ABattleGameMode::ExecuteRunAway()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attempting Run Away..."));
-
 	if (MainLayoutInstance)
 	{
 		MainLayoutInstance->HideBattleUI();
@@ -209,7 +201,7 @@ void ABattleGameMode::ExecuteRunAway()
 					}
 					else
 					{
-						UE_LOG(LogTemp, Error, TEXT("No saved field level name!"));
+						UE_LOG(LogTemp, Error, TEXT("[BattleGameMode -> ExecuteRunAway] No Level."));
 					}
 				}
 			}, FadeOutDuration, false);
@@ -307,7 +299,6 @@ void ABattleGameMode::SpawnEnemyParty()
 
 	for (const FEnemySpawnInfo& Info : EnemyPartyData->EnemyMembers)
 	{
-		// 3. 스폰 포인트 체크
 		AActor** SpawnPointPtr = EnemySpawnPointMap.Find(Info.SpawnIndex);
 
 		AActor* SpawnPoint = *SpawnPointPtr;

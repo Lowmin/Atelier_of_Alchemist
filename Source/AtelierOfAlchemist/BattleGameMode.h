@@ -30,7 +30,6 @@ public:
 
 	void StartBattle();
 	void StartNextTurn();
-	void ExecuteEnemyTurn();
 	void TurnEnd();
 
 	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; };
@@ -40,7 +39,6 @@ public:
 protected:
 	void CalculateTurnOrder();
 	void UpdateTurnWidget();
-	void CheckBattleEndCondition();
 
 	void ExecuteAttack();
 	void ExecuteSkill(int32 SkillIndex);

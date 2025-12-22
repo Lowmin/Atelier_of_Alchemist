@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Inventory/InventorySlotStruct.h"
 #include "InventorySlot.generated.h"
 
 class UImage;
 class UTextBlock;
 class UInventoryItemInfo;
 class UInventory;
-struct FInventorySlotStruct;
 /**
  * 
  */

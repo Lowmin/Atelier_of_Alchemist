@@ -8,6 +8,7 @@
 
 class UProgressBar;
 class UTextBlock;
+class UStatComponent;
 /**
  * 
  */
@@ -17,11 +18,17 @@ class ATELIEROFALCHEMIST_API UEnemyStatusWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION()
 	void UpdateHp(float CurrentHp, float MaxHp);
+
 	void SetLevel(int32 Level);
 	void SetName(FText Name);
 
+	void BindStatComponent(UStatComponent* StatComp);
+
 protected:
+	virtual void NativeConstruct() override;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UProgressBar> HpBar;
 

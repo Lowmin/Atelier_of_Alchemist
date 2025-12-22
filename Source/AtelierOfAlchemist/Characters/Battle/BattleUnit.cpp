@@ -1,21 +1,39 @@
 #include "BattleUnit.h"
-// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BattleUnit.h"
+#include "AIController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "../../Characters/StatComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
+#include "../../DataAssets/CharacterDataAsset.h"
 #include "../../Object/BattleProjectile.h"
 #include "../../BattleGameMode.h"
 
 ABattleUnit::ABattleUnit()
 {
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 	TargetMarkerWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetMarkerWidget"));
 	TargetMarkerWidget->SetupAttachment(RootComponent);
 	TargetMarkerWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	TargetMarkerWidget->SetDrawSize(FVector2D(50.0f, 50.0f));
 	TargetMarkerWidget->SetVisibility(false);
-	TargetMarkerWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+	TargetMarkerWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+}
+
+void ABattleUnit::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AIController = Cast<AAIController>(GetController());
+	if (!AIController)
+	{
+		AIController = GetWorld()->SpawnActor<AAIController>(FVector::ZeroVector, FRotator::ZeroRotator);
+		if (AIController)
+		{
+			AIController->Possess(this);
+		}
+	}
 }
 
 USkillDataAsset* ABattleUnit::GetSkill(int32 Index) const
@@ -24,7 +42,6 @@ USkillDataAsset* ABattleUnit::GetSkill(int32 Index) const
 	{
 		return SkillList[Index];
 	}
-
 	return nullptr;
 }
 
@@ -35,42 +52,124 @@ void ABattleUnit::TurnStart()
 
 void ABattleUnit::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ABattleUnit*>& Targets)
 {
-	if (!Skill) return;
-
-	for (ABattleUnit* TargetUnit : Targets)
+	if (!Skill || Targets.IsEmpty())
 	{
-		if (Skill->SkillMontage)
+		NotifyTurnEnd();
+		return;
+	}
+
+	CachedCurrentSkill = Skill;
+	CachedTargets = Targets;
+	OriginalLocation = GetActorLocation();
+	bIsReturning = false;
+
+	UE_LOG(LogTemp, Warning, TEXT("[BattleUnit] Skill Action Started: %s"), *Skill->GetName());
+
+	if (Skill->SkillType == ESkillType::Melee && AIController)
+	{
+		if (ABattleUnit* Target = Targets[0])
 		{
-			PlayAnimMontage(Skill->SkillMontage);
+			FVector TargetPos = Target->GetActorLocation();
+			FVector Direction = (GetActorLocation() - TargetPos).GetSafeNormal();
+
+			FVector DestPos = TargetPos + (Direction * 100.0f);
+
+			FAIMoveRequest MoveReq;
+			MoveReq.SetGoalLocation(DestPos);
+			MoveReq.SetAcceptanceRadius(10.0f);
+
+			AIController->ReceiveMoveCompleted.AddDynamic(this, &ABattleUnit::OnMoveCompleted);
+			AIController->MoveTo(MoveReq);
 		}
 		else
 		{
-			if (Skill->SkillType == ESkillType::Melee)
-			{
-				OnAnimNotify_MeleeHit();
-			}
-			else
-			{
-				OnAnimNotify_ShootProjectile();
-			}
+			StartAttackSequence();
 		}
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("[BattleUnit] Skill Action Started!"));
-
-	if (Skill && Skill->SkillMontage)
-	{
-		float Duration = PlayAnimMontage(Skill->SkillMontage);
-
-		float WaitTime = (Duration > 0.0f) ? Duration : 1.0f;
-
-		FTimerHandle TurnEndHandle;
-		GetWorld()->GetTimerManager().SetTimer(TurnEndHandle, this, &ABattleUnit::NotifyTurnEnd, WaitTime, false);
 	}
 	else
 	{
-		FTimerHandle TurnEndHandle;
-		GetWorld()->GetTimerManager().SetTimer(TurnEndHandle, this, &ABattleUnit::NotifyTurnEnd, 1.0f, false);
+		if (Targets[0])
+		{
+			FVector LookDir = Targets[0]->GetActorLocation() - GetActorLocation();
+			LookDir.Z = 0.0f;
+			SetActorRotation(LookDir.Rotation());
+		}
+		StartAttackSequence();
+	}
+}
+
+void ABattleUnit::OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
+{
+	if (AIController)
+	{
+		AIController->ReceiveMoveCompleted.RemoveDynamic(this, &ABattleUnit::OnMoveCompleted);
+	}
+
+	if (bIsReturning)
+	{
+		if (CachedTargets.IsValidIndex(0) && CachedTargets[0])
+		{
+			FVector LookDir = CachedTargets[0]->GetActorLocation() - GetActorLocation();
+			LookDir.Z = 0.0f;
+			SetActorRotation(LookDir.Rotation());
+		}
+		NotifyTurnEnd();
+	}
+	else
+	{
+		StartAttackSequence();
+	}
+}
+
+void ABattleUnit::StartAttackSequence()
+{
+	if (!CachedCurrentSkill) return;
+
+	float Duration = 0.0f;
+
+	if (CachedCurrentSkill->SkillMontage)
+	{
+		Duration = PlayAnimMontage(CachedCurrentSkill->SkillMontage);
+	}
+	else
+	{
+		if (CachedCurrentSkill->SkillType == ESkillType::Melee)
+			OnAnimNotify_MeleeHit();
+		else
+			OnAnimNotify_ShootProjectile();
+
+		Duration = 1.0f;
+	}
+
+	float WaitTime = (Duration > 0.0f) ? Duration : 1.0f;
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, this, &ABattleUnit::OnAttackSequenceFinished, WaitTime, false);
+}
+
+void ABattleUnit::OnAttackSequenceFinished()
+{
+	if (CachedCurrentSkill && CachedCurrentSkill->SkillType == ESkillType::Melee)
+	{
+		bIsReturning = true;
+
+		if (AIController)
+		{
+			FAIMoveRequest MoveReq;
+			MoveReq.SetGoalLocation(OriginalLocation);
+			MoveReq.SetAcceptanceRadius(5.0f);
+
+			AIController->ReceiveMoveCompleted.AddDynamic(this, &ABattleUnit::OnMoveCompleted);
+			AIController->MoveTo(MoveReq);
+		}
+		else
+		{
+			NotifyTurnEnd();
+		}
+	}
+	else
+	{
+		NotifyTurnEnd();
 	}
 }
 
@@ -87,87 +186,15 @@ void ABattleUnit::OnAnimNotify_MeleeHit()
 
 void ABattleUnit::OnAnimNotify_ShootProjectile()
 {
-	// 광역 투사체의 경우
-	if (CachedCurrentSkill->IsGlobalProjectile)
-	{
-		FVector CenterLocation = FVector::ZeroVector;
-		int32 Count = 0;
-
-		// 광역 타겟의 중간 Location을 구함
-		for (ABattleUnit* Target : CachedTargets)
-		{
-			if (Target)
-			{
-				CenterLocation += Target->GetActorLocation();
-				Count++;
-			}
-		}
-
-		if (Count > 0)
-		{
-			CenterLocation /= Count;
-		}
-		else
-		{
-			CenterLocation = GetActorLocation() + GetActorForwardVector() * 500.0f;
-		}
-
-		FVector SpawnLoc = ProjectileSpawnPoint(CenterLocation);
-		FRotator SpawnRot = ProjectileSpawnRotation(CenterLocation, SpawnLoc);
-
-		ABattleProjectile* Projectile = GetWorld()->SpawnActor<ABattleProjectile>
-			(CachedCurrentSkill->ProjectileClass, SpawnLoc, SpawnRot);
-
-		if (Projectile)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("광역 투사체 생성."));
-			Projectile->InitializeGlobal(CachedTargets, CachedCurrentSkill, this, CenterLocation);
-		}
-	}
-	// 단일 투사체의 경우
-	else
-	{
-		for (ABattleUnit* Target : CachedTargets)
-		{
-			if (Target)
-			{
-				FVector TargetPos = Target->GetActorLocation();
-
-				FVector SpawnLoc = ProjectileSpawnPoint(TargetPos);
-				FRotator SpawnRot = ProjectileSpawnRotation(TargetPos, SpawnLoc);
-
-				ABattleProjectile* Projectile = GetWorld()->SpawnActor<ABattleProjectile>
-					(CachedCurrentSkill->ProjectileClass, SpawnLoc, SpawnRot);
-
-				if (Projectile)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("단일 투사체 생성."));
-					Projectile->InitializeSingle(Target, CachedCurrentSkill, this);
-				}
-			}
-		}
-	}
-}
-
-void ABattleUnit::NotifyTurnEnd()
-{
-	if (ABattleGameMode* GM = GetWorld()->GetAuthGameMode<ABattleGameMode>())
-	{
-		GM->TurnEnd();
-	}
-}
-
-void ABattleUnit::ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill)
-{
+	if (!CachedCurrentSkill) return;
 
 }
 
-void ABattleUnit::SetTargetSelect(bool IsSelected)
+void ABattleUnit::ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill)
 {
-	if (TargetMarkerWidget)
-	{
-		TargetMarkerWidget->SetVisibility(IsSelected);
-	}
+	if (!Target || !Skill) return;
+
+	UGameplayStatics::ApplyDamage(Target, Skill->Power, GetController(), this, nullptr);
 }
 
 float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -178,16 +205,35 @@ float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	{
 		StatComponent->TakeDamage(ActualDamage);
 
-		if (StatComponent->GetCurrentHealth() <= 0)
-		{
-			
-		}
+		FString MyName = "Unknown";
+		if (auto* Data = GetCharacterData()) MyName = Data->CharacterName.ToString();
+
+		UE_LOG(LogTemp, Error, TEXT("[HIT] %s took %.1f Damage! (HP Left: %.1f)"),
+			*MyName, ActualDamage, StatComponent->GetCurrentHealth());
 	}
 
 	return ActualDamage;
 }
 
-void ABattleUnit::ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill)
+void ABattleUnit::NotifyTurnEnd()
+{
+	bIsReturning = false;
+
+	if (ABattleGameMode* GM = GetWorld()->GetAuthGameMode<ABattleGameMode>())
+	{
+		GM->TurnEnd();
+	}
+}
+
+void ABattleUnit::SetTargetSelect(bool IsSelected)
+{
+	if (TargetMarkerWidget)
+	{
+		TargetMarkerWidget->SetVisibility(IsSelected);
+	}
+}
+
+void ABattleUnit::ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill)
 {
 
 }
@@ -195,6 +241,8 @@ void ABattleUnit::ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill)
 FVector ABattleUnit::ProjectileSpawnPoint(FVector TargetPos)
 {
 	FVector ResultLoc = GetActorLocation();
+
+	if (!CachedCurrentSkill) return ResultLoc;
 
 	switch (CachedCurrentSkill->ProjectileSpawnType)
 	{
@@ -210,12 +258,13 @@ FVector ABattleUnit::ProjectileSpawnPoint(FVector TargetPos)
 	default:
 		break;
 	}
-
 	return ResultLoc;
 }
 
 FRotator ABattleUnit::ProjectileSpawnRotation(FVector TargetPos, FVector SpawnLocation)
 {
+	if (!CachedCurrentSkill) return FRotator::ZeroRotator;
+
 	FRotator ResultRot = FRotator::ZeroRotator;
 
 	switch (CachedCurrentSkill->ProjectileSpawnType)
@@ -232,7 +281,5 @@ FRotator ABattleUnit::ProjectileSpawnRotation(FVector TargetPos, FVector SpawnLo
 	default:
 		break;
 	}
-
-	return FRotator();
+	return ResultRot;
 }
-

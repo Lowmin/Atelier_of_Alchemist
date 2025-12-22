@@ -36,6 +36,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UProgressBar> HpBar;
 
+	UFUNCTION()
 	void UpdateUI(float CurrnetHp, float MaxHp);
 
 	virtual void NativeDestruct() override;
