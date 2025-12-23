@@ -19,6 +19,15 @@ ABattleUnit::ABattleUnit()
 	TargetMarkerWidget->SetDrawSize(FVector2D(50.0f, 50.0f));
 	TargetMarkerWidget->SetVisibility(false);
 	TargetMarkerWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+
+	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+
+	if (GetMesh())
+	{
+		WeaponMesh->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
+	}
+
+	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
 void ABattleUnit::BeginPlay()
@@ -62,8 +71,6 @@ void ABattleUnit::BattleAction_UseSkill(USkillDataAsset* Skill, const TArray<ABa
 	CachedTargets = Targets;
 	OriginalLocation = GetActorLocation();
 	bIsReturning = false;
-
-	UE_LOG(LogTemp, Warning, TEXT("[BattleUnit] Skill Action Started: %s"), *Skill->GetName());
 
 	if (Skill->SkillType == ESkillType::Melee && AIController)
 	{
@@ -204,12 +211,6 @@ float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	if (StatComponent)
 	{
 		StatComponent->TakeDamage(ActualDamage);
-
-		FString MyName = "Unknown";
-		if (auto* Data = GetCharacterData()) MyName = Data->CharacterName.ToString();
-
-		UE_LOG(LogTemp, Error, TEXT("[HIT] %s took %.1f Damage! (HP Left: %.1f)"),
-			*MyName, ActualDamage, StatComponent->GetCurrentHealth());
 	}
 
 	return ActualDamage;

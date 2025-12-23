@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "../../UI/Battle/EnemyStatusWidget.h"
 #include "../Enemy/EnemyAIController.h"
+#include "../../AoABattleController.h"
 
 AEnemyBattleUnit::AEnemyBattleUnit()
 {
@@ -47,6 +48,11 @@ void AEnemyBattleUnit::BeginPlay()
 void AEnemyBattleUnit::TurnStart()
 {
 	Super::TurnStart();
+	if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetInputMode_EnemyTurn"));
+		BattleController->SetInputMode_EnemyTurn();
+	}
 
 	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 	{

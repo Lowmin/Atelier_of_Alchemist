@@ -43,6 +43,8 @@ public:
 
 	void SetTargetSelect(bool IsSelected);
 
+	const TArray<ABattleUnit*>& GetCachedTargets() const { return CachedTargets; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -53,6 +55,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> TargetMarkerWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
 	UFUNCTION()
 	void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);

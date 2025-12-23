@@ -23,6 +23,7 @@ public:
 	void SetInputMode_Main();
 	void SetInputMode_Skill();
 	void SetInputMode_Targeting();
+	void SetInputMode_EnemyTurn();
 
 	void SetMainCamera();
 
@@ -42,6 +43,8 @@ protected:
 	TObjectPtr<UInputMappingContext> IMC_Battle_Skill;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> IMC_Battle_Targeting;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputMappingContext> IMC_Battle_EnemyTurn;
 
 	// 공통 조작
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -56,6 +59,8 @@ protected:
 	TObjectPtr<UInputAction> IA_Skill;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Run;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Dodge;
 
 	// SkillList 조작
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -74,6 +79,7 @@ protected:
 	void Input_Attack();
 	void Input_Skill();
 	void Input_Run();
+	void Input_Dodge();
 
 	void Input_Skill_1();
 	void Input_Skill_2();

@@ -10,6 +10,7 @@
 #include "CineCameraActor.h"
 #include "Characters/Battle/BattleUnit.h"
 #include "DataAssets/SkillDataAsset.h"
+#include "Characters/Battle/PlayerBattleUnit.h"
 
 
 void AAoABattleController::BeginPlay()
@@ -35,6 +36,7 @@ void AAoABattleController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Started, this, &AAoABattleController::Input_Attack);
 		EnhancedInputComponent->BindAction(IA_Skill, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill);
 		EnhancedInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AAoABattleController::Input_Run);
+		EnhancedInputComponent->BindAction(IA_Dodge, ETriggerEvent::Started, this, &AAoABattleController::Input_Dodge);
 
 		EnhancedInputComponent->BindAction(IA_Skill_1, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill_1);
 		EnhancedInputComponent->BindAction(IA_Skill_2, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill_2);
@@ -75,6 +77,15 @@ void AAoABattleController::SetInputMode_Targeting()
 		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
 		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_Targeting, 0);
 		IsTargetingMode = true;
+	}
+}
+
+void AAoABattleController::SetInputMode_EnemyTurn()
+{
+	if (UEnhancedInputLocalPlayerSubsystem* EnhancedInputLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
+		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_EnemyTurn, 0);
 	}
 }
 
@@ -141,6 +152,26 @@ void AAoABattleController::Input_Skill()
 void AAoABattleController::Input_Run()
 {
 	BattleGameMode->ProcessPlayerAction(2);
+}
+
+void AAoABattleController::Input_Dodge()
+{
+	ABattleGameMode* BattleGM = Cast<ABattleGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!BattleGM) return;
+
+	ABattleUnit* Attacker = BattleGM->GetCurrentUnit();
+	if (!Attacker) return;
+
+	const TArray<ABattleUnit*>& Targets = Attacker->GetCachedTargets();
+
+	for (ABattleUnit* TargetUnit : Targets)
+	{
+		if (APlayerBattleUnit* PlayerTarget = Cast<APlayerBattleUnit>(TargetUnit))
+		{
+			PlayerTarget->Dodge();
+			UE_LOG(LogTemp, Log, TEXT(">> [Counter] Target Player %s Dodged!"), *PlayerTarget->GetName());
+		}
+	}
 }
 
 void AAoABattleController::Input_Skill_1()
