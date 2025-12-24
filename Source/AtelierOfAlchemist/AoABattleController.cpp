@@ -147,6 +147,7 @@ void AAoABattleController::Input_Attack()
 void AAoABattleController::Input_Skill()
 {
 	BattleGameMode->ProcessPlayerAction(1);
+	SetInputMode_Skill();
 }
 
 void AAoABattleController::Input_Run()
@@ -247,7 +248,22 @@ void AAoABattleController::Input_Confirm()
 
 void AAoABattleController::Input_Cancel()
 {
+	if (IsTargetingMode)
+	{
+		IsTargetingMode = false;
 
+		UpdateTargetWidget();
+
+		if (BattleGameMode) BattleGameMode->UndoLastAction();
+
+		SetInputMode_Main();
+	}
+	else
+	{
+		if (BattleGameMode) BattleGameMode->UndoLastAction();
+
+		SetInputMode_Main();
+	}
 }
 
 void AAoABattleController::UpdateTargetWidget()

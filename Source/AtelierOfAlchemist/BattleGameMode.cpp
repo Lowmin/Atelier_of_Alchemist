@@ -1,22 +1,17 @@
 #include "BattleGameMode.h"
-
 #include "BattleManagerSubsystem.h"
 #include "GuildMemberManagerSubsystem.h"
 #include "AoABattleController.h"
-
 #include "DataAssets/CharacterDataAsset.h"
 #include "DataAssets/EnemyPartyDataAsset.h"
 #include "DataAssets/SkillDataAsset.h"
 #include "PlayerRuntimeData.h"
 #include "Object/BattleSpawnPoint.h"
-
-#include "Characters/CharacterBase.h"
 #include "Characters/Battle/BattleUnit.h" 
-
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "UI/Battle/BattleMainLayout.h"
-
+#include "DataAssets/SkillListComponent.h"
 
 void ABattleGameMode::BeginPlay()
 {
@@ -30,13 +25,12 @@ void ABattleGameMode::BeginPlay()
 	StartBattle();
 }
 
-
 void ABattleGameMode::ProcessPlayerAction(int32 ActionIndex)
 {
 	switch (ActionIndex)
 	{
 	case 0: ExecuteAttack(); break;
-	case 1: ShowSkillSelectionUI(); break;
+	case 1: ShowSkillListUI(); break;
 	case 2: ExecuteRunAway(); break;
 	default: break;
 	}
@@ -44,16 +38,13 @@ void ABattleGameMode::ProcessPlayerAction(int32 ActionIndex)
 
 void ABattleGameMode::ProcessSkillSelection(int32 SkillSlotIndex)
 {
-	MainLayoutInstance->HideBattleUI();
+	if (MainLayoutInstance) MainLayoutInstance->HideBattleUI();
 	ExecuteSkill(SkillSlotIndex);
 }
 
 void ABattleGameMode::UndoLastAction()
 {
-	if (MainLayoutInstance)
-	{
-		MainLayoutInstance->ShowBattleUI();
-	}
+	if (MainLayoutInstance) MainLayoutInstance->ShowBattleUI();
 }
 
 void ABattleGameMode::StartBattle()
@@ -84,11 +75,7 @@ void ABattleGameMode::CalculateTurnOrder()
 
 void ABattleGameMode::StartNextTurn()
 {
-	if (TurnQueue.IsEmpty())
-	{
-		CalculateTurnOrder();
-	}
-
+	if (TurnQueue.IsEmpty()) CalculateTurnOrder();
 	if (TurnQueue.IsEmpty()) return;
 
 	CurrentUnit = TurnQueue[0];
@@ -97,27 +84,16 @@ void ABattleGameMode::StartNextTurn()
 
 	if (CurrentUnit)
 	{
-		FString UnitName = "Unknown";
-		if (UCharacterDataAsset* Data = CurrentUnit->GetCharacterData())
-		{
-			UnitName = Data->CharacterName.ToString();
-		}
-		UE_LOG(LogTemp, Log, TEXT(">>> Start Turn: %s"), *UnitName);
-
 		if (CurrentUnit->Type == ECharacterType::Player)
 		{
 			if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
 			{
 				if (MainLayoutInstance) MainLayoutInstance->ShowBattleUI();
-
 				BattleController->SetInputMode_Main();
 			}
 		}
 
-		if (ABattleUnit* BattleUnit = Cast<ABattleUnit>(CurrentUnit))
-		{
-			BattleUnit->TurnStart();
-		}
+		CurrentUnit->TurnStart();
 	}
 }
 
@@ -129,10 +105,7 @@ void ABattleGameMode::TurnEnd()
 
 void ABattleGameMode::UpdateTurnWidget()
 {
-	if (MainLayoutInstance)
-	{
-		MainLayoutInstance->UpdateTurnSlotBar(TurnQueue);
-	}
+	if (MainLayoutInstance) MainLayoutInstance->UpdateTurnSlotBar(TurnQueue);
 }
 
 void ABattleGameMode::ExecuteAttack()
@@ -140,46 +113,52 @@ void ABattleGameMode::ExecuteAttack()
 	ExecuteSkill(0);
 }
 
-void ABattleGameMode::ShowSkillSelectionUI()
+void ABattleGameMode::ShowSkillListUI()
 {
+	if (!CurrentUnit) return;
+
 	if (MainLayoutInstance)
 	{
-		MainLayoutInstance->ShowSkillUI();
+		if (USkillListComponent* SkillComponent = CurrentUnit->GetSkillComponent())
+		{
+			MainLayoutInstance->InitSkillList(SkillComponent->GetSkillList());
+			MainLayoutInstance->ShowSkillUI();
+		}
+	}
+
+	if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
+	{
+		BattleController->SetInputMode_Skill();
 	}
 }
 
 void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
 {
-	ABattleUnit* BattleUnit = Cast<ABattleUnit>(CurrentUnit);
-	if (!BattleUnit) return;
+	if (!CurrentUnit) return;
 
-	USkillDataAsset* SkillData = BattleUnit->GetSkill(SkillIndex);
+	USkillDataAsset* SkillData = nullptr;
+	if (USkillListComponent* SkillComp = CurrentUnit->GetSkillComponent())
+	{
+		SkillData = SkillComp->GetSkillIndex(SkillIndex);
+	}
+
 	if (!SkillData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[BattleGameMode -> ExecuteSkill] No Skill Data."));
 		UndoLastAction();
 		return;
 	}
 
-	MainLayoutInstance->HideBattleUI();
+	if (MainLayoutInstance) MainLayoutInstance->HideBattleUI();
 
-	AAoABattleController* PC = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController());
-	if (PC)
+	if (AAoABattleController* PC = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
 	{
 		PC->StartTargetingMode(SkillData);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[BattleGameMode -> ExecuteSkill] No BattleController."));
 	}
 }
 
 void ABattleGameMode::ExecuteRunAway()
 {
-	if (MainLayoutInstance)
-	{
-		MainLayoutInstance->HideBattleUI();
-	}
+	if (MainLayoutInstance) MainLayoutInstance->HideBattleUI();
 
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
@@ -199,10 +178,6 @@ void ABattleGameMode::ExecuteRunAway()
 					{
 						UGameplayStatics::OpenLevel(this, ReturnLevel);
 					}
-					else
-					{
-						UE_LOG(LogTemp, Error, TEXT("[BattleGameMode -> ExecuteRunAway] No Level."));
-					}
 				}
 			}, FadeOutDuration, false);
 	}
@@ -219,14 +194,7 @@ void ABattleGameMode::FindEnemySpawnPoints()
 	{
 		if (ABattleSpawnPoint* Point = Cast<ABattleSpawnPoint>(Actor))
 		{
-			if (EnemySpawnPointMap.Contains(Point->SpawnIndex))
-			{
-				UE_LOG(LogTemp, Error, TEXT("[Spawn] Duplicate Index Found: %d at %s"), Point->SpawnIndex, *Point->GetName());
-			}
-			else
-			{
-				EnemySpawnPointMap.Add(Point->SpawnIndex, Point);
-			}
+			EnemySpawnPointMap.Add(Point->SpawnIndex, Point);
 		}
 	}
 }
@@ -245,27 +213,21 @@ void ABattleGameMode::SpawnPlayerParty()
 		if (i >= SpawnPoints.Num()) break;
 
 		UPlayerRuntimeData* MemberData = GuildManager->GetPlayerRuntimeData(PartyIDs[i]);
-		if (!MemberData) continue;
+		if (!MemberData || !MemberData->GetCharacterDataAsset()) continue;
 
 		UCharacterDataAsset* DataAsset = MemberData->GetCharacterDataAsset();
-		if (!DataAsset) continue;
-
 		UClass* CharacterClass = DataAsset->BP_Character.LoadSynchronous();
+
 		if (CharacterClass)
 		{
 			ACharacter* CDO = Cast<ACharacter>(CharacterClass->GetDefaultObject());
 			float HalfHeight = CDO ? CDO->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 88.0f;
-
-			FVector SpawnLoc = SpawnPoints[i]->GetActorLocation();
-			SpawnLoc.Z += HalfHeight;
+			FVector SpawnLoc = SpawnPoints[i]->GetActorLocation() + FVector(0, 0, HalfHeight);
 
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-			ABattleUnit* NewUnit = GetWorld()->SpawnActor<ABattleUnit>(
-				CharacterClass, SpawnLoc, SpawnPoints[i]->GetActorRotation(), SpawnParams);
-
-			if (NewUnit)
+			if (ABattleUnit* NewUnit = GetWorld()->SpawnActor<ABattleUnit>(CharacterClass, SpawnLoc, SpawnPoints[i]->GetActorRotation(), SpawnParams))
 			{
 				AllUnits.Add(NewUnit);
 				if (UStatComponent* StatComp = NewUnit->GetStatComponent())
@@ -280,50 +242,32 @@ void ABattleGameMode::SpawnPlayerParty()
 void ABattleGameMode::SpawnEnemyParty()
 {
 	UBattleManagerSubsystem* BattleManager = GetBattleManagerSubsystem();
+	if (!BattleManager || !BattleManager->CurrentEnemyPartyData) return;
 
-	if (!BattleManager)
-	{
-		return;
-	}
-
-	if (!BattleManager->EnemyPartyData.IsValid())
-	{
-		return;
-	}
-
-	UEnemyPartyDataAsset* EnemyPartyData = BattleManager->EnemyPartyData.LoadSynchronous();
-	if (!EnemyPartyData)
-	{
-		return;
-	}
-
-	for (const FEnemySpawnInfo& Info : EnemyPartyData->EnemyMembers)
+	for (const FEnemySpawnInfo& Info : BattleManager->CurrentEnemyPartyData->EnemyMembers)
 	{
 		AActor** SpawnPointPtr = EnemySpawnPointMap.Find(Info.SpawnIndex);
+		if (!SpawnPointPtr) continue;
 
 		AActor* SpawnPoint = *SpawnPointPtr;
-		UCharacterDataAsset* EnemyData = Info.EnemyData.LoadSynchronous();
+		if (!Info.EnemyData) continue;
 
-		UClass* EnemyClass = EnemyData->BP_Character.LoadSynchronous();
+		UClass* EnemyClass = Info.EnemyData->BP_Character.LoadSynchronous();
+		if (!EnemyClass) continue;
 
 		ACharacter* CDO = Cast<ACharacter>(EnemyClass->GetDefaultObject());
 		float HalfHeight = CDO ? CDO->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 88.0f;
-
 		FVector SpawnLoc = SpawnPoint->GetActorLocation() + FVector(0, 0, HalfHeight + 2.0f);
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		ABattleUnit* NewEnemy = GetWorld()->SpawnActor<ABattleUnit>(
-			EnemyClass, SpawnLoc, SpawnPoint->GetActorRotation(), SpawnParams);
-
-		if (NewEnemy)
+		if (ABattleUnit* NewEnemy = GetWorld()->SpawnActor<ABattleUnit>(EnemyClass, SpawnLoc, SpawnPoint->GetActorRotation(), SpawnParams))
 		{
 			AllUnits.Add(NewEnemy);
-
 			if (UStatComponent* StatComp = NewEnemy->GetStatComponent())
 			{
-				StatComp->InitializeFromEnemy(EnemyData);
+				StatComp->InitializeFromEnemy(Info.EnemyData);
 			}
 		}
 	}
@@ -342,9 +286,7 @@ void ABattleGameMode::InitializeBattleUI()
 		if (UGuildMemberManagerSubsystem* GuildManager = GetGuildMemberManagerSubsystem())
 		{
 			TArray<UPlayerRuntimeData*> PartyDataList;
-			const TArray<FName>& PartyIDs = GuildManager->GetPartyMemberIDs();
-
-			for (const FName& ID : PartyIDs)
+			for (const FName& ID : GuildManager->GetPartyMemberIDs())
 			{
 				if (auto* Data = GuildManager->GetPlayerRuntimeData(ID))
 				{
@@ -358,18 +300,10 @@ void ABattleGameMode::InitializeBattleUI()
 
 UBattleManagerSubsystem* ABattleGameMode::GetBattleManagerSubsystem() const
 {
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		return GameInstance->GetSubsystem<UBattleManagerSubsystem>();
-	}
-	return nullptr;
+	return GetGameInstance() ? GetGameInstance()->GetSubsystem<UBattleManagerSubsystem>() : nullptr;
 }
 
 UGuildMemberManagerSubsystem* ABattleGameMode::GetGuildMemberManagerSubsystem() const
 {
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		return GameInstance->GetSubsystem<UGuildMemberManagerSubsystem>();
-	}
-	return nullptr;
+	return GetGameInstance() ? GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>() : nullptr;
 }

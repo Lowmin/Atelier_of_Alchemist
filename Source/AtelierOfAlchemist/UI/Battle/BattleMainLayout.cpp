@@ -69,4 +69,24 @@ void UBattleMainLayout::UpdateTurnSlotBar(const TArray<ABattleUnit*>& TurnQueue)
 	}
 }
 
+void UBattleMainLayout::InitSkillList(const TArray<USkillDataAsset*>& Skills)
+{
+	if (!SkillListContainer || !SkillSlotClass) return;
+
+	SkillListContainer->ClearChildren(); // 기존 목록 삭제
+
+	for (int32 i = 0; i < Skills.Num(); ++i)
+	{
+		// 위젯 생성
+		if (USkillSlotWidget* Slot = CreateWidget<USkillSlotWidget>(this, SkillSlotClass))
+		{
+			// 데이터 세팅 (i는 슬롯 번호)
+			Slot->InitSlot(Skills[i], i);
+
+			// 컨테이너에 추가
+			SkillListContainer->AddChild(Slot);
+		}
+	}
+}
+
 

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,18 +7,16 @@
 class UBattleMainLayout;
 class ABattleSpawnPoint;
 class ACharacterBase;
+class ABattleUnit;
 class UBattleManagerSubsystem;
 class UGuildMemberManagerSubsystem;
-class ABattleUnit;
+class UCharacterDataAsset;
 
-/**
- * 
- */
 UCLASS()
 class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void BeginPlay() override;
 
@@ -32,9 +28,8 @@ public:
 	void StartNextTurn();
 	void TurnEnd();
 
-	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; };
-	const TObjectPtr<ABattleUnit>& GetCurrentUnit() const { return CurrentUnit; };
-
+	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; }
+	const TObjectPtr<ABattleUnit>& GetCurrentUnit() const { return CurrentUnit; }
 
 protected:
 	void CalculateTurnOrder();
@@ -43,7 +38,7 @@ protected:
 	void ExecuteAttack();
 	void ExecuteSkill(int32 SkillIndex);
 	void ExecuteRunAway();
-	void ShowSkillSelectionUI();
+	void ShowSkillListUI();
 
 	void FindEnemySpawnPoints();
 	void SpawnPlayerParty();
@@ -54,7 +49,6 @@ protected:
 	UGuildMemberManagerSubsystem* GetGuildMemberManagerSubsystem() const;
 
 protected:
-	// µ•¿Ã≈Õ
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
 	TArray<ABattleUnit*> AllUnits;
 

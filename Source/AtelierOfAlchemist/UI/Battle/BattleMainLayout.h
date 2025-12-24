@@ -13,7 +13,8 @@ class UPlayerRuntimeData;
 class UHorizontalBox;
 class UBattleTurnWidget;
 class ABattleUnit;
-// class USkillListUI;
+class USkillDataAsset;
+class UVerticalBox;
 /**
  * 
  */
@@ -29,6 +30,7 @@ public:
 	void ShowTargetUI();	// Å¸°Ù ÁöÁ¤
 	void InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataList);
 	void UpdateTurnSlotBar(const TArray<ABattleUnit*>& TurnQueue);
+	void InitSkillList(const TArray<USkillDataAsset*>& Skills);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -46,6 +48,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UBattleTurnWidget> TurnWidget;
 
-	/*UPROPERTY(meta = (BindWidget))
-	TObjectPtr<USkillListUI> SkillListMenu;*/
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UVerticalBox> SkillListContainer;
 };

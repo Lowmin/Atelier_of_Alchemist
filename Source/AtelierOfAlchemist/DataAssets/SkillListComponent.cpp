@@ -9,25 +9,24 @@ USkillListComponent::USkillListComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void USkillListComponent::BeginPlay()
+void USkillListComponent::UpdateSkills(int32 CurrentLevel)
 {
-	Super::BeginPlay();
+	arrSkill.Empty();
 
 	for (USkillDataAsset* Skill : arrDefaultSkill)
 	{
-		AddSkill(Skill);
+		if (Skill->UnlockLevel <= CurrentLevel)
+		{
+			arrSkill.AddUnique(Skill);
+		}
 	}
 }
 
-void USkillListComponent::AddSkill(USkillDataAsset* Skill)
+USkillDataAsset* USkillListComponent::GetSkillIndex(int32 Index) const
 {
-	if (Skill) arrSkill.AddUnique(Skill);
-}
-
-void USkillListComponent::UseSkill(int32 SkillIndex)
-{
-	if (arrSkill.IsValidIndex(SkillIndex) && arrSkill[SkillIndex] != nullptr)
+	if (arrSkill.IsValidIndex(Index))
 	{
-		USkillDataAsset* UseSkillData = arrSkill[SkillIndex];
+		return arrSkill[Index];
 	}
+	return nullptr;
 }

@@ -4,6 +4,8 @@
 #include "EnemySymbol.h"
 #include "../Playable/PlayerCharacter.h"
 #include "../../BattleManagerSubsystem.h"
+#include "../../AoAGameInstance.h"
+#include "../../DataAssets/EnemyPartyDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -35,24 +37,13 @@ void AEnemySymbol::BeginPlay()
 
 void AEnemySymbol::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor->IsA(APlayerCharacter::StaticClass()))
+	if (OtherActor && Cast<APlayerCharacter>(OtherActor))
 	{
 		UBattleManagerSubsystem* BattleManager = GetGameInstance()->GetSubsystem<UBattleManagerSubsystem>();
-		
-		if (BattleManager)
+
+		if (BattleManager && EnemyPartyData)
 		{
-			FString CurrentLevelString = UGameplayStatics::GetCurrentLevelName(this);
-			FName CurrentLevelName = FName(*CurrentLevelString);
-
-			BattleManager->EnemyPartyData = this->EnemyPartyData;
-			BattleManager->SaveFieldLocation(Cast<APawn>(OtherActor));
-
-			FName BattleLevelName = BattleManager->GetBattleLevelName(CurrentLevelName);
-
-			UGameplayStatics::OpenLevel(this, BattleLevelName);
-
-			UE_LOG(LogTemp, Warning, TEXT("Encounter! Field: %s -> Battle: %s"), *CurrentLevelName.ToString(), *BattleLevelName.ToString());
+			BattleManager->StartBattle(OtherActor, this, EnemyPartyData, this);
 		}
 	}
 }
-

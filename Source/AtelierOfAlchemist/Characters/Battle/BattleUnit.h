@@ -1,23 +1,21 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../CharacterBase.h"
+#include "../../Characters/CharacterBase.h"
 #include "AITypes.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "BattleUnit.generated.h"
 
 class UWidgetComponent;
-class AAIcontroller;
-/**
- * 
- */
+class AAIController;
+class USkillDataAsset;
+class USkillListComponent;
+
 UCLASS()
 class ATELIEROFALCHEMIST_API ABattleUnit : public ACharacterBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	ABattleUnit();
 
@@ -40,9 +38,9 @@ public:
 	void NotifyTurnEnd();
 
 	void ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill);
-
 	void SetTargetSelect(bool IsSelected);
 
+	USkillListComponent* GetSkillComponent() const { return SkillComponent; }
 	const TArray<ABattleUnit*>& GetCachedTargets() const { return CachedTargets; }
 
 protected:
@@ -50,8 +48,12 @@ protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill);
+
 	FVector ProjectileSpawnPoint(FVector TargetPos);
 	FRotator ProjectileSpawnRotation(FVector TargetPos, FVector SpawnLocation);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USkillListComponent> SkillComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> TargetMarkerWidget;
@@ -66,7 +68,11 @@ private:
 	void StartAttackSequence();
 	void OnAttackSequenceFinished();
 
-private:
+	void PreloadSkillAssets();
+
+	UPROPERTY(Transient)
+	TArray<UObject*> PreloadAssets;
+
 	UPROPERTY()
 	USkillDataAsset* CachedCurrentSkill;
 

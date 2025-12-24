@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,38 +5,39 @@
 #include "BattleManagerSubsystem.generated.h"
 
 class UEnemyPartyDataAsset;
-/**
- * 
- */
+
 UCLASS()
 class ATELIEROFALCHEMIST_API UBattleManagerSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	void StartBattle(AActor* PlayerActor, AActor* EnemyActor, UEnemyPartyDataAsset* InPartyData, UObject* WorldContextObject);
+
 	void SaveFieldLocation(APawn* PlayerPawn);
 	bool GetSavedFieldLocation(FVector& OutLoc, FRotator& OutRot);
 
-	bool IsBattle = false;
+	bool bIsBattle = false;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Battle")
-	FName TargetSymbolName{};
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	FName LastEncounterSymbolName;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Battle")
-	FVector SavedPlayerLocation{};
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	FVector SavedPlayerLocation;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Battle")
-	FRotator SavedPlayerRotation{};
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	FRotator SavedPlayerRotation;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Battle")
-	FName SavedFieldLevelName{};
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	FName SavedFieldLevelName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	TObjectPtr<UEnemyPartyDataAsset> CurrentEnemyPartyData;
 
 	UFUNCTION(BlueprintPure, Category = "Battle")
 	FName GetBattleLevelName(FName CurrentFieldLevelName) const;
-
-	UPROPERTY()
-	TSoftObjectPtr<UEnemyPartyDataAsset> EnemyPartyData;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Battle")

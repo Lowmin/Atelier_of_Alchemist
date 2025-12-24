@@ -16,16 +16,12 @@ class ATELIEROFALCHEMIST_API USkillListComponent : public UActorComponent
 public:	
 	USkillListComponent();
 
-public:	
-	void AddSkill(USkillDataAsset* Skill);
-	void UseSkill(int32 SkillIndex);
+	void UpdateSkills(int32 CurrentLevel);
+	USkillDataAsset* GetSkillIndex(int32 Index) const;
 
-	UFUNCTION(BlueprintPure, Category = "Skill")
 	const TArray<USkillDataAsset*>& GetSkillList() const { return arrSkill; }
 
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	TArray<USkillDataAsset*> arrDefaultSkill;
 

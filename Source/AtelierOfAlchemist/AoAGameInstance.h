@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "AoAGameInstance.generated.h"
 
+class UCharacterDataAsset;
 class APlayerCharacter;
 
 UCLASS()
@@ -13,4 +14,7 @@ class ATELIEROFALCHEMIST_API UAoAGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BattleData")
+	TArray<UCharacterDataAsset*> EnemyDatas;
 };

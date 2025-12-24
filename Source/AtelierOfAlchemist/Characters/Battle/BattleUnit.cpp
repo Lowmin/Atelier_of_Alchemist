@@ -3,6 +3,7 @@
 #include "AIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "../../Characters/StatComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
 #include "../../DataAssets/CharacterDataAsset.h"
@@ -21,12 +22,10 @@ ABattleUnit::ABattleUnit()
 	TargetMarkerWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
 
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
-
 	if (GetMesh())
 	{
 		WeaponMesh->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
 	}
-
 	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
@@ -41,6 +40,34 @@ void ABattleUnit::BeginPlay()
 		if (AIController)
 		{
 			AIController->Possess(this);
+		}
+	}
+
+	PreloadSkillAssets();
+}
+
+void ABattleUnit::PreloadSkillAssets()
+{
+	PreloadAssets.Empty();
+
+	for (USkillDataAsset* Skill : SkillList)
+	{
+		if (!Skill) continue;
+
+		if (!Skill->SkillMontage.IsNull())
+		{
+			if (UAnimMontage* LoadedMontage = Skill->SkillMontage.LoadSynchronous())
+			{
+				PreloadAssets.Add(LoadedMontage);
+			}
+		}
+
+		if (Skill->SkillType == ESkillType::Projectile && !Skill->ProjectileClass.IsNull())
+		{
+			if (UClass* LoadedClass = Skill->ProjectileClass.LoadSynchronous())
+			{
+				PreloadAssets.Add(LoadedClass);
+			}
 		}
 	}
 }
@@ -134,9 +161,11 @@ void ABattleUnit::StartAttackSequence()
 
 	float Duration = 0.0f;
 
-	if (CachedCurrentSkill->SkillMontage)
+	UAnimMontage* MontageToPlay = CachedCurrentSkill->SkillMontage.LoadSynchronous();
+
+	if (MontageToPlay)
 	{
-		Duration = PlayAnimMontage(CachedCurrentSkill->SkillMontage);
+		Duration = PlayAnimMontage(MontageToPlay);
 	}
 	else
 	{
@@ -195,6 +224,30 @@ void ABattleUnit::OnAnimNotify_ShootProjectile()
 {
 	if (!CachedCurrentSkill) return;
 
+	if (CachedTargets.IsValidIndex(0) && CachedTargets[0])
+	{
+		UClass* ProjectileClass = CachedCurrentSkill->ProjectileClass.LoadSynchronous();
+
+		if (ProjectileClass)
+		{
+			FVector TargetPos = CachedTargets[0]->GetActorLocation();
+
+			FVector SpawnLoc = ProjectileSpawnPoint(TargetPos);
+			FRotator SpawnRot = ProjectileSpawnRotation(TargetPos, SpawnLoc);
+
+			FActorSpawnParameters Params;
+			Params.Owner = this;
+			Params.Instigator = this;
+			Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			ABattleProjectile* Projectile = GetWorld()->SpawnActor<ABattleProjectile>(ProjectileClass, SpawnLoc, SpawnRot, Params);
+
+			if (Projectile)
+			{
+				//Projectile->InitializeProjectile(CachedTargets[0], CachedCurrentSkill);
+			}
+		}
+	}
 }
 
 void ABattleUnit::ApplyDamage(ABattleUnit* Target, USkillDataAsset* Skill)

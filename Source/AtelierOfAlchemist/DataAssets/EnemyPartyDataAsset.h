@@ -16,7 +16,7 @@ struct FEnemySpawnInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSoftObjectPtr<UCharacterDataAsset> EnemyData;
+	TObjectPtr<UCharacterDataAsset> EnemyData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 SpawnIndex = 0;

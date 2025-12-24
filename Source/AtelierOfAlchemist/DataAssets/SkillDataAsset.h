@@ -62,7 +62,7 @@ public:
 	FText SkillName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
-	TSoftObjectPtr<UTexture2D> SkillIcon;
+	TObjectPtr<UTexture2D> SkillIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	FText SkillDescription;
@@ -95,10 +95,10 @@ public:
 	bool IsGlobalProjectile;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	UAnimMontage* SkillMontage;
+	TSoftObjectPtr<UAnimMontage> SkillMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (EditCondition = "SkillType == ESkillType::Projectile"))
-	TSubclassOf<ABattleProjectile> ProjectileClass;
+	TSoftClassPtr<ABattleProjectile> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Power")
 	float Power;
