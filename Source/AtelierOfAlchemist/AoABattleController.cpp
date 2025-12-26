@@ -19,10 +19,10 @@ void AAoABattleController::BeginPlay()
 
 	BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
 
-	SetIgnoreLookInput(true);
-	SetIgnoreMoveInput(true);
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
 	SetShowMouseCursor(false);
-	SetInputMode_Main();
+
 	SetMainCamera();
 	SetInputMode_Main();
 }
@@ -54,6 +54,12 @@ void AAoABattleController::SetInputMode_Main()
 {
 	if (UEnhancedInputLocalPlayerSubsystem* EnhancedInputLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
+		if (!IMC_Battle_Main)
+		{
+			UE_LOG(LogTemp, Error, TEXT("IMC_Battle_Main is Missing in BP_BattleController!"));
+			return;
+		}
+
 		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
 		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_Main, 0);
 		IsTargetingMode = false;
@@ -177,36 +183,44 @@ void AAoABattleController::Input_Dodge()
 
 void AAoABattleController::Input_Skill_1()
 {
-	BattleGameMode->ProcessSkillSelection(0);
+	BattleGameMode->ProcessSkillSelection(1);
 }
 
 void AAoABattleController::Input_Skill_2()
 {
-	BattleGameMode->ProcessSkillSelection(1);
+	BattleGameMode->ProcessSkillSelection(2);
 }
 
 void AAoABattleController::Input_Skill_3()
 {
-	BattleGameMode->ProcessSkillSelection(2);
+	BattleGameMode->ProcessSkillSelection(3);
 }
 
 void AAoABattleController::Input_Left()
 {
+	if (PossibleTargets.IsEmpty()) return;
+
 	TargetIndex--;
+
 	if (TargetIndex < 0)
 	{
 		TargetIndex = PossibleTargets.Num() - 1;
 	}
+
 	UpdateTargetWidget();
 }
 
 void AAoABattleController::Input_Right()
 {
+	if (PossibleTargets.IsEmpty()) return;
+
 	TargetIndex++;
-	if (TargetIndex >= 0)
+
+	if (TargetIndex >= PossibleTargets.Num())
 	{
 		TargetIndex = 0;
 	}
+
 	UpdateTargetWidget();
 }
 
@@ -250,9 +264,12 @@ void AAoABattleController::Input_Cancel()
 {
 	if (IsTargetingMode)
 	{
-		IsTargetingMode = false;
+		for (ABattleUnit* Unit : PossibleTargets)
+		{
+			if (Unit) Unit->SetTargetSelect(false);
+		}
 
-		UpdateTargetWidget();
+		IsTargetingMode = false;
 
 		if (BattleGameMode) BattleGameMode->UndoLastAction();
 
@@ -260,6 +277,11 @@ void AAoABattleController::Input_Cancel()
 	}
 	else
 	{
+		for (ABattleUnit* Unit : PossibleTargets)
+		{
+			if (Unit) Unit->SetTargetSelect(false);
+		}
+
 		if (BattleGameMode) BattleGameMode->UndoLastAction();
 
 		SetInputMode_Main();

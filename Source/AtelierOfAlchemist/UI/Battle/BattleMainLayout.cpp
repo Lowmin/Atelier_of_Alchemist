@@ -4,16 +4,18 @@
 #include "BattleMainLayout.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/HorizontalBox.h"
+#include "Components/VerticalBox.h"
 #include "PlayerStatusSlot.h"
 #include "BattleTurnWidget.h"
+#include "SkillSlotWidget.h"
 #include "../../PlayerRuntimeData.h"
 #include "BattleUI.h"
 
 void UBattleMainLayout::HideBattleUI()
 {
-	if (BattleUI)
+	if (MenuSwitcher)
 	{
-		BattleUI->HideUI();
+		MenuSwitcher->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -21,22 +23,18 @@ void UBattleMainLayout::ShowBattleUI()
 {
 	if (MenuSwitcher)
 	{
-		MenuSwitcher->SetActiveWidgetIndex(0);
-	}
-	if (BattleUI)
-	{
-		BattleUI->ShowUI();
+		MenuSwitcher->SetVisibility(ESlateVisibility::Visible);
+		MenuSwitcher->SetActiveWidget(BattleUI);
 	}
 }
 
 void UBattleMainLayout::ShowSkillUI()
 {
-
-}
-
-void UBattleMainLayout::ShowTargetUI()
-{
-
+	if (MenuSwitcher)
+	{
+		MenuSwitcher->SetVisibility(ESlateVisibility::Visible);
+		MenuSwitcher->SetActiveWidget(SkillSelectBox);
+	}
 }
 
 void UBattleMainLayout::InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataList)
@@ -71,20 +69,16 @@ void UBattleMainLayout::UpdateTurnSlotBar(const TArray<ABattleUnit*>& TurnQueue)
 
 void UBattleMainLayout::InitSkillList(const TArray<USkillDataAsset*>& Skills)
 {
-	if (!SkillListContainer || !SkillSlotClass) return;
+	if (!SkillSelectBox || !SkillSlotClass) return;
 
-	SkillListContainer->ClearChildren(); // 기존 목록 삭제
+	SkillSelectBox->ClearChildren();
 
-	for (int32 i = 0; i < Skills.Num(); ++i)
+	for (int32 i = 1; i < Skills.Num(); ++i)
 	{
-		// 위젯 생성
-		if (USkillSlotWidget* Slot = CreateWidget<USkillSlotWidget>(this, SkillSlotClass))
+		if (USkillSlotWidget* SkillSlot = CreateWidget<USkillSlotWidget>(this, SkillSlotClass))
 		{
-			// 데이터 세팅 (i는 슬롯 번호)
-			Slot->InitSlot(Skills[i], i);
-
-			// 컨테이너에 추가
-			SkillListContainer->AddChild(Slot);
+			SkillSlot->InitSlot(Skills[i], i);
+			SkillSelectBox->AddChild(SkillSlot);
 		}
 	}
 }

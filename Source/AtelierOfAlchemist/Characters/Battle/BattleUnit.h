@@ -10,6 +10,8 @@ class UWidgetComponent;
 class AAIController;
 class USkillDataAsset;
 class USkillListComponent;
+class ULevelSequencePlayer;
+class ALevelSequenceActor;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API ABattleUnit : public ACharacterBase
@@ -18,9 +20,6 @@ class ATELIEROFALCHEMIST_API ABattleUnit : public ACharacterBase
 
 public:
 	ABattleUnit();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Battle")
-	TArray<USkillDataAsset*> SkillList;
 
 	USkillDataAsset* GetSkill(int32 Index) const;
 
@@ -61,8 +60,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
+	UPROPERTY()
+	TObjectPtr<ULevelSequencePlayer> SequencePlayer;
+
+	UPROPERTY()
+	TObjectPtr<ALevelSequenceActor> SequenceActor;
+
+	void PlaySkillCameraSequence(USkillDataAsset* Skill);
+
 	UFUNCTION()
 	void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	FVector OriginalLocation;
+	UPROPERTY(BlueprintReadOnly, Category = "Battle")
+	FRotator OriginalRotation;
 
 private:
 	void StartAttackSequence();
@@ -82,6 +94,6 @@ private:
 	UPROPERTY()
 	class AAIController* AIController;
 
-	FVector OriginalLocation;
+
 	bool bIsReturning = false;
 };

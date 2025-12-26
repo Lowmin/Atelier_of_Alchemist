@@ -8,19 +8,21 @@ public class AtelierOfAlchemist : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] 
-		{ 
-			"Core", 
-			"CoreUObject", 
-			"Engine", 
-			"InputCore", 
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
 			"EnhancedInput",
-			"Niagara", 
-			"AIModule", 
-			"UMG", 
-			"Slate", 
+			"Niagara",
+			"AIModule",
+			"UMG",
+			"Slate",
 			"SlateCore",
-			"CinematicCamera"
+			"CinematicCamera",
+			"LevelSequence",
+			"MovieScene"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -6,6 +6,8 @@
 #include "Engine/DataAsset.h"
 #include "SkillDataAsset.generated.h"
 
+class ULevelSequence;
+
 UENUM(BlueprintType)
 enum class ESkillTarget : uint8
 {
@@ -93,6 +95,9 @@ public:
 	// 투사체의 광역기 여부 (운석 등)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (EditCondition = "SkillType == ESkillType::Projectile"))
 	bool IsGlobalProjectile;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
+	TObjectPtr<ULevelSequence> SkillCameraSequence;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	TSoftObjectPtr<UAnimMontage> SkillMontage;
