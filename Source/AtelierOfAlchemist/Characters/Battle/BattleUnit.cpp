@@ -154,23 +154,18 @@ void ABattleUnit::PlaySkillCameraSequence(USkillDataAsset* Skill)
 {
 	if (!Skill || !Skill->SkillCameraSequence) return;
 
-	// 1. 기존 시퀀스 정리
 	if (SequencePlayer)
 	{
 		SequencePlayer->Stop();
 		SequencePlayer = nullptr;
 	}
 
-	// 2. 시퀀스 설정 (UE 5.5 수정 사항)
 	FMovieSceneSequencePlaybackSettings Settings;
 	Settings.bAutoPlay = false;
 	Settings.bDisableCameraCuts = false;
 
-	// [수정 1] Enum 타입 변경 (EMovieSceneCompletionMode -> EMovieSceneCompletionModeOverride)
-	// RestoreState -> ForceRestoreState로 변경
 	Settings.FinishCompletionStateOverride = EMovieSceneCompletionModeOverride::ForceRestoreState;
 
-	// 3. 플레이어 생성
 	ALevelSequenceActor* OutActor = nullptr;
 	SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
 		GetWorld(),

@@ -20,6 +20,7 @@ public:
 	ACollectingObject();
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
 	virtual FText GetInteractText_Implementation() const override;
 	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;
@@ -38,6 +39,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemData")
 	int32 Quantity = 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* HarvestMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Option")
+	bool bIsDestroy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Option")
+	int32 MaxHarvestCount = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Option")
+	int32 CurrentHarvestCount;
+
 public:
 	UItemDataAsset* GetItemData() const { return DroppedItemAsset; }
+
+private:
+	float AnimLength;
 };

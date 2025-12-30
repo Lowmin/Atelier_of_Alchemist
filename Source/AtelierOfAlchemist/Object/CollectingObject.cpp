@@ -6,6 +6,7 @@
 #include "../DataAssets/ItemDataAsset.h"
 #include "../InventoryManagerSubsystem.h"
 #include "Engine/GameInstance.h"
+#include "Components/SphereComponent.h"
 
 ACollectingObject::ACollectingObject()
 {
@@ -17,10 +18,22 @@ ACollectingObject::ACollectingObject()
 	GradeProbability.Add(EItemGrade::EIG_E, 25.0f);
 
 	MaxGrade = EItemGrade::EIG_E;
+
+	MaxHarvestCount = 3;
+	bIsDestroy = true;
+}
+
+void ACollectingObject::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CurrentHarvestCount = MaxHarvestCount;
 }
 
 void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 {
+	if (CurrentHarvestCount == 0) return;
+
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
 
 	if (Interactor && InventoryManager && DroppedItemAsset)
@@ -29,7 +42,19 @@ void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 
 		OnPlayerLeave_Implementation(Interactor);
 
-		Destroy();
+		CurrentHarvestCount--;
+
+		if (CurrentHarvestCount <= 0)
+		{
+			OnPlayerLeave_Implementation(Interactor);
+
+			ObjectSensor->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			if (bIsDestroy)
+			{
+				Destroy();
+			}
+		}
 	}
 }
 
