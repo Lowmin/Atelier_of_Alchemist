@@ -32,8 +32,47 @@ void ACollectingObject::BeginPlay()
 
 void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	if (CurrentHarvestCount == 0) return;
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	float CooldownDuration = 0.0f;
 
+	if (CurrentTime - AnimLength < 0.2f) return;
+
+	if (Interactor)
+	{
+		CooldownDuration = Interactor->PlayCollectingMontage(CollectingType);
+	}
+
+	if (CooldownDuration <= 0.0f) CooldownDuration = 1.0f;
+
+	if (CurrentTime - AnimLength < CooldownDuration) return;
+
+	if (CurrentHarvestCount <= 0) return;
+
+	AnimLength = CurrentTime;
+
+
+	GetWorld()->GetTimerManager().ClearTimer(HarvestTimerHandle);
+
+	FTimerDelegate TimerDel;
+	TimerDel.BindUObject(this, &ACollectingObject::AddCollectingItem, Interactor);
+
+	GetWorld()->GetTimerManager().SetTimer(HarvestTimerHandle, TimerDel, CooldownDuration, false);
+}
+
+FText ACollectingObject::GetInteractText_Implementation() const
+{
+	if (DroppedItemAsset) return DroppedItemAsset->ItemName;
+	return Super::GetInteractText_Implementation();
+}
+
+TSoftObjectPtr<UTexture2D> ACollectingObject::GetInteractIcon_Implementation() const
+{
+	if (DroppedItemAsset) return DroppedItemAsset->ItemIcon;
+	return Super::GetInteractIcon_Implementation();
+}
+
+void ACollectingObject::AddCollectingItem(APlayerCharacter* Interactor)
+{
 	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
 
 	if (Interactor && InventoryManager && DroppedItemAsset)
@@ -56,18 +95,6 @@ void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 			}
 		}
 	}
-}
-
-FText ACollectingObject::GetInteractText_Implementation() const
-{
-	if (DroppedItemAsset) return DroppedItemAsset->ItemName;
-	return Super::GetInteractText_Implementation();
-}
-
-TSoftObjectPtr<UTexture2D> ACollectingObject::GetInteractIcon_Implementation() const
-{
-	if (DroppedItemAsset) return DroppedItemAsset->ItemIcon;
-	return Super::GetInteractIcon_Implementation();
 }
 
 EItemGrade ACollectingObject::RandomGrade()

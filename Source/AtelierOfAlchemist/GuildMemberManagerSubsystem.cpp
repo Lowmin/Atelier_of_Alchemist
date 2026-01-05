@@ -11,8 +11,10 @@ void UGuildMemberManagerSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 
 	const FString DefaultCharacterDataAssetPath = TEXT("/Game/Blueprints/Data/Characters/Party/DA_Reina.DA_Reina");
 	const FString DefaultCharacterDataAssetPath1 = TEXT("/Game/Blueprints/Data/Characters/Party/DA_Sato.DA_Sato");
+	const FString DefaultCharacterDataAssetPath2 = TEXT("/Game/Blueprints/Data/Characters/Party/DA_Yuu.DA_Yuu");
 	UCharacterDataAsset* DefaultCharacterData = LoadObject<UCharacterDataAsset>(nullptr, *DefaultCharacterDataAssetPath);
 	UCharacterDataAsset* DefaultCharacterData1 = LoadObject<UCharacterDataAsset>(nullptr, *DefaultCharacterDataAssetPath1);
+	UCharacterDataAsset* DefaultCharacterData2 = LoadObject<UCharacterDataAsset>(nullptr, *DefaultCharacterDataAssetPath2);
 
 	if (DefaultCharacterData != nullptr)
 	{
@@ -20,6 +22,8 @@ void UGuildMemberManagerSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 		AddPartyMember(DefaultMemberID);
 		AddGuildMember(DefaultCharacterData1);
 		AddPartyMember("DA_Sato");
+		AddGuildMember(DefaultCharacterData2);
+		AddPartyMember("DA_Yuu");
 	}
 }
 

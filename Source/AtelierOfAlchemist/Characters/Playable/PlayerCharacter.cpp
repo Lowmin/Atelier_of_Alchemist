@@ -218,3 +218,19 @@ void APlayerCharacter::ClearInteractObject(AActor* InteractObject)
 		OnInteract.Broadcast(nullptr);
 	}
 }
+
+float APlayerCharacter::PlayCollectingMontage(ECollectingType CollectingType)
+{
+	if (UAnimMontage** FoundMontage = CollectingMontageMap.Find(CollectingType))
+	{
+		UAnimMontage* MontagePlay = *FoundMontage;
+
+		if (MontagePlay)
+		{
+			PlayAnimMontage(MontagePlay);
+
+			return MontagePlay->GetPlayLength();
+		}
+	}
+	return 1.0f;
+}

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InteractableActorBase.h"
+#include "../Characters/Playable/PlayerCharacter.h"
 #include "../DataAssets/ItemDataAsset.h"
 #include "CollectingObject.generated.h"
 
@@ -25,6 +26,8 @@ protected:
 	virtual FText GetInteractText_Implementation() const override;
 	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;
 
+	void AddCollectingItem(APlayerCharacter* Interactor);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemData")
 	TMap<EItemGrade, float> GradeProbability;
 
@@ -40,7 +43,7 @@ protected:
 	int32 Quantity = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	UAnimMontage* HarvestMontage;
+	ECollectingType CollectingType = ECollectingType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Option")
 	bool bIsDestroy;
@@ -56,4 +59,5 @@ public:
 
 private:
 	float AnimLength;
+	FTimerHandle HarvestTimerHandle;
 };

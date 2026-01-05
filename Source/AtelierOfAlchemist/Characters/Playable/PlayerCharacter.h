@@ -15,7 +15,17 @@ class UCameraComponent;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AActor*, InteractObject);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCollectedItem, AAcotr*, InteractObject);
+
+UENUM(BlueprintType)
+enum class ECollectingType : uint8
+{
+	None		UMETA(DisplayName = "None"),
+	PickUp		UMETA(DisplayName = "PickUp"),
+	Mining		UMETA(DisplayName = "Mining"),
+	Logging		UMETA(DisplayName = "Logging"),
+	Fishing		UMETA(DisplayName = "Fishing")
+
+};
 
 /**
  *
@@ -82,6 +92,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Collect;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TMap<ECollectingType, UAnimMontage*> CollectingMontageMap;
+
 	// 조작 함수
 	void Look(const FInputActionValue& Value);
 	void Zoom(const FInputActionValue& Value);
@@ -91,9 +104,6 @@ protected:
 	// 캐릭터 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
 	TObjectPtr<UCharacterDataAsset> CharacterDataAsset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	UAnimMontage* CollectingMontage;
 
 public:
 	APlayerCharacter();
@@ -109,6 +119,8 @@ public:
 	TObjectPtr<AActor> CurrentInteractObject;
 	void SetInteractObject(AActor* InteractObject);
 	void ClearInteractObject(AActor* InteractObject);
+
+	float PlayCollectingMontage(ECollectingType CollectingType);
 
 	UPROPERTY()
 	FOnInteract OnInteract;

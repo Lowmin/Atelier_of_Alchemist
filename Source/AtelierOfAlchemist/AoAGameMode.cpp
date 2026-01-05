@@ -10,7 +10,7 @@
 
 AAoAGameMode::AAoAGameMode()
 {
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/Characters/Party/Reina/BP_Reina.BP_Reina_C"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/Characters/Party/Yuu/BP_Yuu.BP_Yuu_C"));
 
 	if (PlayerPawnBPClass.Class != nullptr)
 	{
