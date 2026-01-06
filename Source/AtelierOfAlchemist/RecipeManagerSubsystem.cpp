@@ -10,39 +10,22 @@ void URecipeManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
-bool URecipeManagerSubsystem::AddRecipe(URecipeDataAsset* RecipeDataAsset)
+bool URecipeManagerSubsystem::AddRecipe(FName RecipeID)
 {
-	if (!RecipeDataAsset) return false;
+	if (RecipeID.IsNone()) return false;
 
-	TSoftObjectPtr<URecipeDataAsset> RecipeDataPtr = RecipeDataAsset;
-
-	if (UnlockedRecipeList.Contains(RecipeDataPtr))
+	if (UnlockedRecipeIDs.Contains(RecipeID))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AddRecipe: Already learned %s"), *RecipeDataAsset->GetName());
 		return false;
 	}
 
-	UnlockedRecipeList.Add(RecipeDataPtr);
-
-	UE_LOG(LogTemp, Warning, TEXT("AddRecipe: Success! %s"), *RecipeDataAsset->GetName());
+	UnlockedRecipeIDs.Add(RecipeID);
+	UE_LOG(LogTemp, Log, TEXT("Recipe Unlocked: %s"), *RecipeID.ToString());
 	return true;
 }
 
-bool URecipeManagerSubsystem::GetAllRecipeId(TArray<FPrimaryAssetId>& RecipeId) const
+bool URecipeManagerSubsystem::IsRecipeUnlocked(FName RecipeID) const
 {
-	UAssetManager& AssetManager = UAssetManager::Get();
-
-	const FName RecipeAssetType = FName("Recipe");
-
-	AssetManager.GetPrimaryAssetIdList(RecipeAssetType, RecipeId);
-
-	return RecipeId.Num() > 0;
-}
-
-TSoftObjectPtr<URecipeDataAsset> URecipeManagerSubsystem::GetRecipeFromId(const FPrimaryAssetId& RecipeId) const
-{
-	UAssetManager& AssetManager = UAssetManager::Get();
-	FSoftObjectPath AssetPath = AssetManager.GetPrimaryAssetPath(RecipeId);
-
-	return TSoftObjectPtr<URecipeDataAsset>(AssetPath);
+	if (RecipeID.IsNone()) return false;
+	return UnlockedRecipeIDs.Contains(RecipeID);
 }

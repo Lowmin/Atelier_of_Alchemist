@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,9 +7,7 @@
 #include "CollectingObject.generated.h"
 
 class UItemDataAsset;
-/**
- * 
- */
+
 UCLASS()
 class ATELIEROFALCHEMIST_API ACollectingObject : public AInteractableActorBase
 {
@@ -19,6 +15,8 @@ class ATELIEROFALCHEMIST_API ACollectingObject : public AInteractableActorBase
 
 public:
 	ACollectingObject();
+
+	UItemDataAsset* GetItemData() const { return DroppedItemAsset; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,9 +51,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Option")
 	int32 CurrentHarvestCount;
-
-public:
-	UItemDataAsset* GetItemData() const { return DroppedItemAsset; }
 
 private:
 	float AnimLength;

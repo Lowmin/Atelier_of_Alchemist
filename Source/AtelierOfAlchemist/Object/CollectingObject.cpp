@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CollectingObject.h"
 #include "../Characters/Playable/PlayerCharacter.h"
 #include "../DataAssets/ItemDataAsset.h"
@@ -50,7 +47,6 @@ void ACollectingObject::Interact_Implementation(APlayerCharacter* Interactor)
 
 	AnimLength = CurrentTime;
 
-
 	GetWorld()->GetTimerManager().ClearTimer(HarvestTimerHandle);
 
 	FTimerDelegate TimerDel;
@@ -79,14 +75,10 @@ void ACollectingObject::AddCollectingItem(APlayerCharacter* Interactor)
 	{
 		InventoryManager->AddItem(this, DroppedItemAsset, RandomGrade(), Quantity);
 
-		OnPlayerLeave_Implementation(Interactor);
-
 		CurrentHarvestCount--;
 
 		if (CurrentHarvestCount <= 0)
 		{
-			OnPlayerLeave_Implementation(Interactor);
-
 			ObjectSensor->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 			if (bIsDestroy)

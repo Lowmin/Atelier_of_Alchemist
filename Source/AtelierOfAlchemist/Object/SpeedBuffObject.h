@@ -31,7 +31,5 @@ protected:
 	TObjectPtr<UItemDataAsset> ItemData;
 
 public:
-	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter) override;
-	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter) override;
 
 };

@@ -6,16 +6,21 @@
 #include "InteractableActorBase.h"
 #include "AlchemyKiln.generated.h"
 
+class URecipeDataAsset;
 class URecipeList;
-/**
- *
- */
+
 UCLASS()
 class ATELIEROFALCHEMIST_API AAlchemyKiln : public AInteractableActorBase
 {
 	GENERATED_BODY()
 
-	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter) override;
-	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter) override;
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Alchemy")
+	TObjectPtr<URecipeDataAsset> KilnRecipes;
 
+protected:
+	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
+
+private:
+	URecipeList* CachedRecipeList;
 };

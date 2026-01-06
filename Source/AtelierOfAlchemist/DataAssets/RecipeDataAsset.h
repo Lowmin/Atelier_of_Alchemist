@@ -7,27 +7,46 @@
 #include "RecipeDataAsset.generated.h"
 
 class UItemDataAsset;
-/**
- * 
- */
-UCLASS()
-class ATELIEROFALCHEMIST_API URecipeDataAsset : public UPrimaryDataAsset
+
+USTRUCT(BlueprintType)
+struct FAlchemyRecipe
 {
 	GENERATED_BODY()
 
 public:
-	virtual FPrimaryAssetId GetPrimaryAssetId() const override
-	{
-		return FPrimaryAssetId("Recipe", GetFName());
-	}
+	// 레시피 ID
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
+	FName RecipeID;
 
+	// 레시피 이름
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
+	FText RecipeName;
+
+	// 아이콘
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
+	UTexture2D* Icon;
+
+	// 필요한 재료(예시 = 약초, 2개)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
+	TMap<UItemDataAsset*, int32> Ingredients;
+
+	// 결과 아이템
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
+	UItemDataAsset* ResultItem;
+
+	// 결과 아이템 개수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
+	int32 ResultCount = 1;
+};
+/**
+ * 
+ */
+UCLASS(BlueprintType)
+class ATELIEROFALCHEMIST_API URecipeDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
-	TSoftObjectPtr<UItemDataAsset> ResultItem;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
-	int32 ResultQuantity;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
-	TMap<TSoftObjectPtr<UItemDataAsset>, int32> Ingredients;	// 필요한 아이템과 개수
-
+	TArray<FAlchemyRecipe> Recipes;
 };

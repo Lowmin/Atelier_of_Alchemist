@@ -19,24 +19,3 @@ ASpeedBuffObject::ASpeedBuffObject()
 	NiagaraEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraEffec"));
 	NiagaraEffect->SetupAttachment(Mesh);
 }
-
-void ASpeedBuffObject::OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter)
-{
-	PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed *= SpeedMultiply;
-
-	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
-	if (GuildManager)
-	{
-		GuildManager->ApplyDamageToAllPartyMembers(20.0f);
-	}
-	UInventoryManagerSubsystem* InventoryManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
-	if (InventoryManager)
-	{
-		InventoryManager->AddItem(this, ItemData, EItemGrade::EIG_B, 5);
-	}
-}
-
-void ASpeedBuffObject::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter)
-{
-	PlayerCharacter->GetCharacterMovement()->MaxWalkSpeed /= SpeedMultiply;
-}

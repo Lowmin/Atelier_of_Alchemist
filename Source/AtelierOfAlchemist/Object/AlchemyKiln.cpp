@@ -2,23 +2,30 @@
 
 
 #include "AlchemyKiln.h"
+#include "../AoAPlayerController.h"
 #include "../Characters/Playable/PlayerCharacter.h"
 #include "../UI/Alchemy/RecipeList.h"
 
-void AAlchemyKiln::OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter)
+void AAlchemyKiln::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	Super::OnPlayerEnter_Implementation(PlayerCharacter);
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->SetInteractObject(this);
-	}
-}
+	if (!Interactor || !MainWidgetClass || !KilnRecipes) return;
 
-void AAlchemyKiln::OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter)
-{
-	Super::OnPlayerLeave_Implementation(PlayerCharacter);
-	if (PlayerCharacter)
+	if (CachedRecipeList && CachedRecipeList->IsInViewport()) return;
+
+	if (AAoAPlayerController* PC = Interactor->GetController<AAoAPlayerController>())
 	{
-		PlayerCharacter->ClearInteractObject(this);
+		UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(PC, MainWidgetClass);
+
+		if (URecipeList* RecipeList = Cast<URecipeList>(CreatedWidget))
+		{
+			CachedRecipeList = RecipeList;
+			UE_LOG(LogTemp, Warning, TEXT("AddToViewport!"));
+			RecipeList->InitAlchemyWindow(KilnRecipes);
+			RecipeList->AddToViewport();
+
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(RecipeList->TakeWidget());
+			PC->SetMenuState(true, RecipeList);
+		}
 	}
 }

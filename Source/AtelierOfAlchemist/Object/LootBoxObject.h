@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "InteractableActorBase.h"
-#include "../Object/CollectingObject.h"
+#include "../DataAssets/ItemDataAsset.h"
 #include "LootBoxObject.generated.h"
 
 class UItemDataAsset;
@@ -24,9 +22,7 @@ struct FLootItem
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EItemGrade ItemGrade;
 };
-/**
- *
- */
+
 UCLASS()
 class ATELIEROFALCHEMIST_API ALootBoxObject : public AInteractableActorBase
 {

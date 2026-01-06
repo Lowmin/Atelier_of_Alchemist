@@ -17,16 +17,15 @@ class ATELIEROFALCHEMIST_API URecipeManagerSubsystem : public UGameInstanceSubsy
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	bool AddRecipe(URecipeDataAsset* RecipeDataAsset);
-	const TArray<TSoftObjectPtr<URecipeDataAsset>> GetUnlockedRecipes() { return UnlockedRecipeList; };
-	bool GetAllRecipeId(TArray<FPrimaryAssetId>& RecipeId) const;
+	UFUNCTION(BlueprintCallable, Category = "Recipe")
+	bool AddRecipe(FName RecipeID);
 
 	UFUNCTION(BlueprintPure, Category = "Recipe")
-	TSoftObjectPtr<URecipeDataAsset> GetRecipeFromId(const FPrimaryAssetId& RecipeId) const;
+	bool IsRecipeUnlocked(FName RecipeID) const;
 
+	const TSet<FName>& GetUnlockedRecipeIDs() const { return UnlockedRecipeIDs; }
 
 protected:
-	UPROPERTY(SaveGame)
-	TArray<TSoftObjectPtr<URecipeDataAsset>> UnlockedRecipeList;
-
+	UPROPERTY(VisibleAnywhere, Category = "Recipe")
+	TSet<FName> UnlockedRecipeIDs;
 };

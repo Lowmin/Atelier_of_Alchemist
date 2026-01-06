@@ -24,6 +24,7 @@ class ATELIEROFALCHEMIST_API AAoAPlayerController : public APlayerController
 public:
 	AAoAPlayerController();
 
+	void SetMenuState(bool bIsVisible, UUserWidget* CurrentWidget = nullptr);
 	void OpenObjectUI(TSubclassOf<UUserWidget> WidgetClass);
 	void CloseObjectUI();
 

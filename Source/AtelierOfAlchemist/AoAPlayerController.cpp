@@ -61,6 +61,27 @@ void AAoAPlayerController::ToggleInventory()
     }
 }
 
+void AAoAPlayerController::SetMenuState(bool bIsVisible, UUserWidget* CurrentWidget)
+{
+    if (bIsVisible)
+    {
+        FInputModeUIOnly InputMode;
+
+        if (CurrentWidget) InputMode.SetWidgetToFocus(CurrentWidget->TakeWidget());
+
+        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+        SetInputMode(InputMode);
+        bShowMouseCursor = true;
+    }
+    else
+    {
+        FInputModeGameOnly InputMode;
+        SetInputMode(InputMode);
+
+        bShowMouseCursor = false;
+    }
+}
+
 void AAoAPlayerController::OpenObjectUI(TSubclassOf<UUserWidget> WidgetClass)
 {
     if (CurrentOpenWidget)

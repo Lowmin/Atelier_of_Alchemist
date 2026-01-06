@@ -4,21 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "../../DataAssets/RecipeDataAsset.h"
 #include "RecipeListSlot.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSlotClicked, TSoftObjectPtr<URecipeDataAsset>, RecipePtr);
 
 class UImage;
 class UTextBlock;
 class URecipeDataAsset;
 class UButton;
-/**
- *
- */
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRecipeSelectedDelegate, const FAlchemyRecipe&);
+
 UCLASS()
 class ATELIEROFALCHEMIST_API URecipeListSlot : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	void InitSlot(const FAlchemyRecipe& Recipe, bool bIsKnown);
+	void InitEmpty();
+
+	FOnRecipeSelectedDelegate OnRecipeSelected;
 
 protected:
 	virtual void NativeConstruct() override;
@@ -26,28 +31,19 @@ protected:
 	UFUNCTION()
 	void OnButtonClicked();
 
-public:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> SlotButton;
+	TObjectPtr<UTextBlock> Text_RecipeName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UImage> ResultItemImage;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> Image_Icon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UTextBlock> ResultItemName;
-
-	void UpdateSlot(const TSoftObjectPtr<URecipeDataAsset>& RecipeDataAsset, bool bIsUnlocked);
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Button_Select;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TObjectPtr<UMaterialInterface> GrayscaleMaterialBase;
+	TObjectPtr<UTexture2D> UnknownIcon;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInstanceDynamic> GrayscaleDMI;
-
-	TSoftObjectPtr<URecipeDataAsset> CachedRecipePtr;
-
-	bool bIsSlotUnlocked = false;
-
-	FOnRecipeSlotClicked OnSlotClicked;
-
+private:
+	FAlchemyRecipe RecipeInfo;
+	bool bIsUnLock;
 };

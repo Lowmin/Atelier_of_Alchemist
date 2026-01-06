@@ -10,6 +10,7 @@
 class USphereComponent;
 class APlayerCharacter;
 class UInteractObjectWidget;
+class UUserWidget;
 
 UCLASS(Abstract)
 class ATELIEROFALCHEMIST_API AInteractableActorBase : public AActor, public IInteractableInterface
@@ -17,29 +18,16 @@ class ATELIEROFALCHEMIST_API AInteractableActorBase : public AActor, public IInt
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AInteractableActorBase();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> ObjectSensor;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
-	void OnPlayerEnter(APlayerCharacter* PlayerCharacter);
-	virtual void OnPlayerEnter_Implementation(APlayerCharacter* PlayerCharacter);
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
-	void OnPlayerLeave(APlayerCharacter* PlayerCharacter);
-	virtual void OnPlayerLeave_Implementation(APlayerCharacter* PlayerCharacter);
-
-	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UInteractObjectWidget> PromptWidgetClass;
@@ -51,10 +39,14 @@ protected:
 	TSoftObjectPtr<UTexture2D> DefaultInteractIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UUserWidget> MainWidgetClass;
+	FText DefaultInteractText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	FText DefaultInteractText;
+	TSubclassOf<UUserWidget> MainWidgetClass;
+
+	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
+	virtual FText GetInteractText_Implementation() const override;
+	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;
 
 private:
 	UFUNCTION()
@@ -62,9 +54,4 @@ private:
 
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-public:
-	virtual FText GetInteractText_Implementation() const override;
-	virtual TSoftObjectPtr<UTexture2D> GetInteractIcon_Implementation() const override;
-
 };
