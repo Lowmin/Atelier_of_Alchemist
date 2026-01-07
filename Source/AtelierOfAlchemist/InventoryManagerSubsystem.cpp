@@ -110,6 +110,32 @@ bool UInventoryManagerSubsystem::AddItem(const UObject* WorldContextObject, UIte
 	return bAddedAny;
 }
 
+TArray<FInventorySearchResult> UInventoryManagerSubsystem::FindItemsByAsset(UItemDataAsset* TargetAsset)
+{
+	TArray<FInventorySearchResult> Results;
+
+	FSoftObjectPath TargetPath = FSoftObjectPath(TargetAsset);
+
+	for (int32 i = 0; i < InventorySlot.Num(); ++i)
+	{
+		if (InventorySlot[i].ItemData.IsNull()) continue;
+
+		FSoftObjectPath CurrentPath = InventorySlot[i].ItemData.ToSoftObjectPath();
+
+		if (CurrentPath == TargetPath)
+		{
+			FInventorySearchResult Result;
+			Result.SlotIndex = i;
+			Result.SlotData.Grade = InventorySlot[i].Grade;
+			Result.SlotData.Quantity = InventorySlot[i].Quantity;
+
+			Results.Add(Result);
+		}
+	}
+
+	return Results;
+}
+
 void UInventoryManagerSubsystem::InventorySort()
 {
 	InventorySlot.Sort([](const FInventorySlotStruct& A, const FInventorySlotStruct& B)

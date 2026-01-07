@@ -1,27 +1,31 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "RecipeList.h"
-#include "../../AoAGameInstance.h"
-#include "../../AoAPlayerController.h"
-#include "../../RecipeManagerSubsystem.h"
-#include "../../DataAssets/RecipeDataAsset.h"
+﻿#include "RecipeList.h"
 #include "RecipeListSlot.h"
-#include "Components/GridPanel.h"
+#include "IngredientSlot.h"
+#include "IngredientSelectWidget.h"
+#include "../../AoAGameInstance.h"
+#include "../../InventoryManagerSubsystem.h"
+#include "../../RecipeManagerSubsystem.h"
+#include "../../AoAPlayerController.h"
+#include "../../DataAssets/GradeHelper.h"
+
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
-#include "Components/ScrollBox.h"
-#include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include "Engine/AssetManager.h"
 
 void URecipeList::InitAlchemyWindow(URecipeDataAsset* InRecipeData)
 {
 	RecipeData = InRecipeData;
-    Image_SelectedIcon->SetVisibility(ESlateVisibility::Hidden);
-    Text_SelectedName->SetText(FText::GetEmpty());
-    Button_Craft->SetIsEnabled(false);
+
+	if (Image_SelectedIcon) Image_SelectedIcon->SetVisibility(ESlateVisibility::Hidden);
+	if (Text_SelectedName) Text_SelectedName->SetText(FText::GetEmpty());
+	if (Button_Craft) Button_Craft->SetIsEnabled(false);
+
+	if (Box_IngredientSlots) Box_IngredientSlots->ClearChildren();
+	if (Text_ResultGrade) Text_ResultGrade->SetText(FText::GetEmpty());
+
 	RefreshRecipeList();
 }
 
@@ -29,48 +33,63 @@ void URecipeList::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Button_Close->OnClicked.AddDynamic(this, &URecipeList::OnCloseButtonClicked);
+	if (Button_Close)
+	{
+		Button_Close->OnClicked.AddDynamic(this, &URecipeList::OnCloseButtonClicked);
+	}
+
+	if (Button_Craft)
+	{
+		Button_Craft->OnClicked.AddDynamic(this, &URecipeList::OnCraftButtonClicked);
+	}
 }
 
 void URecipeList::RefreshRecipeList()
 {
-    GridPanel_RecipeList->ClearChildren();
-    UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
-    URecipeManagerSubsystem* RecipeManager = GameInst->GetSubsystem<URecipeManagerSubsystem>();
+	if (!GridPanel_RecipeList || !RecipeSlotClass) return;
 
-    for (int32 i = 0; i < TotalSlots; ++i)
-    {
-        URecipeListSlot* NewSlot = CreateWidget<URecipeListSlot>(this, RecipeSlotClass);
-        if (!NewSlot) continue;
+	GridPanel_RecipeList->ClearChildren();
 
-        int32 Row = i / MaxColumns;
-        int32 Col = i % MaxColumns;
+	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
+	URecipeManagerSubsystem* RecipeManager = GameInst ? GameInst->GetSubsystem<URecipeManagerSubsystem>() : nullptr;
 
-        if (RecipeData && i < RecipeData->Recipes.Num())
-        {
-            const FAlchemyRecipe& Recipe = RecipeData->Recipes[i];
-            bool bIsKnown = RecipeManager ? RecipeManager->IsRecipeUnlocked(Recipe.RecipeID) : false;
+	for (int32 i = 0; i < TotalSlots; ++i)
+	{
+		UUserWidget* Widget = CreateWidget<UUserWidget>(this, RecipeSlotClass);
+		URecipeListSlot* NewSlot = Cast<URecipeListSlot>(Widget);
 
-            NewSlot->InitSlot(Recipe, bIsKnown);
-            NewSlot->OnRecipeSelected.AddUObject(this, &URecipeList::HandleRecipeSelected);
-        }
-        else
-        {
-            NewSlot->InitEmpty();
-        }
+		if (!NewSlot) continue;
 
-        UUniformGridSlot* GridSlot = GridPanel_RecipeList->AddChildToUniformGrid(NewSlot, Row, Col);
+		int32 Row = i / MaxColumns;
+		int32 Col = i % MaxColumns;
 
-        if (GridSlot)
-        {
-            GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
-            GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
-        }
-    }
+		if (RecipeData && i < RecipeData->Recipes.Num())
+		{
+			const FAlchemyRecipe& Recipe = RecipeData->Recipes[i];
+			bool bIsKnown = RecipeManager ? RecipeManager->IsRecipeUnlocked(Recipe.RecipeID) : false;
+
+			NewSlot->InitSlot(Recipe, bIsKnown);
+			NewSlot->OnRecipeSelected.AddUObject(this, &URecipeList::HandleRecipeSelected);
+		}
+		else
+		{
+			NewSlot->InitEmpty();
+		}
+
+		UUniformGridSlot* GridSlot = GridPanel_RecipeList->AddChildToUniformGrid(NewSlot, Row, Col);
+
+		if (GridSlot)
+		{
+			GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+			GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+		}
+	}
 }
 
 void URecipeList::HandleRecipeSelected(const FAlchemyRecipe& InRecipe)
 {
+	SelectedRecipe = InRecipe;
+
 	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
 	URecipeManagerSubsystem* RecipeSubsystem = GameInst->GetSubsystem<URecipeManagerSubsystem>();
 
@@ -78,14 +97,24 @@ void URecipeList::HandleRecipeSelected(const FAlchemyRecipe& InRecipe)
 
 	if (bIsKnown)
 	{
-        Image_SelectedIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		Image_SelectedIcon->SetBrushFromTexture(InRecipe.Icon);
-		Text_SelectedName->SetText(InRecipe.RecipeName);
-        Button_Craft->SetIsEnabled(true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Unknown Recipe!"));
+		if (Image_SelectedIcon)
+		{
+			Image_SelectedIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+			UTexture2D* IconTex = InRecipe.Icon;
+			if (IconTex)
+			{
+				Image_SelectedIcon->SetBrushFromTexture(IconTex);
+			}
+		}
+
+		if (Text_SelectedName)
+		{
+			Text_SelectedName->SetText(InRecipe.RecipeName);
+		}
+
+		CreateIngredientSlots(InRecipe);
+		UpdateCraftingState();
 	}
 }
 
@@ -93,8 +122,159 @@ void URecipeList::OnCloseButtonClicked()
 {
 	RemoveFromParent();
 
-	if (AAoAPlayerController* PlayerController = Cast<AAoAPlayerController>(GetOwningPlayer()))
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetOwningPlayer()))
 	{
-		PlayerController->SetMenuState(false);
+		AAoAPlayerController* PC = Cast<AAoAPlayerController>(PlayerController);
+		if (PC) PC->SetMenuState(false);
 	}
+}
+
+void URecipeList::CreateIngredientSlots(const FAlchemyRecipe& Recipe)
+{
+	if (!Box_IngredientSlots || !IngredientSlotClass) return;
+
+	Box_IngredientSlots->ClearChildren();
+	CreatedSlots.Empty();
+
+	for (const auto& Pair : Recipe.Ingredients)
+	{
+		UItemDataAsset* ItemAsset = Pair.Key;
+		int32 Count = Pair.Value;
+
+		UIngredientSlot* NewSlot = CreateWidget<UIngredientSlot>(this, IngredientSlotClass);
+		if (NewSlot)
+		{
+			NewSlot->InitRequirement(ItemAsset, Count);
+
+			NewSlot->OnRequestPopup.AddDynamic(this, &URecipeList::OnRequireSlotClicked);
+
+			Box_IngredientSlots->AddChild(NewSlot);
+			CreatedSlots.Add(NewSlot);
+		}
+	}
+}
+
+void URecipeList::OnRequireSlotClicked(UIngredientSlot* SlotWidget)
+{
+	if (!SlotWidget) return;
+
+	CurrentEditingSlot = SlotWidget;
+	UItemDataAsset* TargetItem = SlotWidget->GetRequiredAsset();
+
+	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
+	UInventoryManagerSubsystem* InvSys = GameInst->GetSubsystem<UInventoryManagerSubsystem>();
+
+	TArray<FInventorySearchResult> FoundItems = InvSys->FindItemsByAsset(TargetItem);
+
+	if (PopupClass)
+	{
+		UIngredientSelectWidget* Popup = CreateWidget<UIngredientSelectWidget>(this, PopupClass);
+		if (Popup)
+		{
+			Popup->InitPopup(FoundItems, TargetItem);
+			Popup->OnIngredientPicked.AddDynamic(this, &URecipeList::OnMaterialSelectedFromPopup);
+			Popup->AddToViewport(100);
+		}
+	}
+}
+
+void URecipeList::OnMaterialSelectedFromPopup(int32 InventoryIndex, EItemGrade Grade)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[RecipeList] Signal Received! Index: %d, Grade: %d"), InventoryIndex, (int32)Grade);
+
+	if (CurrentEditingSlot)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[RecipeList] Updating Slot..."));
+
+		// 실제 데이터 업데이트
+		CurrentEditingSlot->SetSelectedMaterial(InventoryIndex, Grade);
+
+		// 등급 재계산
+		UpdateCraftingState();
+	}
+	else
+	{
+		// 범인은 바로 이놈입니다.
+		UE_LOG(LogTemp, Error, TEXT("[RecipeList] Error: CurrentEditingSlot is NULL! I forgot which slot to fill."));
+	}
+
+	CurrentEditingSlot = nullptr;
+}
+
+void URecipeList::UpdateCraftingState()
+{
+	int32 TotalScore = 0;
+	int32 SelectedCount = 0;
+	bool bAllSelected = true;
+
+	for (UIngredientSlot* IngSlot : CreatedSlots)
+	{
+		if (IngSlot && IngSlot->IsSelected())
+		{
+			TotalScore += AlchemyMath::GetGradeScore(IngSlot->GetSelectedGrade());
+			SelectedCount++;
+		}
+		else
+		{
+			bAllSelected = false;
+		}
+	}
+
+	if (bAllSelected && SelectedCount > 0)
+	{
+		Button_Craft->SetIsEnabled(true);
+
+		int32 AvgScore = TotalScore / SelectedCount;
+		EItemGrade ResultGrade = AlchemyMath::GetGradeFromScore(AvgScore);
+
+		FString GradeStr = UEnum::GetDisplayValueAsText(ResultGrade).ToString();
+		if (Text_ResultGrade)
+		{
+			Text_ResultGrade->SetText(FText::FromString(GradeStr));
+		}
+	}
+	else
+	{
+		Button_Craft->SetIsEnabled(false);
+		if (Text_ResultGrade)
+		{
+			Text_ResultGrade->SetText(FText::FromString(TEXT("재료 선택 필요")));
+		}
+	}
+}
+
+void URecipeList::OnCraftButtonClicked()
+{
+	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
+	if (!GameInst) return;
+
+	UInventoryManagerSubsystem* InvSys = GameInst->GetSubsystem<UInventoryManagerSubsystem>();
+	if (!InvSys) return;
+
+	int32 TotalScore = 0;
+	int32 Count = 0;
+	for (UIngredientSlot* IngSlot : CreatedSlots)
+	{
+		if (IngSlot)
+		{
+			TotalScore += AlchemyMath::GetGradeScore(IngSlot->GetSelectedGrade());
+			Count++;
+		}
+	}
+
+	EItemGrade FinalGrade = EItemGrade::EIG_E;
+	if (Count > 0)
+	{
+		FinalGrade = AlchemyMath::GetGradeFromScore(TotalScore / Count);
+	}
+
+	InvSys->AddItem(this, SelectedRecipe.ResultItem, FinalGrade, SelectedRecipe.ResultCount);
+
+	// 3. 재료 소모 로직 (생략 - 필요시 InvSys->RemoveItem 구현)
+	// for (UIngredientSlot* IngSlot : CreatedSlots) { ... }
+
+	CreateIngredientSlots(SelectedRecipe);
+	UpdateCraftingState();
+
+	UE_LOG(LogTemp, Log, TEXT("Craft Complete. Grade: %d"), (int32)FinalGrade);
 }

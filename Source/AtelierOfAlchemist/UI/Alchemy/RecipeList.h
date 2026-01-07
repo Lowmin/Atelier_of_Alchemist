@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "../../DataAssets/RecipeDataAsset.h"
+#include "../../DataAssets/ItemDataAsset.h"
 #include "RecipeList.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSelected, TSoftObjectPtr<URecipeDataAsset>, RecipePtr);
@@ -17,6 +18,10 @@ class UScrollBox;
 class URecipeListSlot;
 class URecipeManagerSubsystem;
 class URecipeDataAsset;
+class UVerticalBox;
+class UIngredientSlot;
+class UIngredientSelectWidget;
+
 /**
  *
  */
@@ -43,28 +48,57 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> RecipeSlotClass;
-	
-	// 레시피 선택 후 UI
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Image_SelectedIcon;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_SelectedName;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UVerticalBox> Box_IngredientSlots;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_ResultGrade;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UIngredientSlot> IngredientSlotClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UIngredientSelectWidget> PopupClass;
+
 private:
 	UPROPERTY()
 	URecipeDataAsset* RecipeData;
 
 	FAlchemyRecipe SelectedRecipe;
-	
+
 	UFUNCTION()
 	void OnCloseButtonClicked();
 
 	void RefreshRecipeList();
 	void HandleRecipeSelected(const FAlchemyRecipe& InRecipe);
 
-	// GridPanel
 	const int32 MaxColumns = 8;
 	const int32 MaxRows = 3;
 	const int32 TotalSlots = MaxColumns * MaxRows;
+
+	UPROPERTY()
+	TArray<UIngredientSlot*> CreatedSlots;
+
+	UPROPERTY()
+	UIngredientSlot* CurrentEditingSlot;
+
+	void CreateIngredientSlots(const FAlchemyRecipe& Recipe);
+
+	void UpdateCraftingState();
+
+	UFUNCTION()
+	void OnCraftButtonClicked();
+
+	UFUNCTION()
+	void OnRequireSlotClicked(UIngredientSlot* SlotWidget);
+
+	UFUNCTION()
+	void OnMaterialSelectedFromPopup(int32 InventoryIndex, EItemGrade Grade);
 };

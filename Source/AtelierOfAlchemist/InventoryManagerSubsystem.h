@@ -10,6 +10,18 @@
 
 class UItemDataAsset;
 
+USTRUCT(BlueprintType)
+struct FInventorySearchResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	int32 SlotIndex;
+
+	UPROPERTY()
+	FInventorySlotStruct SlotData;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
 /**
  *
@@ -29,6 +41,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FInventorySearchResult> FindItemsByAsset(UItemDataAsset* TargetAsset);
 protected:
 	UPROPERTY(SaveGame)
 	TArray<FInventorySlotStruct> InventorySlot;
