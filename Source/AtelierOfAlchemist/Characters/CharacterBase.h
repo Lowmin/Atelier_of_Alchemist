@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "StatComponent.h"
+#include "../DataAssets/ItemDataAsset.h"
 #include "CharacterBase.generated.h"
 
 class USkillDataAsset;

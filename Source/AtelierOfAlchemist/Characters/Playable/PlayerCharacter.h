@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PartyMemberBase.h"
+#include "../../DataAssets/ItemDataAsset.h"
 #include "PlayerCharacter.generated.h"
 
 class UInputMappingContext;
@@ -124,4 +125,13 @@ public:
 
 	UPROPERTY()
 	FOnInteract OnInteract;
+
+// 장비 장착 관련
+public:
+	void EquipItem(UItemDataAsset* EquipData);
+	void UnEquipItem(EEquipPart InPart);
+	UItemDataAsset* GetEquippedItem(EEquipPart InPart) const;
+	
+private:
+	TMap<EEquipPart, UItemDataAsset*> EquippedItems;
 };

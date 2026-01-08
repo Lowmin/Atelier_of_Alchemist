@@ -10,7 +10,7 @@
 
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
-#include "Components/VerticalBox.h"
+#include "Components/HorizontalBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
@@ -180,22 +180,10 @@ void URecipeList::OnRequireSlotClicked(UIngredientSlot* SlotWidget)
 
 void URecipeList::OnMaterialSelectedFromPopup(int32 InventoryIndex, EItemGrade Grade)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[RecipeList] Signal Received! Index: %d, Grade: %d"), InventoryIndex, (int32)Grade);
-
 	if (CurrentEditingSlot)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[RecipeList] Updating Slot..."));
-
-		// 실제 데이터 업데이트
 		CurrentEditingSlot->SetSelectedMaterial(InventoryIndex, Grade);
-
-		// 등급 재계산
 		UpdateCraftingState();
-	}
-	else
-	{
-		// 범인은 바로 이놈입니다.
-		UE_LOG(LogTemp, Error, TEXT("[RecipeList] Error: CurrentEditingSlot is NULL! I forgot which slot to fill."));
 	}
 
 	CurrentEditingSlot = nullptr;

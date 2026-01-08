@@ -89,8 +89,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	int32 MaxStackSize = 99;
 
-	// ItemType::EIT_Equip 설정
-	// 부위
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
 	EEquipPart Part;
 
@@ -107,19 +105,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
 	int32 LevelLimit;
 
-	// ItemType::EIT_Boom 설정
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boom", meta = (EditCondition = "ItemType == EItemType::EIT_Boom"))
 	float Damage;
 
-	// ItemType::EIT_Potion 설정
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
 	EPotionEffectType PotionType;
 
-	// 체력 회복, 공격력 등 효과의 수치
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
 	float Amount;
 
-	// 지속 시간 (즉시 회복의 효과를 갖고 있는 PET_InstantHeal 의 경우 영향 없음)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
 	float Duration;
 };

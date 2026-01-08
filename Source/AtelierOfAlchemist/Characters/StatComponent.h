@@ -6,6 +6,7 @@
 #include "StatComponent.generated.h"
 
 class UCharacterDataAsset;
+class UItemDataAsset;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ATELIEROFALCHEMIST_API UStatComponent : public UActorComponent
@@ -21,6 +22,9 @@ public:
 	void TakeDamage(float DamageAmount);
 	void Heal(float HealAmount);
 
+	void AddEquipStat(UItemDataAsset* EquipData);
+	void RemoveEquipStat(UItemDataAsset* EquipData);
+
 	int32 GetLevel() const;
 	float GetCurrentHealth() const;
 	float GetMaxHealth() const;
@@ -35,6 +39,11 @@ public:
 	FOnHealthChanged OnHealthChanged;
 
 protected:
+	float BonusAttackPower;
+	float BonusDefense;
+	float BonusHealth;
+	float BonusSpeed;
+
 	UPROPERTY()
 	TObjectPtr<UPlayerRuntimeData> LinkedRuntimeData;
 

@@ -44,7 +44,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Triggered, this, &APlayerCharacter::Zoom);
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-		EnhancedInputComponent->BindAction(IA_Collect, ETriggerEvent::Triggered, this, &APlayerCharacter::CollectItem);
+		EnhancedInputComponent->BindAction(IA_Collect, ETriggerEvent::Started, this, &APlayerCharacter::CollectItem);
 	}
 }
 
@@ -233,4 +233,35 @@ float APlayerCharacter::PlayCollectingMontage(ECollectingType CollectingType)
 		}
 	}
 	return 1.0f;
+}
+
+void APlayerCharacter::EquipItem(UItemDataAsset* EquipData)
+{
+	if (!EquipData || EquipData->ItemType != EItemType::EIT_Equip) return;
+	if (EquipData->LevelLimit > StatComponent->GetLevel()) return;
+
+	EEquipPart ThisPart = EquipData->Part;
+
+	if (EquippedItems.FindRef(ThisPart))
+	{
+		UnEquipItem(ThisPart);
+	}
+
+	EquippedItems.Add(ThisPart, EquipData);
+	StatComponent->AddEquipStat(EquipData);
+	UE_LOG(LogTemp, Warning, TEXT("Equip : %s"), *EquipData->ItemName.ToString());
+}
+
+void APlayerCharacter::UnEquipItem(EEquipPart InPart)
+{
+	if (!EquippedItems.Find(InPart)) return;
+
+	StatComponent->RemoveEquipStat(GetEquippedItem(InPart));
+	UE_LOG(LogTemp, Warning, TEXT("UnEquip : %s"), *GetEquippedItem(InPart)->ItemName.ToString());
+	EquippedItems.Remove(InPart);
+}
+
+UItemDataAsset* APlayerCharacter::GetEquippedItem(EEquipPart InPart) const
+{
+	return EquippedItems.FindRef(InPart);
 }

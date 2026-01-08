@@ -1,6 +1,7 @@
 #include "StatComponent.h"
 #include "../PlayerRuntimeData.h"     
 #include "../DataAssets/CharacterDataAsset.h" 
+#include "../DataAssets/ItemDataAsset.h"
 
 UStatComponent::UStatComponent()
 {
@@ -37,16 +38,12 @@ void UStatComponent::TakeDamage(float Amount)
 {
 	if (LinkedRuntimeData)
 	{
-		UE_LOG(LogTemp, Error, TEXT(">> [HIT] Data Address: %p"), LinkedRuntimeData.Get());
-		UE_LOG(LogTemp, Log, TEXT("Player"));
 		LinkedRuntimeData->ApplyDamage(Amount);
 
 		CurrentHealth = LinkedRuntimeData->GetCurrentHealth();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("Enemy"));
-
 		CurrentHealth -= Amount;
 		if (OnHealthChanged.IsBound()) OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
 	}
@@ -57,18 +54,36 @@ void UStatComponent::Heal(float HealAmount)
 	if (LinkedRuntimeData && StaticData)
 	{
 		float CurHp = LinkedRuntimeData->GetCurrentHealth();
-		float MaxHp = StaticData->BaseMaxHealth;
+		float MaxHp = GetMaxHealth();
 
 		float AfterHp = FMath::Min(CurHp + HealAmount, MaxHp);
 		LinkedRuntimeData->SetCurrentHealth(AfterHp);
 	}
 	else if (StaticData)
 	{
-		float MaxHp = StaticData->BaseMaxHealth;
+		float MaxHp = GetMaxHealth();
 		CurrentHealth = FMath::Min(CurrentHealth + HealAmount, MaxHp);
 
 		OnHealthChanged.Broadcast(CurrentHealth, MaxHp);
 	}
+}
+
+void UStatComponent::AddEquipStat(UItemDataAsset* EquipData)
+{
+	BonusAttackPower += EquipData->EquipAttackPower;
+	BonusDefense += EquipData->EquipDefense;
+	BonusHealth += EquipData->EquipMaxHealth;
+}
+
+void UStatComponent::RemoveEquipStat(UItemDataAsset* EquipData)
+{
+	BonusAttackPower -= EquipData->EquipAttackPower;
+	BonusDefense -= EquipData->EquipDefense;
+	BonusHealth -= EquipData->EquipMaxHealth;
+
+	BonusAttackPower = FMath::Max(BonusAttackPower, 0.0f);
+	BonusDefense = FMath::Max(BonusDefense, 0.0f);
+	BonusHealth = FMath::Max(BonusHealth, 0.0f);
 }
 
 int32 UStatComponent::GetLevel() const
@@ -84,22 +99,22 @@ float UStatComponent::GetCurrentHealth() const
 
 float UStatComponent::GetMaxHealth() const
 {
-	return StaticData ? StaticData->BaseMaxHealth : 0.0f;
+	return StaticData ? StaticData->BaseMaxHealth + BonusHealth : 0.0f;
 }
 
 float UStatComponent::GetAttackPower() const
 {
-	return StaticData ? StaticData->BaseAttackPower : 0.0f;
+	return StaticData ? StaticData->BaseAttackPower + BonusAttackPower : 0.0f;
 }
 
 float UStatComponent::GetDefense() const
 {
-	return StaticData ? StaticData->BaseDefensePower : 0.0f;
+	return StaticData ? StaticData->BaseDefensePower + BonusDefense : 0.0f;
 }
 
 float UStatComponent::GetSpeed() const
 {
-	return StaticData ? StaticData->BaseSpeed : 0.0f;
+	return StaticData ? StaticData->BaseSpeed + BonusSpeed : 0.0f;
 }
 
 UCharacterDataAsset* UStatComponent::GetCharacterData() const

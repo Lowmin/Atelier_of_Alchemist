@@ -18,7 +18,7 @@ class UScrollBox;
 class URecipeListSlot;
 class URecipeManagerSubsystem;
 class URecipeDataAsset;
-class UVerticalBox;
+class UHorizontalBox;
 class UIngredientSlot;
 class UIngredientSelectWidget;
 
@@ -56,7 +56,7 @@ protected:
 	TObjectPtr<UTextBlock> Text_SelectedName;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UVerticalBox> Box_IngredientSlots;
+	TObjectPtr<UHorizontalBox> Box_IngredientSlots;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_ResultGrade;
