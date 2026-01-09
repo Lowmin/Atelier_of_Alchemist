@@ -9,12 +9,12 @@
 #include "../../DataAssets/CharacterDataAsset.h"
 #include "../../Characters/Playable/PlayerCharacter.h"
 
-void UPartyMemberSlot::InitSlot(APlayerCharacter* InCharacter)
+void UPartyMemberSlot::InitSlot(UPlayerRuntimeData* InData)
 {
-	if (!InCharacter->GetCharacterData()) return;
+	if (!InData) return;
 
-	LinkedCharacter = InCharacter;
-	UCharacterDataAsset* CharacterData = InCharacter->GetCharacterData();
+	LinkedData = InData;
+	UCharacterDataAsset* CharacterData = InData->GetCharacterDataAsset();
 
 	Image_Portrait->SetBrushFromTexture(CharacterData->CharacterImage.LoadSynchronous());
 	Button_Select->OnClicked.AddDynamic(this, &UPartyMemberSlot::OnButtonClicked);
@@ -22,5 +22,5 @@ void UPartyMemberSlot::InitSlot(APlayerCharacter* InCharacter)
 
 void UPartyMemberSlot::OnButtonClicked()
 {
-	OnSlotSelected.Broadcast(LinkedCharacter);
+	OnSlotSelected.Broadcast(LinkedData);
 }

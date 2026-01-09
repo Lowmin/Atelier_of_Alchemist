@@ -10,7 +10,7 @@
 class UImage;
 class UButton;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMemberSelected, APlayerCharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMemberSelected, UPlayerRuntimeData*, Data);
 /**
  * 
  */
@@ -20,7 +20,7 @@ class ATELIEROFALCHEMIST_API UPartyMemberSlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void InitSlot(APlayerCharacter* InCharacter);
+	void InitSlot(UPlayerRuntimeData* InData);
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnMemberSelected OnSlotSelected;
@@ -33,7 +33,7 @@ protected:
 	TObjectPtr<UButton> Button_Select;
 
 	UPROPERTY()
-	APlayerCharacter* LinkedCharacter;
+	UPlayerRuntimeData* LinkedData;
 
 private:
 	UFUNCTION()
