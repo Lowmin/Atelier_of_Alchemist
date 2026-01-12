@@ -2,11 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "../PlayerRuntimeData.h"
+#include "../PlayerRuntimeData.h" 
 #include "StatComponent.generated.h"
 
 class UCharacterDataAsset;
-class UItemDataAsset;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ATELIEROFALCHEMIST_API UStatComponent : public UActorComponent
@@ -22,28 +21,21 @@ public:
 	void TakeDamage(float DamageAmount);
 	void Heal(float HealAmount);
 
-	void AddEquipStat(UItemDataAsset* EquipData);
-	void RemoveEquipStat(UItemDataAsset* EquipData);
-
-	int32 GetLevel() const;
 	float GetCurrentHealth() const;
 	float GetMaxHealth() const;
 	float GetAttackPower() const;
 	float GetDefense() const;
 	float GetSpeed() const;
-
-	UCharacterDataAsset* GetCharacterData() const;
-	UPlayerRuntimeData* GetRuntimeData() const { return LinkedRuntimeData; }
+	float GetLevel() const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 
-protected:
-	float BonusAttackPower;
-	float BonusDefense;
-	float BonusHealth;
-	float BonusSpeed;
+	UCharacterDataAsset* GetCharacterData() const;
 
+	UPlayerRuntimeData* GetRuntimeData() { return LinkedRuntimeData; }
+
+protected:
 	UPROPERTY()
 	TObjectPtr<UPlayerRuntimeData> LinkedRuntimeData;
 

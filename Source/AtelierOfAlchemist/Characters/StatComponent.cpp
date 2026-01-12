@@ -1,13 +1,10 @@
 #include "StatComponent.h"
-#include "../PlayerRuntimeData.h"     
-#include "../DataAssets/CharacterDataAsset.h" 
-#include "../DataAssets/ItemDataAsset.h"
+#include "../PlayerRuntimeData.h"
+#include "../DataAssets/CharacterDataAsset.h"
 
 UStatComponent::UStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	LinkedRuntimeData = nullptr;
-	StaticData = nullptr;
 	CurrentHealth = 0.0f;
 }
 
@@ -68,53 +65,44 @@ void UStatComponent::Heal(float HealAmount)
 	}
 }
 
-void UStatComponent::AddEquipStat(UItemDataAsset* EquipData)
-{
-	BonusAttackPower += EquipData->EquipAttackPower;
-	BonusDefense += EquipData->EquipDefense;
-	BonusHealth += EquipData->EquipMaxHealth;
-}
-
-void UStatComponent::RemoveEquipStat(UItemDataAsset* EquipData)
-{
-	BonusAttackPower -= EquipData->EquipAttackPower;
-	BonusDefense -= EquipData->EquipDefense;
-	BonusHealth -= EquipData->EquipMaxHealth;
-
-	BonusAttackPower = FMath::Max(BonusAttackPower, 0.0f);
-	BonusDefense = FMath::Max(BonusDefense, 0.0f);
-	BonusHealth = FMath::Max(BonusHealth, 0.0f);
-}
-
-int32 UStatComponent::GetLevel() const
-{
-	return (StaticData != nullptr) ? 1 : 1;
-}
-
 float UStatComponent::GetCurrentHealth() const
 {
-	if (LinkedRuntimeData) return LinkedRuntimeData ? LinkedRuntimeData->GetCurrentHealth() : 0.0f;
-	else return CurrentHealth;
-}
+	if (LinkedRuntimeData)
+	{
+		return LinkedRuntimeData->GetCurrentHealth();
+	}
 
-float UStatComponent::GetMaxHealth() const
-{
-	return StaticData ? StaticData->BaseMaxHealth + BonusHealth : 0.0f;
+	return CurrentHealth;
 }
 
 float UStatComponent::GetAttackPower() const
 {
-	return StaticData ? StaticData->BaseAttackPower + BonusAttackPower : 0.0f;
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalAttack();
+	return StaticData ? StaticData->BaseAttackPower : 0.0f;
 }
 
 float UStatComponent::GetDefense() const
 {
-	return StaticData ? StaticData->BaseDefensePower + BonusDefense : 0.0f;
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalDefense();
+	return StaticData ? StaticData->BaseDefensePower : 0.0f;
+}
+
+float UStatComponent::GetMaxHealth() const
+{
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalMaxHealth();
+	return StaticData ? StaticData->BaseMaxHealth : 0.0f;
 }
 
 float UStatComponent::GetSpeed() const
 {
-	return StaticData ? StaticData->BaseSpeed + BonusSpeed : 0.0f;
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalSpeed();
+	return StaticData ? StaticData->BaseSpeed : 0.0f;
+}
+
+float UStatComponent::GetLevel() const
+{
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetLevel();
+	return StaticData ? StaticData->BaseLevel : 0.0f;
 }
 
 UCharacterDataAsset* UStatComponent::GetCharacterData() const

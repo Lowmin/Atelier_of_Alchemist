@@ -40,5 +40,8 @@ public:
 	float BaseSpeed = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
+	float BaseLevel = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	TSoftClassPtr<ACharacterBase> BP_Character;
 };

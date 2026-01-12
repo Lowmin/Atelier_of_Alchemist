@@ -25,12 +25,8 @@ enum class ECollectingType : uint8
 	Mining		UMETA(DisplayName = "Mining"),
 	Logging		UMETA(DisplayName = "Logging"),
 	Fishing		UMETA(DisplayName = "Fishing")
-
 };
 
-/**
- *
- */
 UCLASS()
 class ATELIEROFALCHEMIST_API APlayerCharacter : public APartyMemberBase
 {
@@ -40,7 +36,6 @@ private:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	// 카메라 관련
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> SpringArm;
 
@@ -77,7 +72,6 @@ private:
 	FVector2D LastMovementInput;
 
 protected:
-	// 조작 입력
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> IMC_Default;
 
@@ -96,13 +90,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TMap<ECollectingType, UAnimMontage*> CollectingMontageMap;
 
-	// 조작 함수
 	void Look(const FInputActionValue& Value);
 	void Zoom(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
 	void CollectItem();
 
-	// 캐릭터 데이터 에셋
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data")
 	TObjectPtr<UCharacterDataAsset> CharacterDataAsset;
 
@@ -126,12 +118,8 @@ public:
 	UPROPERTY()
 	FOnInteract OnInteract;
 
-// 장비 장착 관련
 public:
 	void EquipItem(UItemDataAsset* EquipData);
 	void UnEquipItem(EEquipPart InPart);
 	UItemDataAsset* GetEquippedItem(EEquipPart InPart) const;
-	
-private:
-	TMap<EEquipPart, UItemDataAsset*> EquippedItems;
 };

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,17 +13,15 @@ struct FInventorySearchResult
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	int32 SlotIndex;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	FInventorySlotStruct SlotData;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
-/**
- *
- */
+
 UCLASS()
 class ATELIEROFALCHEMIST_API UInventoryManagerSubsystem : public UGameInstanceSubsystem
 {
@@ -44,12 +40,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TArray<FInventorySearchResult> FindItemsByAsset(UItemDataAsset* TargetAsset);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void EquipItemToCharacter(FName CharacterID, int32 InvSlotIndex, EEquipPart TargetPart);
+
 protected:
 	UPROPERTY(SaveGame)
 	TArray<FInventorySlotStruct> InventorySlot;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int32 MaxInventorySlot = 32;
-
-	void InventorySort();
 };

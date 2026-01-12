@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+癤�// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -82,9 +81,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	UStatComponent* MyStatComp = GetStatComponent();
-
 	UCharacterDataAsset* MyDataAsset = GetCharacterData();
-
 	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
 
 	if (MyStatComp && MyDataAsset && GuildManager)
@@ -102,26 +99,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Spd
-	float CurrentSpeed = GetCharacterMovement()->GetLastUpdateVelocity().Size();
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			0.0f,
-			FColor::Yellow,
-			FString::Printf(TEXT("Current Speed: %.2f"), CurrentSpeed)
-		);
-	}
-
 	if (Controller != nullptr)
 	{
-		// 카메라 관련
 		UpdateCameraLook(DeltaTime);
 		UpdateCameraZoom(DeltaTime);
-
-		// 캐릭터 이동 관련
 		UpdateCharacterRotate(DeltaTime);
 	}
 }
@@ -228,7 +209,6 @@ float APlayerCharacter::PlayCollectingMontage(ECollectingType CollectingType)
 		if (MontagePlay)
 		{
 			PlayAnimMontage(MontagePlay);
-
 			return MontagePlay->GetPlayLength();
 		}
 	}
@@ -238,30 +218,37 @@ float APlayerCharacter::PlayCollectingMontage(ECollectingType CollectingType)
 void APlayerCharacter::EquipItem(UItemDataAsset* EquipData)
 {
 	if (!EquipData || EquipData->ItemType != EItemType::EIT_Equip) return;
-	if (EquipData->LevelLimit > StatComponent->GetLevel()) return;
 
-	EEquipPart ThisPart = EquipData->Part;
+	UStatComponent* MyStat = GetStatComponent();
 
-	if (EquippedItems.FindRef(ThisPart))
+	if (EquipData->LevelLimit > MyStat->GetLevel()) return;
+
+	UPlayerRuntimeData* RuntimeData = MyStat->GetRuntimeData();
+	if (RuntimeData)
 	{
-		UnEquipItem(ThisPart);
+		RuntimeData->SetEquipItem(EquipData->Part, EquipData);
 	}
-
-	EquippedItems.Add(ThisPart, EquipData);
-	StatComponent->AddEquipStat(EquipData);
-	UE_LOG(LogTemp, Warning, TEXT("Equip : %s"), *EquipData->ItemName.ToString());
 }
 
 void APlayerCharacter::UnEquipItem(EEquipPart InPart)
 {
-	if (!EquippedItems.Find(InPart)) return;
-
-	StatComponent->RemoveEquipStat(GetEquippedItem(InPart));
-	UE_LOG(LogTemp, Warning, TEXT("UnEquip : %s"), *GetEquippedItem(InPart)->ItemName.ToString());
-	EquippedItems.Remove(InPart);
+	if (UStatComponent* MyStat = GetStatComponent())
+	{
+		if (UPlayerRuntimeData* RuntimeData = MyStat->GetRuntimeData())
+		{
+			RuntimeData->SetEquipItem(InPart, nullptr);
+		}
+	}
 }
 
 UItemDataAsset* APlayerCharacter::GetEquippedItem(EEquipPart InPart) const
 {
-	return EquippedItems.FindRef(InPart);
+	if (UStatComponent* MyStat = GetStatComponent())
+	{
+		if (UPlayerRuntimeData* RuntimeData = MyStat->GetRuntimeData())
+		{
+			return RuntimeData->GetEquipItem(InPart);
+		}
+	}
+	return nullptr;
 }

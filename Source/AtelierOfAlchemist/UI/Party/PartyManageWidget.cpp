@@ -1,36 +1,89 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "PartyManageWidget.h"
+﻿#include "PartyManageWidget.h"
 #include "../../GuildMemberManagerSubsystem.h"
 #include "../../PlayerRuntimeData.h"
 #include "../../DataAssets/CharacterDataAsset.h"
-
+#include "../../InventoryManagerSubsystem.h"
+#include "PartyMemberSlot.h"
+#include "../Inventory/Inventory.h"
+#include "EquipSlotWidget.h"
 #include "Components/TextBlock.h"
-#include "Components/UniformGridPanel.h"
-#include "Components/UniformGridSlot.h"
 #include "Components/HorizontalBox.h"
+#include "../Inventory/InventorySlotStruct.h"
+
+void UPartyManageWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (InventoryWidget)
+	{
+		InventoryWidget->OnItemSelected.RemoveDynamic(this, &UPartyManageWidget::OnInventoryItemSelected);
+		InventoryWidget->OnItemSelected.AddDynamic(this, &UPartyManageWidget::OnInventoryItemSelected);
+	}
+
+	if (Slot_Weapon)
+	{
+		Slot_Weapon->SetPartType(EEquipPart::PET_Weapon);
+		Slot_Weapon->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
+	}
+
+	if (Slot_Head)
+	{
+		Slot_Head->SetPartType(EEquipPart::PET_Head);
+		Slot_Head->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
+	}
+
+	if (Slot_Body)
+	{
+		Slot_Body->SetPartType(EEquipPart::PET_Body);
+		Slot_Body->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
+	}
+
+	if (Slot_Shoes)
+	{
+		Slot_Shoes->SetPartType(EEquipPart::PET_Shoes);
+		Slot_Shoes->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
+	}
+
+	InitPartyList();
+}
+
+void UPartyManageWidget::NativeDestruct()
+{
+	if (CurrentSelectedData)
+	{
+		CurrentSelectedData->OnEquipChanged.RemoveDynamic(this, &UPartyManageWidget::UpdateUI);
+	}
+	Super::NativeDestruct();
+}
 
 void UPartyManageWidget::InitPartyList()
 {
-	if(Box_PartyList) Box_PartyList->ClearChildren();
+	if (!Box_PartyList) return;
+	Box_PartyList->ClearChildren();
 
 	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
-	TArray<FName> PartyIDs = GuildManager->GetPartyMemberIDs();
+	if (!GuildManager) return;
 
-	for (int i = 0; i <= PartyIDs.Num(); i++)
+	const TArray<FName>& PartyIDs = GuildManager->GetPartyMemberIDs();
+
+	for (int i = 0; i < PartyIDs.Num(); i++)
 	{
 		FName MemberID = PartyIDs[i];
 		UPlayerRuntimeData* MemberData = GuildManager->GetPlayerRuntimeData(MemberID);
 
-		if (MemberData)
+		if (MemberData && MemberSlotClass)
 		{
 			UPartyMemberSlot* NewSlot = CreateWidget<UPartyMemberSlot>(this, MemberSlotClass);
-			
 			if (NewSlot)
 			{
 				NewSlot->InitSlot(MemberData);
 				NewSlot->OnSlotSelected.AddDynamic(this, &UPartyManageWidget::OnMemberSelected);
+				Box_PartyList->AddChildToHorizontalBox(NewSlot);
+
+				if (i == 0)
+				{
+					OnMemberSelected(MemberData);
+				}
 			}
 		}
 	}
@@ -38,13 +91,104 @@ void UPartyManageWidget::InitPartyList()
 
 void UPartyManageWidget::OnMemberSelected(UPlayerRuntimeData* Data)
 {
-	CurrentSelectedData = Data;
-	UCharacterDataAsset* CharacterDataAsset = Data->GetCharacterDataAsset();
+	if (CurrentSelectedData)
+	{
+		CurrentSelectedData->OnEquipChanged.RemoveDynamic(this, &UPartyManageWidget::UpdateUI);
+	}
 
-	if(Text_CharacterName) Text_CharacterName->SetText(CharacterDataAsset->CharacterName);
-	if(Text_AttackPower) Text_AttackPower->SetText(FText::AsNumber(CharacterDataAsset->BaseAttackPower));
-	if(Text_Defense) Text_Defense->SetText(FText::AsNumber(CharacterDataAsset->BaseDefensePower));
-	if(Text_MaxHealth) Text_MaxHealth->SetText(FText::AsNumber(CharacterDataAsset->BaseMaxHealth));
-	if(Text_Speed) Text_Speed->SetText(FText::AsNumber(CharacterDataAsset->BaseSpeed));
-	if(Text_Level) Text_Level->SetText(FText::AsNumber(1));
+	CurrentSelectedData = Data;
+
+	if (CurrentSelectedData)
+	{
+		CurrentSelectedData->OnEquipChanged.AddDynamic(this, &UPartyManageWidget::UpdateUI);
+		UpdateUI();
+	}
+}
+
+void UPartyManageWidget::UpdateUI()
+{
+	if (!CurrentSelectedData) return;
+
+	UCharacterDataAsset* DataAsset = CurrentSelectedData->GetCharacterDataAsset();
+
+	if (!DataAsset) return;
+
+	if (Text_CharacterName) Text_CharacterName->SetText(DataAsset->CharacterName);
+
+	if (Text_AttackPower)
+		Text_AttackPower->SetText(FText::AsNumber((int32)CurrentSelectedData->GetTotalAttack()));
+
+	if (Text_Defense)
+		Text_Defense->SetText(FText::AsNumber((int32)CurrentSelectedData->GetTotalDefense()));
+
+	if (Text_Speed)
+		Text_Speed->SetText(FText::AsNumber((int32)CurrentSelectedData->GetTotalSpeed()));
+
+	if (Text_Level)
+		Text_Level->SetText(FText::AsNumber(CurrentSelectedData->GetLevel()));
+
+	if (Text_HP)
+	{
+		int32 CurrentHP = (int32)CurrentSelectedData->GetCurrentHealth();
+		int32 MaxHP = (int32)CurrentSelectedData->GetTotalMaxHealth();
+
+		FText HPString = FText::Format(
+			FText::FromString(TEXT("{0} / {1}")),
+			FText::AsNumber(CurrentHP),
+			FText::AsNumber(MaxHP)
+		);
+
+		Text_HP->SetText(HPString);
+	}
+
+	auto UpdateSlotIcon = [&](UEquipSlotWidget* SlotWidget, EEquipPart Part)
+		{
+			if (SlotWidget)
+			{
+				UItemDataAsset* Item = CurrentSelectedData->GetEquipItem(Part);
+				SlotWidget->SetItemIcon(Item ? Item->ItemIcon : nullptr);
+			}
+		};
+
+	UpdateSlotIcon(Slot_Weapon, EEquipPart::PET_Weapon);
+	UpdateSlotIcon(Slot_Head, EEquipPart::PET_Head);
+	UpdateSlotIcon(Slot_Shoes, EEquipPart::PET_Shoes);
+	UpdateSlotIcon(Slot_Body, EEquipPart::PET_Body);
+}
+
+void UPartyManageWidget::OnEquipSlotClicked(EEquipPart Part)
+{
+	if (!InventoryWidget && InventoryClass)
+	{
+		InventoryWidget = CreateWidget<UInventory>(this, InventoryClass);
+		InventoryWidget->AddToViewport(10);
+		InventoryWidget->OnItemSelected.AddDynamic(this, &UPartyManageWidget::OnInventoryItemSelected);
+	}
+
+	PendingEquipPart = Part;
+
+	if (InventoryWidget)
+	{
+		InventoryWidget->OpenAsSelectionMode(Part);
+	}
+}
+
+void UPartyManageWidget::OnInventoryItemSelected(int32 InvSlotIndex)
+{
+	if (!CurrentSelectedData) return;
+
+	UInventoryManagerSubsystem* InvManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
+	if (!InvManager) return;
+
+	const TArray<FInventorySlotStruct>& Slots = InvManager->GetInventorySlot();
+
+	if (Slots.IsValidIndex(InvSlotIndex))
+	{
+		UItemDataAsset* SelectedItem = Slots[InvSlotIndex].ItemData.LoadSynchronous();
+
+		if (SelectedItem)
+		{
+			CurrentSelectedData->SetEquipItem(PendingEquipPart, SelectedItem);
+		}
+	}
 }

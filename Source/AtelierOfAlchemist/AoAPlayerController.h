@@ -1,18 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "AoAPlayerController.generated.h"
 
-/**
- *
- */
 class UInputMappingContext;
 class UInputAction;
 class UMainUI;
 class UUserWidget;
+class UPartyManageWidget;
 
 struct FInputActionValue;
 
@@ -27,6 +23,7 @@ public:
 	void SetMenuState(bool bIsVisible, UUserWidget* CurrentWidget = nullptr);
 	void OpenObjectUI(TSubclassOf<UUserWidget> WidgetClass);
 	void CloseObjectUI();
+	bool IsPartyMenuOpen() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,18 +33,27 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_ToggleInventory;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_TogglePartyMenu;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UMainUI> WBP_MainUI;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UMainUI> MainUIClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UPartyManageWidget> PartyWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UPartyManageWidget> PartyWidgetInstance;
+
 	UPROPERTY(VisibleInstanceOnly, Category = "UI")
 	TObjectPtr<UUserWidget> CurrentOpenWidget;
 
 	void ToggleInventory();
+	void TogglePartyMenu();
 
 private:
 	bool bIsInventoryAnimPlay = false;
-
 };
