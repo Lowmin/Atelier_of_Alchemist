@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UMainUI> MainUIClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UPartyManageWidget> PartyWidgetClass;
 
 	UPROPERTY()

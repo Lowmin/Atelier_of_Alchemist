@@ -7,6 +7,7 @@
 #include "../../RecipeManagerSubsystem.h"
 #include "../../AoAPlayerController.h"
 #include "../../DataAssets/GradeHelper.h"
+#include "../../UI/MyHUD.h"
 
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
@@ -120,12 +121,18 @@ void URecipeList::HandleRecipeSelected(const FAlchemyRecipe& InRecipe)
 
 void URecipeList::OnCloseButtonClicked()
 {
-	RemoveFromParent();
-
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetOwningPlayer()))
+	if (APlayerController* PC = GetOwningPlayer())
 	{
-		AAoAPlayerController* PC = Cast<AAoAPlayerController>(PlayerController);
-		if (PC) PC->SetMenuState(false);
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
+		{
+			MyHUD->CloseAllWidgets();
+		}
+		else
+		{
+			RemoveFromParent();
+			PC->SetInputMode(FInputModeGameOnly());
+			PC->bShowMouseCursor = false;
+		}
 	}
 }
 
@@ -241,12 +248,19 @@ void URecipeList::OnCraftButtonClicked()
 
 	int32 TotalScore = 0;
 	int32 Count = 0;
+
 	for (UIngredientSlot* IngSlot : CreatedSlots)
 	{
 		if (IngSlot)
 		{
 			TotalScore += AlchemyMath::GetGradeScore(IngSlot->GetSelectedGrade());
 			Count++;
+
+			int32 SlotIndex = IngSlot->GetSelectedInventoryIndex();
+			if (SlotIndex >= 0)
+			{
+				InvSys->RemoveItemByIndex(this, SlotIndex, IngSlot->GetRequiredCount());
+			}
 		}
 	}
 
@@ -258,11 +272,6 @@ void URecipeList::OnCraftButtonClicked()
 
 	InvSys->AddItem(this, SelectedRecipe.ResultItem, FinalGrade, SelectedRecipe.ResultCount);
 
-	// 3. 재료 소모 로직 (생략 - 필요시 InvSys->RemoveItem 구현)
-	// for (UIngredientSlot* IngSlot : CreatedSlots) { ... }
-
 	CreateIngredientSlots(SelectedRecipe);
 	UpdateCraftingState();
-
-	UE_LOG(LogTemp, Log, TEXT("Craft Complete. Grade: %d"), (int32)FinalGrade);
 }

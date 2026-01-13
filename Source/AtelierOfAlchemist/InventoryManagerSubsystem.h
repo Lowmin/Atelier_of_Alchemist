@@ -33,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
 	bool AddItem(const UObject* WorldContextObject, UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount = 1);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
+	bool RemoveItemByIndex(const UObject* WorldContextObject, int32 SlotIndex, int32 Amount = 1);
+
 	const TArray<FInventorySlotStruct>& GetInventorySlot() const { return InventorySlot; };
 
 	UPROPERTY(BlueprintAssignable)

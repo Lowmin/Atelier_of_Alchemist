@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -23,7 +21,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void Interact_Implementation(AActor* Interactor) override;
+	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere)

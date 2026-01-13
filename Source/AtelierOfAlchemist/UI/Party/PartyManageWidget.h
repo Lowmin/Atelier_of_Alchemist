@@ -11,6 +11,7 @@ class UInventory;
 class UPlayerRuntimeData;
 class UTextBlock;
 class UHorizontalBox;
+class UImage;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API UPartyManageWidget : public UUserWidget
@@ -29,6 +30,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UPartyMemberSlot> MemberSlotClass;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> Image_Character;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UHorizontalBox> Box_PartyList;

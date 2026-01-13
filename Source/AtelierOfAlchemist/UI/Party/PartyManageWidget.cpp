@@ -3,12 +3,14 @@
 #include "../../PlayerRuntimeData.h"
 #include "../../DataAssets/CharacterDataAsset.h"
 #include "../../InventoryManagerSubsystem.h"
+#include "Components/Image.h"
 #include "PartyMemberSlot.h"
 #include "../Inventory/Inventory.h"
 #include "EquipSlotWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "../Inventory/InventorySlotStruct.h"
+#include "../MyHUD.h"
 
 void UPartyManageWidget::NativeConstruct()
 {
@@ -112,6 +114,8 @@ void UPartyManageWidget::UpdateUI()
 	UCharacterDataAsset* DataAsset = CurrentSelectedData->GetCharacterDataAsset();
 
 	if (!DataAsset) return;
+	
+	if (Image_Character) Image_Character->SetBrushFromTexture(DataAsset->CharacterImage.LoadSynchronous());
 
 	if (Text_CharacterName) Text_CharacterName->SetText(DataAsset->CharacterName);
 
@@ -158,19 +162,23 @@ void UPartyManageWidget::UpdateUI()
 
 void UPartyManageWidget::OnEquipSlotClicked(EEquipPart Part)
 {
-	if (!InventoryWidget && InventoryClass)
+	if (APlayerController* PC = GetOwningPlayer())
 	{
-		InventoryWidget = CreateWidget<UInventory>(this, InventoryClass);
-		InventoryWidget->AddToViewport(10);
-		InventoryWidget->OnItemSelected.AddDynamic(this, &UPartyManageWidget::OnInventoryItemSelected);
+		if (AMyHUD* HUDManager = Cast<AMyHUD>(PC->GetHUD()))
+		{
+			HUDManager->OpenWidget(EWidgetType::Inventory);
+
+			if (UUserWidget* Widget = HUDManager->GetWidget(EWidgetType::Inventory))
+			{
+				if (UInventory* InvWidget = Cast<UInventory>(Widget))
+				{
+					InvWidget->SetSelectionMode(true, Part);
+				}
+			}
+		}
 	}
 
 	PendingEquipPart = Part;
-
-	if (InventoryWidget)
-	{
-		InventoryWidget->OpenAsSelectionMode(Part);
-	}
 }
 
 void UPartyManageWidget::OnInventoryItemSelected(int32 InvSlotIndex)

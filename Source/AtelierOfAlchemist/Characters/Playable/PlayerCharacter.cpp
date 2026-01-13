@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "PlayerCharacter.h"
+﻿#include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -8,9 +6,10 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
+#include "Engine/GameInstance.h"
+
 #include "../../DataAssets/CharacterDataAsset.h"
 #include "../../PlayerRuntimeData.h"
-#include "Engine/GameInstance.h"
 #include "../../GuildMemberManagerSubsystem.h"
 #include "../StatComponent.h"
 #include "../../Object/InteractableInterface.h"

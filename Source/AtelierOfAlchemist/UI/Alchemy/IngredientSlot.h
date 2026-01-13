@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,14 +19,14 @@ class ATELIEROFALCHEMIST_API UIngredientSlot : public UUserWidget
 
 public:
 	void InitIngredientSlot(int32 InIndex, EItemGrade InGrade, int32 InQuantity, UItemDataAsset* InAsset);
-
 	void InitRequirement(UItemDataAsset* InAsset, int32 InCount);
-
 	void SetSelectedMaterial(int32 InIndex, EItemGrade InGrade);
 
 	UItemDataAsset* GetRequiredAsset() const { return RequiredAsset; }
 	EItemGrade GetSelectedGrade() const { return Grade; }
 	bool IsSelected() const { return bIsSelected; }
+	int32 GetRequiredCount() const { return RequiredCount; }
+	int32 GetSelectedInventoryIndex() const { return InventoryIndex; }
 
 	FOnIngredientSlotSelected OnSlotSelected;
 	FOnRequestPopup OnRequestPopup;
@@ -53,7 +51,7 @@ protected:
 
 private:
 	int32 InventoryIndex = -1;
-	EItemGrade Grade;
+	EItemGrade Grade = EItemGrade::EIG_E;
 
 	UPROPERTY()
 	UItemDataAsset* RequiredAsset;

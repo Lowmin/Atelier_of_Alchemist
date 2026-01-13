@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Inventory/Inventory.h"
+#include "NPC/DialogueWidget.h"
 #include "MainUI.generated.h"
 
 class UInteractObjectWidget;
@@ -28,4 +27,7 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UInventory> WBP_Inventory;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UDialogueWidget> WBP_DialogueWidget;
 };

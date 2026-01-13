@@ -1,15 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Inventory.h"
 #include "../../InventoryManagerSubsystem.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
 #include "InventorySlotStruct.h"
 #include "../InventorySlot.h"
-#include "InventoryItemInfo.h" 
-#include "Animation/WidgetAnimation.h"
-#include "../../AoAPlayerController.h"
+#include "InventoryItemInfo.h"
+#include "../../UI/MyHUD.h"
 #include "GameFramework/PlayerController.h"
 
 void UInventory::NativeConstruct()
@@ -37,6 +33,18 @@ void UInventory::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
+}
+
+void UInventory::RefreshInventory()
+{
+	UpdateInventory();
+}
+
+void UInventory::SetSelectionMode(bool bIsSelection, EEquipPart InPart)
+{
+	bIsSelectionMode = bIsSelection;
+	FilterPart = InPart;
+	UpdateInventory();
 }
 
 void UInventory::UpdateInventory()
@@ -84,56 +92,6 @@ void UInventory::UpdateInventory()
 	}
 }
 
-void UInventory::Show()
-{
-	if (bIsAnimating || IsVisible()) return;
-
-	if (FadeInAnim)
-	{
-		bIsAnimating = true;
-		float AnimDuration = FadeInAnim->GetEndTime();
-
-		SetVisibility(ESlateVisibility::Visible);
-		PlayAnimation(FadeInAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]() { bIsAnimating = false; }, AnimDuration, false);
-	}
-	else
-	{
-		SetVisibility(ESlateVisibility::Visible);
-	}
-}
-
-void UInventory::Hide()
-{
-	if (bIsAnimating || !IsVisible()) return;
-
-	if (FadeOutAnim)
-	{
-		bIsAnimating = true;
-		float AnimDuration = FadeOutAnim->GetEndTime();
-
-		PlayAnimation(FadeOutAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle,
-			[this]() { SetVisibility(ESlateVisibility::Collapsed); bIsAnimating = false; },
-			AnimDuration, false);
-	}
-	else
-	{
-		SetVisibility(ESlateVisibility::Collapsed);
-	}
-}
-
-void UInventory::OpenAsSelectionMode(EEquipPart InPart)
-{
-	bIsSelectionMode = true;
-	FilterPart = InPart;
-
-	UpdateInventory();
-	Show();
-}
-
 void UInventory::OnSlotClicked(int32 SlotIndex)
 {
 	if (bIsSelectionMode)
@@ -148,34 +106,28 @@ void UInventory::OnSlotClicked(int32 SlotIndex)
 		}
 
 		OnItemSelected.Broadcast(SlotIndex);
-		Hide();
-		bIsSelectionMode = false;
 
 		if (APlayerController* PC = GetOwningPlayer())
 		{
-			// 파티 메뉴가 열려있지 않을 때만 게임 모드로 복귀 (이전 로직 유지)
-			// (IsPartyMenuOpen() 함수가 없으면 이 부분은 기존 코드대로 두세요)
-			// PC->SetShowMouseCursor(false);
-			// PC->SetInputMode(FInputModeGameOnly());
-
-			// *주의: 파티창 연동 로직을 넣으셨다면 OnCloseClicked처럼 PC->IsPartyMenuOpen() 체크가 필요할 수 있습니다.
+			if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
+			{
+				MyHUD->CloseWidget(EWidgetType::Inventory);
+			}
 		}
+
+		bIsSelectionMode = false;
 	}
 }
 
 void UInventory::OnCloseClicked()
 {
-	Hide();
-	bIsSelectionMode = false;
-
-	if (AAoAPlayerController* PC = Cast<AAoAPlayerController>(GetOwningPlayer()))
+	if (APlayerController* PC = GetOwningPlayer())
 	{
-		if (PC->IsPartyMenuOpen())
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
 		{
-			return;
+			MyHUD->CloseWidget(EWidgetType::Inventory);
 		}
-
-		PC->SetShowMouseCursor(false);
-		PC->SetInputMode(FInputModeGameOnly());
 	}
+
+	bIsSelectionMode = false;
 }

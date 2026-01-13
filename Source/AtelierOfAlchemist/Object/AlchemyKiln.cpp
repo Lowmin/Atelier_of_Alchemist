@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AlchemyKiln.h"
 #include "../AoAPlayerController.h"
-#include "../Characters/Playable/PlayerCharacter.h"
+#include "../UI/MyHUD.h"
+#include "Blueprint/UserWidget.h"
 #include "../UI/Alchemy/RecipeList.h"
+#include "../Characters/Playable/PlayerCharacter.h"
 
 void AAlchemyKiln::Interact_Implementation(APlayerCharacter* Interactor)
 {
@@ -12,20 +11,22 @@ void AAlchemyKiln::Interact_Implementation(APlayerCharacter* Interactor)
 
 	if (CachedRecipeList && CachedRecipeList->IsInViewport()) return;
 
-	if (AAoAPlayerController* PC = Interactor->GetController<AAoAPlayerController>())
+	if (APlayerController* PC = Cast<APlayerController>(Interactor->GetController()))
 	{
-		UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(PC, MainWidgetClass);
-
-		if (URecipeList* RecipeList = Cast<URecipeList>(CreatedWidget))
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
 		{
-			CachedRecipeList = RecipeList;
-			UE_LOG(LogTemp, Warning, TEXT("AddToViewport!"));
-			RecipeList->InitAlchemyWindow(KilnRecipes);
-			RecipeList->AddToViewport();
 
-			FInputModeUIOnly InputMode;
-			InputMode.SetWidgetToFocus(RecipeList->TakeWidget());
-			PC->SetMenuState(true, RecipeList);
+			UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(PC, MainWidgetClass);
+			if (URecipeList* RecipeList = Cast<URecipeList>(CreatedWidget))
+			{
+				CachedRecipeList = RecipeList;
+				RecipeList->InitAlchemyWindow(KilnRecipes);
+				RecipeList->AddToViewport(10);
+				FInputModeUIOnly InputMode;
+				InputMode.SetWidgetToFocus(RecipeList->TakeWidget());
+				PC->SetInputMode(InputMode);
+				PC->bShowMouseCursor = true;
+			}
 		}
 	}
 }

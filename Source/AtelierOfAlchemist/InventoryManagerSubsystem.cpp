@@ -48,6 +48,23 @@ bool UInventoryManagerSubsystem::AddItem(const UObject* WorldContextObject, UIte
 	return false;
 }
 
+bool UInventoryManagerSubsystem::RemoveItemByIndex(const UObject* WorldContextObject, int32 SlotIndex, int32 Amount)
+{
+	if (!InventorySlot.IsValidIndex(SlotIndex)) return false;
+
+	if (InventorySlot[SlotIndex].Quantity < Amount) return false;
+
+	InventorySlot[SlotIndex].Quantity -= Amount;
+
+	if (InventorySlot[SlotIndex].Quantity <= 0)
+	{
+		InventorySlot[SlotIndex] = FInventorySlotStruct();
+	}
+
+	OnInventoryUpdated.Broadcast();
+	return true;
+}
+
 TArray<FInventorySearchResult> UInventoryManagerSubsystem::FindItemsByAsset(UItemDataAsset* TargetAsset)
 {
 	TArray<FInventorySearchResult> Results;

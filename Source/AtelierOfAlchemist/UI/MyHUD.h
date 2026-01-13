@@ -10,32 +10,50 @@
 class UMainUI;
 class AActor;
 class UNotificationContainer;
-/**
- *
- */
+
+UENUM(BlueprintType)
+enum class EWidgetType : uint8
+{
+	None,
+	MainHUD,
+	Inventory,
+	PartyManage,
+	Dialogue
+};
+
 UCLASS()
 class ATELIEROFALCHEMIST_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(BlueprintCallable)
+	void OpenWidget(EWidgetType Type);
+
+	UFUNCTION(BlueprintCallable)
+	void CloseWidget(EWidgetType Type);
+
+	UFUNCTION(BlueprintCallable)
+	void CloseAllWidgets();
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleWidget(EWidgetType Type);
+
+	UUserWidget* GetWidget(EWidgetType Type);
+	bool IsAnyUIMode() const { return CurrentPopupType != EWidgetType::None; }
+
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UMainUI> MainUIClass;
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "UI Config")
+	TMap<EWidgetType, TSubclassOf<UUserWidget>> WidgetClasses;
 
 	UPROPERTY()
-	TObjectPtr<UMainUI> MainUIInstance;
+	TMap<EWidgetType, TObjectPtr<UUserWidget>> CreatedWidgets;
 
-	UPROPERTY(EditAnywhere, Category = "Notification")
-	TSubclassOf<UNotificationContainer> NotificationContainerClass;
+	EWidgetType CurrentPopupType = EWidgetType::None;
 
-	UPROPERTY()
-	TObjectPtr<UNotificationContainer> NotificationContainer;
-
-public:
-	UFUNCTION(BlueprintPure, Category = "UI")
-	UMainUI* GetMainUIInstance() const { return MainUIInstance; }
-
-	void ShowNotification(const FNotificationData& Data);
+	UUserWidget* GetOrCreateWidget(EWidgetType Type);
+	void UpdateInputMode();
 };

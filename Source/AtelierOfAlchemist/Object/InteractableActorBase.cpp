@@ -71,7 +71,7 @@ void AInteractableActorBase::OnEndOverlap(UPrimitiveComponent* OverlappedCompone
 	}
 }
 
-void AInteractableActorBase::Interact_Implementation(APlayerCharacter* Interactor)
+void AInteractableActorBase::Interact_Implementation(APlayerCharacter* AActor)
 {
 }
 
