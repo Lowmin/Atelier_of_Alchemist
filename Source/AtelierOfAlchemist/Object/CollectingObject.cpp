@@ -1,4 +1,4 @@
-#include "CollectingObject.h"
+﻿#include "CollectingObject.h"
 #include "../Characters/Playable/PlayerCharacter.h"
 #include "../DataAssets/ItemDataAsset.h"
 #include "../InventoryManagerSubsystem.h"

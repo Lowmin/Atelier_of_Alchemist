@@ -80,17 +80,28 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	UStatComponent* MyStatComp = GetStatComponent();
-	UCharacterDataAsset* MyDataAsset = GetCharacterData();
+	UCharacterDataAsset* MyDataAsset = CharacterDataAsset;
 	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
 
 	if (MyStatComp && MyDataAsset && GuildManager)
 	{
 		UPlayerRuntimeData* MyRuntimeData = GuildManager->GetPlayerRuntimeData(MyDataAsset->GetFName());
 
-		if (MyRuntimeData)
+		if (MyRuntimeData == nullptr)
 		{
-			MyStatComp->Initialize(MyRuntimeData);
+			UE_LOG(LogTemp, Error, TEXT("MyRuntimeData is Null."));
+			MyRuntimeData = NewObject<UPlayerRuntimeData>(this);
+			MyRuntimeData->Initialize(MyDataAsset);
 		}
+
+		MyStatComp->Initialize(MyRuntimeData);
+		UE_LOG(LogTemp, Error, TEXT("MyStatComp Init."));
+	}
+	else
+	{
+		if (!MyStatComp) UE_LOG(LogTemp, Error, TEXT("StatComp is Null."));
+		if (!MyDataAsset) UE_LOG(LogTemp, Error, TEXT("MyDataAsset is Null."));
+		if (!GuildManager) UE_LOG(LogTemp, Error, TEXT("GuildManager is Null."));
 	}
 }
 

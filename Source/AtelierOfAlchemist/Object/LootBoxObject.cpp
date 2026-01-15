@@ -1,4 +1,4 @@
-#include "LootBoxObject.h"
+﻿#include "LootBoxObject.h"
 #include "../InventoryManagerSubsystem.h"
 #include "../RecipeManagerSubsystem.h"
 #include "../DataAssets/RecipeDataAsset.h"

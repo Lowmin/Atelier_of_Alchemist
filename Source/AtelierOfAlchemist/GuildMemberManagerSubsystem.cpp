@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GuildMemberManagerSubsystem.h"
@@ -63,16 +63,16 @@ void UGuildMemberManagerSubsystem::ApplyDamageToAllPartyMembers(float DamageAmou
 {
 	if (DamageAmount <= 0.f) return;
 
-	// 1. ÇöÀç ÆÄÆ¼ ID ¸ñ·ÏÀ» °¡Á®¿É´Ï´Ù.
+	// 1. í˜„ìž¬ íŒŒí‹° ID ëª©ë¡ì„ ê°€ì ¸ì˜µë‹ˆë‹¤.
 	for (const FName& CharacterID : PartyMemberIDs)
 	{
-		// 2. ¸Ê¿¡¼­ ÇØ´ç IDÀÇ '½Ç½Ã°£ µ¥ÀÌÅÍ °´Ã¼'¸¦ Ã£½À´Ï´Ù.
-		UPlayerRuntimeData* RuntimeData = GetPlayerRuntimeData(CharacterID); // ÀÌ¹Ì ¸¸µé¾îµÐ ÇïÆÛ ÇÔ¼ö »ç¿ë
+		// 2. ë§µì—ì„œ í•´ë‹¹ IDì˜ 'ì‹¤ì‹œê°„ ë°ì´í„° ê°ì²´'ë¥¼ ì°¾ìŠµë‹ˆë‹¤.
+		UPlayerRuntimeData* RuntimeData = GetPlayerRuntimeData(CharacterID); // ì´ë¯¸ ë§Œë“¤ì–´ë‘” í—¬í¼ í•¨ìˆ˜ ì‚¬ìš©
 
 		if (RuntimeData)
 		{
-			// 3. µ¥ÀÌÅÍ °´Ã¼ÀÇ µ¥¹ÌÁö ÇÔ¼ö¸¦ È£ÃâÇÕ´Ï´Ù.
-			//    (ÀÌ ÇÔ¼ö°¡ µ¨¸®°ÔÀÌÆ®¸¦ È£ÃâÇÏ¿© UI¸¦ ÀÚµ¿À¸·Î ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.)
+			// 3. ë°ì´í„° ê°ì²´ì˜ ë°ë¯¸ì§€ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
+			//    (ì´ í•¨ìˆ˜ê°€ ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ í˜¸ì¶œí•˜ì—¬ UIë¥¼ ìžë™ìœ¼ë¡œ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.)
 			RuntimeData->ApplyDamage(DamageAmount);
 		}
 	}

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "InventorySlot.h"
@@ -28,7 +28,7 @@ void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData, int32 InIn
 
 	if (SlotData.ItemData.IsNull() || SlotData.Quantity == 0)
 	{
-		// ¾ÆÀÌÅÛÀÌ ¾øÀ» ¶§´Â ¼û±è (HiddenÀº ¾Æ¿¹ ·»´õ¸µµµ ¾È ÇÏ°í °ø°£µµ Â÷ÁöÇÏÁö ¾Ê°Å³ª ·¹ÀÌ¾Æ¿ô¿¡ µû¶ó ´Ù¸§)
+		// ì•„ì´í…œì´ ì—†ì„ ë•ŒëŠ” ìˆ¨ê¹€ (Hiddenì€ ì•„ì˜ˆ ë Œë”ë§ë„ ì•ˆ í•˜ê³  ê³µê°„ë„ ì°¨ì§€í•˜ì§€ ì•Šê±°ë‚˜ ë ˆì´ì•„ì›ƒì— ë”°ë¼ ë‹¤ë¦„)
 		if (ItemImage)		ItemImage->SetVisibility(ESlateVisibility::Hidden);
 		if (ItemQuantity)	ItemQuantity->SetVisibility(ESlateVisibility::Hidden);
 		if (ItemGrade)		ItemGrade->SetVisibility(ESlateVisibility::Hidden);
@@ -40,8 +40,8 @@ void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData, int32 InIn
 		if (ItemImage && ItemDataAsset->ItemIcon)
 		{
 			ItemImage->SetBrushFromSoftTexture(ItemDataAsset->ItemIcon);
-			// [¼öÁ¤ ÇÙ½É] Visible -> HitTestInvisible
-			// ÀÌ¹ÌÁö´Â º¸ÀÌµÇ, ¸¶¿ì½º Å¬¸¯Àº Åë°ú½ÃÄÑ µÚÀÇ ¹öÆ°ÀÌ ´­¸®°Ô ÇÕ´Ï´Ù.
+			// [ìˆ˜ì • í•µì‹¬] Visible -> HitTestInvisible
+			// ì´ë¯¸ì§€ëŠ” ë³´ì´ë˜, ë§ˆìš°ìŠ¤ í´ë¦­ì€ í†µê³¼ì‹œì¼œ ë’¤ì˜ ë²„íŠ¼ì´ ëˆŒë¦¬ê²Œ í•©ë‹ˆë‹¤.
 			ItemImage->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 
@@ -54,7 +54,7 @@ void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData, int32 InIn
 			FText QuantityText = FText::Format(QuantityFormat, Args);
 
 			ItemQuantity->SetText(QuantityText);
-			// [¼öÁ¤] ÅØ½ºÆ®µµ Å¬¸¯À» ¹æÇØÇÏÁö ¾Êµµ·Ï HitTestInvisible·Î º¯°æ
+			// [ìˆ˜ì •] í…ìŠ¤íŠ¸ë„ í´ë¦­ì„ ë°©í•´í•˜ì§€ ì•Šë„ë¡ HitTestInvisibleë¡œ ë³€ê²½
 			ItemQuantity->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 
@@ -63,7 +63,7 @@ void UInventorySlot::UpdateSlot(const FInventorySlotStruct& SlotData, int32 InIn
 			FText Grade = UEnum::GetDisplayValueAsText(SlotData.Grade);
 
 			ItemGrade->SetText(Grade);
-			// [¼öÁ¤] µî±Þ ÅØ½ºÆ®µµ Å¬¸¯ ¹æÇØ ±ÝÁö
+			// [ìˆ˜ì •] ë“±ê¸‰ í…ìŠ¤íŠ¸ë„ í´ë¦­ ë°©í•´ ê¸ˆì§€
 			ItemGrade->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 	}

@@ -1,4 +1,4 @@
-#include "NPCBase.h"
+﻿#include "NPCBase.h"
 
 #include "../../AoAPlayerController.h"
 #include "../Playable/PlayerCharacter.h"
@@ -7,6 +7,7 @@
 #include "../../UI/NPC/DialogueWidget.h"
 #include "../../UI/MyHUD.h"
 #include "DialogueDataStruct.h"
+#include "../../QuestManagerSubsystem.h"
 
 ANPCBase::ANPCBase()
 {
@@ -56,55 +57,77 @@ void ANPCBase::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
 		InteractWidget->SetVisibility(false);
-		Player->SetInteractObject(this);
+		Player->SetInteractObject(nullptr);
 	}
 }
 
 void ANPCBase::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	if (!DialogueTable || NPCID.IsNone())
+	UQuestManagerSubsystem* QuestManagerSubsystem = GetGameInstance()->GetSubsystem<UQuestManagerSubsystem>();
+
+	TArray<FName> RowNames = DialogueTable->GetRowNames();
+
+	const FDialogueData* Candidate_Quest = nullptr;
+	const FDialogueData* Candidate_Normal = nullptr;
+
+	int32 CurrnetLevel = Interactor->GetLevel();
+
+	for (const FName& RowName : RowNames)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NPC Data is missing!"));
-		return;
-	}
+		static const FString Context(TEXT("NPC Search Context"));
+		FDialogueData* Row = DialogueTable->FindRow<FDialogueData>(RowName, Context);
 
-	AAoAPlayerController* PC = Cast<AAoAPlayerController>(Interactor->GetController());
-	if (!PC) return;
+		if (!Row) return;
 
-	AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD());
-	if (!MyHUD) return;
-
-	static const FString ContextString(TEXT("NPC Dialogue Context"));
-	FNPCData* NPCData = DialogueTable->FindRow<FNPCData>(NPCID, ContextString);
-
-	if (!NPCData) return;
-
-	int32 CurrentLevel = Interactor->GetLevel();
-
-	const FDialogueScenario* SelectedScenario = nullptr;
-	int32 MaxConditionFound = -1;
-
-	for (const FDialogueScenario& Scenario : NPCData->Scenarios)
-	{
-		if (CurrentLevel >= Scenario.MinLevelCondition && Scenario.MinLevelCondition > MaxConditionFound)
+		if (Row->DialogueType == EDialogueType::Normal) Candidate_Normal = Row;
+		else
 		{
-			MaxConditionFound = Scenario.MinLevelCondition;
-			SelectedScenario = &Scenario;
+			if (CurrnetLevel < Row->ReqLevel) continue;
+
+			if (Row->QuestCondition == EQuestCondition::NotStarted)
+			{
+				Candidate_Quest = Row;
+			}
+			else if (Row->QuestCondition == EQuestCondition::InProgress)
+			{
+				if (QuestManagerSubsystem->GetActiveQuests().Find(Row->QuestID) && !QuestManagerSubsystem->IsQuestReadyToCompleted(Row->QuestID)) Candidate_Quest = Row;
+			}
+			else if (Row->QuestCondition == EQuestCondition::Completed)
+			{
+				if (QuestManagerSubsystem->GetActiveQuests().Find(Row->QuestID) && QuestManagerSubsystem->IsQuestReadyToCompleted(Row->QuestID))
+				{
+					Candidate_Quest = Row;
+					break;
+				}
+			}
 		}
 	}
-	if (SelectedScenario)
-	{
-		MyHUD->OpenWidget(EWidgetType::Dialogue);
 
-		if (UUserWidget* Widget = MyHUD->GetWidget(EWidgetType::Dialogue))
+	const FDialogueData* SelectedRow = nullptr;
+
+	if (Candidate_Quest) SelectedRow = Candidate_Quest;
+	else SelectedRow = Candidate_Normal;
+
+	if (SelectedRow)
+	{
+		AAoAPlayerController* PC = Cast<AAoAPlayerController>(Interactor->GetController());
+		if (PC)
 		{
-			if (UDialogueWidget* DialogueWidget = Cast<UDialogueWidget>(Widget))
+			AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD());
+			if (MyHUD)
 			{
-				DialogueWidget->UpdateDialogue(
-					FText::FromName(NPCData->NPCName),
-					SelectedScenario->Dialogues,
-					NPCData->Portrait
-				);
+				MyHUD->OpenWidget(EWidgetType::Dialogue);
+				UDialogueWidget* Widget = Cast<UDialogueWidget>(MyHUD->GetWidget(EWidgetType::Dialogue));
+
+				if (Widget)
+				{
+					Widget->UpdateDialogue(
+						FText::FromName(NPCName),
+						SelectedRow->Dialogues,
+						SelectedRow->Portrait,
+						SelectedRow->QuestID
+					);
+				}
 			}
 		}
 	}

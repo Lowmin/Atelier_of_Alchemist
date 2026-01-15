@@ -1,4 +1,4 @@
-#include "BattleGameMode.h"
+﻿#include "BattleGameMode.h"
 #include "BattleManagerSubsystem.h"
 #include "GuildMemberManagerSubsystem.h"
 #include "AoABattleController.h"

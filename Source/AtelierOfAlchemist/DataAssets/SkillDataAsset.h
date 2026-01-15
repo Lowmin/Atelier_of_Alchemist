@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -69,30 +69,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	FText SkillDescription;
 
-	// ½ºÅ³ ÇØ±İ ·¹º§
+	// ìŠ¤í‚¬ í•´ê¸ˆ ë ˆë²¨
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	int32 UnlockLevel = 0;
 
-	// Å¸°Ù
+	// íƒ€ê²Ÿ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Target")
 	ESkillTarget Target;
 
-	// ¹üÀ§
+	// ë²”ìœ„
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Target")
 	ESkillScope Scope;
 
-	// È¿°úÅ¸ÀÔ (µ¥¹ÌÁö, ¹öÇÁ, µğ¹öÇÁ, Èú)
+	// íš¨ê³¼íƒ€ì… (ë°ë¯¸ì§€, ë²„í”„, ë””ë²„í”„, í)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
 	ESkillEffectType EffectType;
 
-	// ½ºÅ³Å¸ÀÔ (±ÙÁ¢, Åõ»çÃ¼)
+	// ìŠ¤í‚¬íƒ€ì… (ê·¼ì ‘, íˆ¬ì‚¬ì²´)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	ESkillType SkillType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	EProjectileSpawnType ProjectileSpawnType;
 
-	// Åõ»çÃ¼ÀÇ ±¤¿ª±â ¿©ºÎ (¿î¼® µî)
+	// íˆ¬ì‚¬ì²´ì˜ ê´‘ì—­ê¸° ì—¬ë¶€ (ìš´ì„ ë“±)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile", meta = (EditCondition = "SkillType == ESkillType::Projectile"))
 	bool IsGlobalProjectile;
 

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,27 +14,27 @@ struct FAlchemyRecipe
 	GENERATED_BODY()
 
 public:
-	// ·¹½ÃÇÇ ID
+	// ë ˆì‹œí”¼ ID
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
 	FName RecipeID;
 
-	// ·¹½ÃÇÇ ÀÌ¸§
+	// ë ˆì‹œí”¼ ì´ë¦„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
 	FText RecipeName;
 
-	// ¾ÆÀÌÄÜ
+	// ì•„ì´ì½˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
 	UTexture2D* Icon;
 
-	// ÇÊ¿äÇÑ Àç·á(¿¹½Ã = ¾àÃÊ, 2°³)
+	// í•„ìš”í•œ ì¬ë£Œ(ì˜ˆì‹œ = ì•½ì´ˆ, 2ê°œ)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
 	TMap<UItemDataAsset*, int32> Ingredients;
 
-	// °á°ú ¾ÆÀÌÅÛ
+	// ê²°ê³¼ ì•„ì´í…œ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
 	UItemDataAsset* ResultItem;
 
-	// °á°ú ¾ÆÀÌÅÛ °³¼ö
+	// ê²°ê³¼ ì•„ì´í…œ ê°œìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recipe")
 	int32 ResultCount = 1;
 };

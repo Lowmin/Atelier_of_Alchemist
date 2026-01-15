@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Characters/NPCs/QuestDataStruct.h"
 
@@ -19,6 +19,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	void CompletedQuest(FName QuestID);
+
+	TMap<FName, int32> GetActiveQuests() { return ActiveQuests; };
+
+	UFUNCTION(BlueprintCallable, Category = "Quest")
+	bool IsQuestReadyToCompleted(FName QuestID);
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest")

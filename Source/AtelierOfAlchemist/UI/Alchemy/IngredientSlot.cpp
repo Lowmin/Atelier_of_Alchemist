@@ -1,4 +1,4 @@
-#include "IngredientSlot.h"
+О╩©#include "IngredientSlot.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
@@ -50,7 +50,7 @@ void UIngredientSlot::InitRequirement(UItemDataAsset* InAsset, int32 InCount)
 
 	if (Text_Grade)
 	{
-		Text_Grade->SetText(FText::FromString(TEXT("╪╠ец")));
+		Text_Grade->SetText(FText::FromString(TEXT("Л└═М┐²")));
 	}
 
 	if (Image_Icon && InAsset)

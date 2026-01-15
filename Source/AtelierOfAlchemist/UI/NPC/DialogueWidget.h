@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -16,7 +16,7 @@ class ATELIEROFALCHEMIST_API UDialogueWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void UpdateDialogue(const FText& Name, const TArray<FText>& Contents, UTexture2D* Portrait);
+	void UpdateDialogue(const FText& Name, const TArray<FText>& Contents, UTexture2D* Portrait, FName QuestID = NAME_None);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDialogueEnded OnDialogueEnded;
@@ -43,4 +43,6 @@ private:
 
 	TArray<FText> CurrentDialogues;
 	int32 CurrentDialogIndex = 0;
+
+	FName PendingQuestID;
 };

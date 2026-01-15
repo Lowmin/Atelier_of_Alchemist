@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -26,8 +26,8 @@ class ATELIEROFALCHEMIST_API UBattleMainLayout : public UUserWidget
 	
 public:
 	void HideBattleUI();
-	void ShowBattleUI();	// «‡µø º±≈√
-	void ShowSkillUI();		// Ω∫≈≥ ∏ÆΩ∫∆Æ
+	void ShowBattleUI();	// ÌñâÎèô ÏÑ†ÌÉù
+	void ShowSkillUI();		// Ïä§ÌÇ¨ Î¶¨Ïä§Ìä∏
 	void InitStatusSlot(TArray<UPlayerRuntimeData*>& PartyDataList);
 	void UpdateTurnSlotBar(const TArray<ABattleUnit*>& TurnQueue);
 	void InitSkillList(const TArray<USkillDataAsset*>& Skills);

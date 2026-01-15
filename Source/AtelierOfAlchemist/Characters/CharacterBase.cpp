@@ -1,4 +1,4 @@
-#include "CharacterBase.h"
+﻿#include "CharacterBase.h"
 #include "StatComponent.h"
 #include "../DataAssets/SkillDataAsset.h"
 #include "Kismet/GameplayStatics.h"

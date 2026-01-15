@@ -1,13 +1,16 @@
-#pragma once
+癤�#pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "../../DataAssets/ItemDataAsset.h"
+#include "../../DataAssets/CharacterDataAsset.h"
+#include "QuestDataStruct.generated.h"
 
 UENUM(BlueprintType)
 enum class EQuestType : uint8
 {
-	Hunting		UMETA(DisplayName = "사냥"),
-	Collection	UMETA(DisplayName = "수집")
+	Hunting		UMETA(DisplayName = "Hunt"),
+	Collection	UMETA(DisplayName = "Collect")
 };
 
 USTRUCT(BlueprintType)
@@ -25,15 +28,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EQuestType QuestType = EQuestType::Collection;
 
-	// 퀘스트 목표의 ID (사냥이면 MonsterID, 수집이면 ItemID)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName TargetID;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Target", meta = (EditCondition = "QuestType == EQuestType::Collection", EditConditionHides))
+	TObjectPtr<UItemDataAsset> TargetItemAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Target", meta = (EditCondition = "QuestType == EQuestType::Hunting", EditConditionHides))
+	TObjectPtr<UCharacterDataAsset> TargetMonsterAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 TargetCount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UItemDataAsset* RewardItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EItemGrade RewardItemGrade;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 RewardItemQuantity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 RewardExp;

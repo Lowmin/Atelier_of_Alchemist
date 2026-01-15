@@ -1,4 +1,4 @@
-#include "PlayerRuntimeData.h"
+﻿#include "PlayerRuntimeData.h"
 #include "DataAssets/CharacterDataAsset.h"
 
 void UPlayerRuntimeData::Initialize(UCharacterDataAsset* NewCharacterDataAsset)
@@ -10,7 +10,7 @@ void UPlayerRuntimeData::Initialize(UCharacterDataAsset* NewCharacterDataAsset)
 		MaxHealth = CharacterDataAsset->BaseMaxHealth;
 		CurrentHealth = MaxHealth;
 		CharacterID = CharacterDataAsset->GetFName();
-		Level = 1;
+		Level = CharacterDataAsset->BaseLevel;
 	}
 }
 

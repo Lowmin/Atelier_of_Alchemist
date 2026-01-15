@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -46,6 +46,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void EquipItemToCharacter(FName CharacterID, int32 InvSlotIndex, EEquipPart TargetPart);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	int32 GetItemCount(UItemDataAsset* TargetItemAsset) const;
 
 protected:
 	UPROPERTY(SaveGame)

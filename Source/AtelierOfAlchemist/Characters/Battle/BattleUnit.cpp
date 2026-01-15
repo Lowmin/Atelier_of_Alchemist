@@ -1,4 +1,4 @@
-#include "BattleUnit.h"
+ï»¿#include "BattleUnit.h"
 
 #include "AIController.h"
 #include "Kismet/GameplayStatics.h"
@@ -203,8 +203,8 @@ void ABattleUnit::PlaySkillCameraSequence(USkillDataAsset* Skill)
 
 			if (ActorsToBind.Num() > 0)
 			{
-				// [¼öÁ¤ 2] »ý¼ºÀÚ ÀÎÀÚ º¯°æ (ÀÎÀÚ 2°³ -> ÀÎÀÚ 1°³)
-				// UE 5.5¿¡¼­´Â GUID¸¸ ³ÖÀ¸¸é Local ¹ÙÀÎµùÀ¸·Î °£ÁÖÇÕ´Ï´Ù.
+				// [ìˆ˜ì • 2] ìƒì„±ìž ì¸ìž ë³€ê²½ (ì¸ìž 2ê°œ -> ì¸ìž 1ê°œ)
+				// UE 5.5ì—ì„œëŠ” GUIDë§Œ ë„£ìœ¼ë©´ Local ë°”ì¸ë”©ìœ¼ë¡œ ê°„ì£¼í•©ë‹ˆë‹¤.
 				FMovieSceneObjectBindingID BindingID(Binding.GetObjectGuid());
 
 				SequenceActor->SetBinding(BindingID, ActorsToBind);

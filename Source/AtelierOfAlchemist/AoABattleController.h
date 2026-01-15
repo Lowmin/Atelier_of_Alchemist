@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -46,13 +46,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> IMC_Battle_EnemyTurn;
 
-	// °øÅë Á¶ÀÛ
+	// ê³µí†µ ì¡°ìž‘
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Cancel;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Confirm;
 
-	// BattleUI Á¶ÀÛ
+	// BattleUI ì¡°ìž‘
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Attack;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -62,7 +62,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Dodge;
 
-	// SkillList Á¶ÀÛ
+	// SkillList ì¡°ìž‘
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Skill_1;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -70,7 +70,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Skill_3;
 
-	// Target Á¶ÀÛ
+	// Target ì¡°ìž‘
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Left;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")

@@ -1,4 +1,4 @@
-#pragma once
+癤�#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -36,9 +36,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UWidgetComponent* InteractWidget;
 
-	// 데이터 테이블 내 ID 입력
-	UPROPERTY(EditAnywhere, Category = "Dialogue")
-	FName NPCID;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName NPCName;
 
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 	UDataTable* DialogueTable;

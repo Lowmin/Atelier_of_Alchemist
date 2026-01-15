@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BattleProjectile.h"
 #include "Kismet/GameplayStatics.h"
 
-// ÄÄÆ÷³ÍÆ®
+// ì»´í¬ë„ŒíŠ¸
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -17,18 +17,18 @@ ABattleProjectile::ABattleProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Ãæµ¹
+	// ì¶©ëŒ
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	RootComponent = SphereComponent;
 	SphereComponent->SetCollisionProfileName(TEXT("Trigger"));
 	SphereComponent->SetSphereRadius(30.0f);
 
-	// ¿ÜÇü
+	// ì™¸í˜•
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	MeshComponent->SetupAttachment(RootComponent);
 	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 
-	// Åõ»çÃ¼ ÀÌµ¿
+	// íˆ¬ì‚¬ì²´ ì´ë™
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComponent"));
 	MovementComponent->InitialSpeed = 1500.0f;
 	MovementComponent->MaxSpeed = 3000.0f;
@@ -109,10 +109,10 @@ void ABattleProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 
 	if (IsHit)
 	{
-		// TODO: ¿©±â¿¡ Æø¹ß ÀÌÆåÆ®(Particle/Niagara) »ı¼º ÄÚµå Ãß°¡
+		// TODO: ì—¬ê¸°ì— í­ë°œ ì´í™íŠ¸(Particle/Niagara) ìƒì„± ì½”ë“œ ì¶”ê°€
 		// UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionVFX, GetActorLocation());
 
-		// TODO: Æø¹ß »ç¿îµå Àç»ı
+		// TODO: í­ë°œ ì‚¬ìš´ë“œ ì¬ìƒ
 		// UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 
 		Destroy();

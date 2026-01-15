@@ -1,4 +1,4 @@
-#include "InventoryManagerSubsystem.h"
+﻿#include "InventoryManagerSubsystem.h"
 #include "PlayerRuntimeData.h"
 #include "GuildMemberManagerSubsystem.h"
 
@@ -113,4 +113,21 @@ void UInventoryManagerSubsystem::EquipItemToCharacter(FName CharacterID, int32 I
 	}
 
 	OnInventoryUpdated.Broadcast();
+}
+
+int32 UInventoryManagerSubsystem::GetItemCount(UItemDataAsset* TargetItemAsset) const
+{
+	if (!TargetItemAsset) return 0;
+
+	int32 TotalCount = 0;
+
+	for (const FInventorySlotStruct& Slot : InventorySlot)
+	{
+		if (Slot.Quantity > 0 && Slot.ItemData.LoadSynchronous() == TargetItemAsset)
+		{
+			TotalCount += Slot.Quantity;
+		}
+	}
+
+	return TotalCount;
 }

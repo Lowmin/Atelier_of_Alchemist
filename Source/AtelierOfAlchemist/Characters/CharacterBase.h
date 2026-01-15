@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Battle")
 	ECharacterType Type;
 
-	// µ•¿Ã≈Õ
+	// Îç∞Ïù¥ÌÑ∞
 	FORCEINLINE UStatComponent* GetStatComponent() const { return StatComponent; }
 	UCharacterDataAsset* GetCharacterData() const;
 	int32 GetLevel() const;

@@ -1,4 +1,4 @@
-#include "StatComponent.h"
+﻿#include "StatComponent.h"
 #include "../PlayerRuntimeData.h"
 #include "../DataAssets/CharacterDataAsset.h"
 
