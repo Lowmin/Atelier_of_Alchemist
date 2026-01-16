@@ -7,16 +7,6 @@
 #include "ItemDataAsset.generated.h"
 
 UENUM(BlueprintType)
-enum class EItemAttribute : uint8
-{
-	EIA_None	UMETA(DisplayName = "속성 없음"),
-	EIA_Fire	UMETA(DisplayName = "불"),
-	EIA_Water	UMETA(DisplayName = "물"),
-	EIA_Wind	UMETA(DisplayName = "바람"),
-	EIA_Earth	UMETA(DisplayName = "땅")
-};
-
-UENUM(BlueprintType)
 enum class EItemGrade : uint8
 {
 	EIG_S	UMETA(DisplayName = "S"),
@@ -31,7 +21,6 @@ UENUM(BlueprintType)
 enum class EItemType : uint8
 {
 	EIT_Potion	UMETA(DisplayName = "Potion"),
-	EIT_Boom	UMETA(DisplayName = "Boom"),
 	EIT_Equip	UMETA(DisplayName = "Equip"),
 	EIT_Ingredient	UMETA(DisplayName = "Ingredient")
 };
@@ -73,9 +62,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText ItemDescription;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	EItemAttribute ItemAttribute;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	EItemGrade ItemGrade;
