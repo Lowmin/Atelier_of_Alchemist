@@ -3,13 +3,16 @@
 #include "GuildMemberManagerSubsystem.h"
 #include "AoABattleController.h"
 #include "DataAssets/CharacterDataAsset.h"
+#include "DataAssets/EnemyDataAsset.h"
 #include "DataAssets/EnemyPartyDataAsset.h"
 #include "DataAssets/SkillDataAsset.h"
 #include "PlayerRuntimeData.h"
 #include "Object/BattleSpawnPoint.h"
-#include "Characters/Battle/BattleUnit.h" 
+#include "Characters/Battle/BattleUnit.h"
+#include "Characters/Enemy/BattleAIComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
+#include "Characters/StatComponent.h"
 #include "UI/Battle/BattleMainLayout.h"
 #include "DataAssets/SkillListComponent.h"
 
@@ -29,7 +32,7 @@ void ABattleGameMode::ProcessPlayerAction(int32 ActionIndex)
 {
 	switch (ActionIndex)
 	{
-	case 0: ExecuteAttack(); break;
+	case 0: ExecutePlayerSkill(0); break;
 	case 1: ShowSkillListUI(); break;
 	case 2: ExecuteRunAway(); break;
 	default: break;
@@ -39,7 +42,7 @@ void ABattleGameMode::ProcessPlayerAction(int32 ActionIndex)
 void ABattleGameMode::ProcessSkillSelection(int32 SkillSlotIndex)
 {
 	if (MainLayoutInstance) MainLayoutInstance->HideBattleUI();
-	ExecuteSkill(SkillSlotIndex);
+	ExecutePlayerSkill(SkillSlotIndex);
 }
 
 void ABattleGameMode::UndoLastAction()
@@ -82,18 +85,34 @@ void ABattleGameMode::StartNextTurn()
 	TurnQueue.RemoveAt(0);
 	UpdateTurnWidget();
 
-	if (CurrentUnit)
+	if (!CurrentUnit || CurrentUnit->GetCurHealth() <= 0)
 	{
-		if (CurrentUnit->Type == ECharacterType::Player)
-		{
-			if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
-			{
-				if (MainLayoutInstance) MainLayoutInstance->ShowBattleUI();
-				BattleController->SetInputMode_Main();
-			}
-		}
+		StartNextTurn();
+		return;
+	}
 
-		CurrentUnit->TurnStart();
+	CurrentUnit->TurnStart();
+
+	if (CurrentUnit->Type == ECharacterType::Player)
+	{
+		if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
+		{
+			if (MainLayoutInstance) MainLayoutInstance->ShowBattleUI();
+			BattleController->SetInputMode_Main();
+		}
+	}
+	else
+	{
+		if (MainLayoutInstance) MainLayoutInstance->HideBattleUI();
+
+		if (UBattleAIComponent* AIComp = CurrentUnit->FindComponentByClass<UBattleAIComponent>())
+		{
+			AIComp->ProcessAITurn(CurrentUnit);
+		}
+		else
+		{
+			TurnEnd();
+		}
 	}
 }
 
@@ -106,11 +125,6 @@ void ABattleGameMode::TurnEnd()
 void ABattleGameMode::UpdateTurnWidget()
 {
 	if (MainLayoutInstance) MainLayoutInstance->UpdateTurnSlotBar(TurnQueue);
-}
-
-void ABattleGameMode::ExecuteAttack()
-{
-	ExecuteSkill(0);
 }
 
 void ABattleGameMode::ShowSkillListUI()
@@ -132,7 +146,7 @@ void ABattleGameMode::ShowSkillListUI()
 	}
 }
 
-void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
+void ABattleGameMode::ExecutePlayerSkill(int32 SkillIndex)
 {
 	if (!CurrentUnit) return;
 
@@ -150,9 +164,35 @@ void ABattleGameMode::ExecuteSkill(int32 SkillIndex)
 
 	if (MainLayoutInstance) MainLayoutInstance->HideBattleUI();
 
-	if (AAoABattleController* PC = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
+	if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
 	{
-		PC->StartTargetingMode(SkillData);
+		BattleController->StartTargetingMode(SkillData);
+	}
+}
+
+void ABattleGameMode::ExecuteAIAction(ABattleUnit* Attacker, int32 SkillIndex, ABattleUnit* Target)
+{
+	if (!Attacker || !Target)
+	{
+		TurnEnd();
+		return;
+	}
+
+	USkillDataAsset* SkillData = nullptr;
+	if (USkillListComponent* SkillComp = Attacker->GetSkillComponent())
+	{
+		SkillData = SkillComp->GetSkillIndex(SkillIndex);
+	}
+
+	if (SkillData)
+	{
+		TArray<ABattleUnit*> Targets;
+		Targets.Add(Target);
+		Attacker->BattleAction_UseSkill(SkillData, Targets);
+	}
+	else
+	{
+		TurnEnd();
 	}
 }
 
@@ -265,9 +305,16 @@ void ABattleGameMode::SpawnEnemyParty()
 		if (ABattleUnit* NewEnemy = GetWorld()->SpawnActor<ABattleUnit>(EnemyClass, SpawnLoc, SpawnPoint->GetActorRotation(), SpawnParams))
 		{
 			AllUnits.Add(NewEnemy);
+
 			if (UStatComponent* StatComp = NewEnemy->GetStatComponent())
 			{
 				StatComp->InitializeFromEnemy(Info.EnemyData);
+			}
+
+			if (UBattleAIComponent* AIComponent = NewObject<UBattleAIComponent>(NewEnemy))
+			{
+				AIComponent->RegisterComponent();
+				AIComponent->InitializeAI(Info.EnemyData);
 			}
 		}
 	}
@@ -296,6 +343,19 @@ void ABattleGameMode::InitializeBattleUI()
 			MainLayoutInstance->InitStatusSlot(PartyDataList);
 		}
 	}
+}
+
+TArray<ABattleUnit*> ABattleGameMode::GetPlayerUnits() const
+{
+	TArray<ABattleUnit*> PlayerUnits;
+	for (ABattleUnit* Unit : AllUnits)
+	{
+		if (Unit && Unit->Type == ECharacterType::Player && Unit->GetCurHealth() > 0)
+		{
+			PlayerUnits.Add(Unit);
+		}
+	}
+	return PlayerUnits;
 }
 
 UBattleManagerSubsystem* ABattleGameMode::GetBattleManagerSubsystem() const

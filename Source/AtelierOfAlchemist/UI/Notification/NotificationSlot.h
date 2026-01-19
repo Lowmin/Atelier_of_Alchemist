@@ -18,7 +18,7 @@ class ATELIEROFALCHEMIST_API UNotificationSlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void Initialize(const FNotificationData& Data);
+	void SetNotificationData(const FNotificationData& Data);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

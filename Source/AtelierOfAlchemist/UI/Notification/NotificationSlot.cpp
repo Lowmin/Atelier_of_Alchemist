@@ -7,7 +7,7 @@
 #include "NotificationData.h"
 #include "Animation/WidgetAnimation.h"
 
-void UNotificationSlot::Initialize(const FNotificationData& Data)
+void UNotificationSlot::SetNotificationData(const FNotificationData& Data)
 {
 	NotificationText->SetText(Data.Message);
 	NotificationText->SetVisibility(ESlateVisibility::HitTestInvisible);

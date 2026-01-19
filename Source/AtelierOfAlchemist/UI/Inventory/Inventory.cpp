@@ -2,7 +2,6 @@
 #include "../../InventoryManagerSubsystem.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
-#include "InventorySlotStruct.h"
 #include "../InventorySlot.h"
 #include "InventoryItemInfo.h"
 #include "../../UI/MyHUD.h"
@@ -61,13 +60,13 @@ void UInventory::UpdateInventory()
 	for (int32 i = 0; i < Slots.Num(); ++i)
 	{
 		const FInventorySlotStruct& SlotData = Slots[i];
-		bool bIsEmpty = SlotData.ItemData.IsNull();
+		bool bIsEmpty = (!SlotData.ItemData);
 
 		if (bIsSelectionMode)
 		{
 			if (!bIsEmpty)
 			{
-				UItemDataAsset* Asset = SlotData.ItemData.LoadSynchronous();
+				UItemDataAsset* Asset = SlotData.ItemData;
 
 				if (!Asset || Asset->ItemType != EItemType::EIT_Equip || Asset->Part != FilterPart)
 				{
@@ -99,7 +98,7 @@ void UInventory::OnSlotClicked(int32 SlotIndex)
 		if (InventoryManager)
 		{
 			const TArray<FInventorySlotStruct>& Slots = InventoryManager->GetInventorySlot();
-			if (Slots.IsValidIndex(SlotIndex) && Slots[SlotIndex].ItemData.IsNull())
+			if (Slots.IsValidIndex(SlotIndex) && !Slots[SlotIndex].ItemData)
 			{
 				return;
 			}

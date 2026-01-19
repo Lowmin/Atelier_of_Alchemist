@@ -59,6 +59,9 @@ struct FEnemyDropInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemGrade MaxGrade = EItemGrade::EIG_A;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 DropQuantity;
 };
 
 UCLASS()

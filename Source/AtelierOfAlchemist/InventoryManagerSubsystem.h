@@ -3,10 +3,24 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "DataAssets/ItemDataAsset.h"
-#include "UI/Inventory/InventorySlotStruct.h"
 #include "InventoryManagerSubsystem.generated.h"
 
 class UItemDataAsset;
+
+USTRUCT(BlueprintType)
+struct FInventorySlotStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UItemDataAsset* ItemData = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EItemGrade Grade = EItemGrade::EIG_E;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Quantity = 0;
+};
 
 USTRUCT(BlueprintType)
 struct FInventorySearchResult
@@ -21,6 +35,7 @@ struct FInventorySearchResult
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnItemAdded, UItemDataAsset*, ItemData, EItemGrade, Grade, int32, Amount);
 
 UCLASS()
 class ATELIEROFALCHEMIST_API UInventoryManagerSubsystem : public UGameInstanceSubsystem
@@ -40,6 +55,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnItemAdded OnItemAdded;
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TArray<FInventorySearchResult> FindItemsByAsset(UItemDataAsset* TargetAsset);

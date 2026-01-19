@@ -12,6 +12,7 @@ class USkillDataAsset;
 class USkillListComponent;
 class ULevelSequencePlayer;
 class ALevelSequenceActor;
+class UBattleAIComponent;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API ABattleUnit : public ACharacterBase
@@ -51,8 +52,17 @@ protected:
 	FVector ProjectileSpawnPoint(FVector TargetPos);
 	FRotator ProjectileSpawnRotation(FVector TargetPos, FVector SpawnLocation);
 
+	void PlaySkillCameraSequence(USkillDataAsset* Skill);
+
+	UFUNCTION()
+	void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);
+
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkillListComponent> SkillComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	TObjectPtr<UBattleAIComponent> BattleAIComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> TargetMarkerWidget;
@@ -66,20 +76,15 @@ protected:
 	UPROPERTY()
 	TObjectPtr<ALevelSequenceActor> SequenceActor;
 
-	void PlaySkillCameraSequence(USkillDataAsset* Skill);
-
-	UFUNCTION()
-	void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);
-
 	UPROPERTY(BlueprintReadOnly, Category = "Battle")
 	FVector OriginalLocation;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Battle")
 	FRotator OriginalRotation;
 
 private:
 	void StartAttackSequence();
 	void OnAttackSequenceFinished();
-
 	void PreloadSkillAssets();
 
 	UPROPERTY(Transient)
@@ -93,7 +98,6 @@ private:
 
 	UPROPERTY()
 	class AAIController* AIController;
-
 
 	bool bIsReturning = false;
 };

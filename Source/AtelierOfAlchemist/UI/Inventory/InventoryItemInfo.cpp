@@ -2,19 +2,19 @@
 
 
 #include "InventoryItemInfo.h"
-#include "InventorySlotStruct.h"
+#include "../../InventoryManagerSubsystem.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 
 void UInventoryItemInfo::UpdateInfo(const FInventorySlotStruct& SlotData)
 {
-	if (SlotData.ItemData.IsNull())
+	if (!SlotData.ItemData)
 	{
 		ClearInfo();
 		return;
 	}
 
-	UItemDataAsset* ItemAsset = SlotData.ItemData.LoadSynchronous();
+	UItemDataAsset* ItemAsset = SlotData.ItemData;
 	if (ItemAsset == nullptr)
 	{
 		ClearInfo();

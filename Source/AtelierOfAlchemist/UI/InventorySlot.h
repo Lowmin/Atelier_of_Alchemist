@@ -1,10 +1,8 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Inventory/InventorySlotStruct.h"
+#include "../InventoryManagerSubsystem.h"
 #include "InventorySlot.generated.h"
 
 class UImage;

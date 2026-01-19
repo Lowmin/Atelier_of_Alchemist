@@ -9,7 +9,6 @@
 #include "EquipSlotWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
-#include "../Inventory/InventorySlotStruct.h"
 #include "../MyHUD.h"
 
 void UPartyManageWidget::NativeConstruct()
@@ -192,7 +191,7 @@ void UPartyManageWidget::OnInventoryItemSelected(int32 InvSlotIndex)
 
 	if (Slots.IsValidIndex(InvSlotIndex))
 	{
-		UItemDataAsset* SelectedItem = Slots[InvSlotIndex].ItemData.LoadSynchronous();
+		UItemDataAsset* SelectedItem = Slots[InvSlotIndex].ItemData;
 
 		if (SelectedItem)
 		{

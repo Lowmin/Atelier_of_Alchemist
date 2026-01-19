@@ -1,17 +1,15 @@
 ﻿#include "BattleUnit.h"
-
+#include "../Enemy/BattleAIComponent.h"
 #include "AIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
-
 #include "../../Characters/StatComponent.h"
 #include "../../DataAssets/SkillListComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
 #include "../../DataAssets/CharacterDataAsset.h"
 #include "../../Object/BattleProjectile.h"
 #include "../../BattleGameMode.h"
-
 #include "LevelSequence.h"
 #include "LevelSequenceActor.h"
 #include "LevelSequencePlayer.h"
@@ -20,7 +18,9 @@
 ABattleUnit::ABattleUnit()
 {
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 	SkillComponent = CreateDefaultSubobject<USkillListComponent>(TEXT("SkillComponent"));
+	BattleAIComponent = CreateDefaultSubobject<UBattleAIComponent>(TEXT("BattleAIComponent"));
 
 	TargetMarkerWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetMarkerWidget"));
 	TargetMarkerWidget->SetupAttachment(RootComponent);
@@ -163,7 +163,6 @@ void ABattleUnit::PlaySkillCameraSequence(USkillDataAsset* Skill)
 	FMovieSceneSequencePlaybackSettings Settings;
 	Settings.bAutoPlay = false;
 	Settings.bDisableCameraCuts = false;
-
 	Settings.FinishCompletionStateOverride = EMovieSceneCompletionModeOverride::ForceRestoreState;
 
 	ALevelSequenceActor* OutActor = nullptr;
@@ -186,7 +185,6 @@ void ABattleUnit::PlaySkillCameraSequence(USkillDataAsset* Skill)
 		for (const FMovieSceneBinding& Binding : Bindings)
 		{
 			FString BindingName = Binding.GetName();
-
 			TArray<AActor*> ActorsToBind;
 
 			if (BindingName.Equals(TEXT("Attacker")))
@@ -203,10 +201,7 @@ void ABattleUnit::PlaySkillCameraSequence(USkillDataAsset* Skill)
 
 			if (ActorsToBind.Num() > 0)
 			{
-				// [수정 2] 생성자 인자 변경 (인자 2개 -> 인자 1개)
-				// UE 5.5에서는 GUID만 넣으면 Local 바인딩으로 간주합니다.
 				FMovieSceneObjectBindingID BindingID(Binding.GetObjectGuid());
-
 				SequenceActor->SetBinding(BindingID, ActorsToBind);
 			}
 		}
@@ -248,7 +243,6 @@ void ABattleUnit::StartAttackSequence()
 	}
 
 	float Duration = 0.0f;
-
 	UAnimMontage* MontageToPlay = CachedCurrentSkill->SkillMontage.LoadSynchronous();
 
 	if (MontageToPlay)
@@ -301,10 +295,18 @@ void ABattleUnit::OnAnimNotify_MeleeHit()
 {
 	for (ABattleUnit* Target : CachedTargets)
 	{
-		if (Target && Target->GetCurHealth() > 0)
+		if (Target)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Uhaha!"))
-			ApplyDamage(Target, CachedCurrentSkill);
+			float TargetHP = 0.0f;
+			if (UStatComponent* TargetStat = Target->GetStatComponent())
+			{
+				TargetHP = TargetStat->GetCurrentHealth();
+			}
+
+			if (TargetHP > 0.0f)
+			{
+				ApplyDamage(Target, CachedCurrentSkill);
+			}
 		}
 	}
 }
@@ -393,7 +395,6 @@ void ABattleUnit::SetTargetSelect(bool IsSelected)
 	if (TargetMarkerWidget)
 	{
 		TargetMarkerWidget->SetHiddenInGame(!IsSelected);
-
 		TargetMarkerWidget->SetVisibility(IsSelected);
 
 		if (UUserWidget* WidgetObj = TargetMarkerWidget->GetWidget())
@@ -412,16 +413,9 @@ void ABattleUnit::ApplySkillEffect(ABattleUnit* Target, USkillDataAsset* Skill)
 	case ESkillEffectType::Damage:
 	{
 		float FinalDamage = Skill->Power;
-
-		if (StatComponent)
-		{
-		}
-
 		UGameplayStatics::ApplyDamage(Target, FinalDamage, GetController(), this, nullptr);
-
-		UE_LOG(LogTemp, Log, TEXT(">> [Effect] Applied Damage: %.1f to %s"), FinalDamage, *Target->GetName());
 	}
-	break; 
+	break;
 
 	default:
 		break;

@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "DataAssets/EnemyDataAsset.h"
+#include "InventoryManagerSubsystem.h"
 #include "BattleManagerSubsystem.generated.h"
 
 class UEnemyPartyDataAsset;
@@ -42,4 +44,8 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Battle")
 	TMap<FName, FName> FieldToBattleMapName;
+
+	TArray<FInventorySlotStruct> GenerateDropItem(UEnemyDataAsset* EnemyData);
+
+	EItemGrade CalculateDropGrade(EItemGrade MinGrade, EItemGrade MaxGrade);
 };

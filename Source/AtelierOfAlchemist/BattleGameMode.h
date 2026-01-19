@@ -28,15 +28,18 @@ public:
 	void StartNextTurn();
 	void TurnEnd();
 
+	void ExecutePlayerSkill(int32 SkillIndex);
+	void ExecuteAIAction(ABattleUnit* Attacker, int32 SkillIndex, ABattleUnit* Target);
+
 	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; }
 	const TObjectPtr<ABattleUnit>& GetCurrentUnit() const { return CurrentUnit; }
+
+	TArray<ABattleUnit*> GetPlayerUnits() const;
 
 protected:
 	void CalculateTurnOrder();
 	void UpdateTurnWidget();
 
-	void ExecuteAttack();
-	void ExecuteSkill(int32 SkillIndex);
 	void ExecuteRunAway();
 	void ShowSkillListUI();
 

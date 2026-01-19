@@ -32,7 +32,6 @@ void UBattleAIComponent::DecideAction()
 	ABattleUnit* SelectedTarget = nullptr;
 	bool bPatternFound = false;
 
-	// Priority Sort
 	EnemyData->AIPatterns.Sort([](const FAIPattern& A, const FAIPattern& B) {
 		return A.Priority > B.Priority;
 		});
@@ -75,7 +74,13 @@ bool UBattleAIComponent::CheckCondition(const FAIPattern& Pattern)
 
 	if (UStatComponent* StatComp = OwnerUnit->FindComponentByClass<UStatComponent>())
 	{
-		HPRatio = StatComp->GetHPRatio();
+		float MaxHP = StatComp->GetMaxHealth();
+		float CurHP = StatComp->GetCurrentHealth();
+
+		if (MaxHP > 0.0f)
+		{
+			HPRatio = CurHP / MaxHP;
+		}
 	}
 
 	switch (Pattern.Condition)
