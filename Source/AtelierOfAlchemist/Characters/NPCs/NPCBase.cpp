@@ -65,6 +65,8 @@ void ANPCBase::Interact_Implementation(APlayerCharacter* Interactor)
 {
 	UQuestManagerSubsystem* QuestManagerSubsystem = GetGameInstance()->GetSubsystem<UQuestManagerSubsystem>();
 
+	if (!DialogueTable) return;
+
 	TArray<FName> RowNames = DialogueTable->GetRowNames();
 
 	const FDialogueData* Candidate_Quest = nullptr;
