@@ -6,6 +6,7 @@
 #include "StatComponent.generated.h"
 
 class UCharacterDataAsset;
+class UEnemyDataAsset;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ATELIEROFALCHEMIST_API UStatComponent : public UActorComponent
@@ -16,7 +17,7 @@ public:
 	UStatComponent();
 
 	void Initialize(UPlayerRuntimeData* InRuntimeData);
-	void InitializeFromEnemy(UCharacterDataAsset* InDataAsset);
+	void InitializeFromEnemy(UEnemyDataAsset* InDataAsset);
 
 	void TakeDamage(float DamageAmount);
 	void Heal(float HealAmount);

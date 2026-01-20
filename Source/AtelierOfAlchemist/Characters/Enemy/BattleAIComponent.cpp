@@ -21,49 +21,7 @@ void UBattleAIComponent::ProcessAITurn(ABattleUnit* InOwnerUnit)
 
 void UBattleAIComponent::DecideAction()
 {
-	if (!OwnerUnit || !EnemyData) return;
 
-	ABattleGameMode* GM = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
-	if (!GM) return;
-
-	TArray<ABattleUnit*> PlayerUnits = GM->GetPlayerUnits();
-
-	int32 SelectedSkillIndex = 0;
-	ABattleUnit* SelectedTarget = nullptr;
-	bool bPatternFound = false;
-
-	EnemyData->AIPatterns.Sort([](const FAIPattern& A, const FAIPattern& B) {
-		return A.Priority > B.Priority;
-		});
-
-	for (const FAIPattern& Pattern : EnemyData->AIPatterns)
-	{
-		if (CheckCondition(Pattern))
-		{
-			SelectedTarget = FindTarget(Pattern.TargetType, PlayerUnits);
-			if (SelectedTarget)
-			{
-				SelectedSkillIndex = Pattern.SkillIndex;
-				bPatternFound = true;
-				break;
-			}
-		}
-	}
-
-	if (!bPatternFound)
-	{
-		SelectedSkillIndex = 0;
-		SelectedTarget = FindTarget(EAITargetType::Random, PlayerUnits);
-	}
-
-	if (SelectedTarget)
-	{
-		GM->ExecuteAIAction(OwnerUnit, SelectedSkillIndex, SelectedTarget);
-	}
-	else
-	{
-		GM->StartNextTurn();
-	}
 }
 
 bool UBattleAIComponent::CheckCondition(const FAIPattern& Pattern)

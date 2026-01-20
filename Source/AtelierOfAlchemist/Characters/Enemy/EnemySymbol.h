@@ -6,10 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "EnemySymbol.generated.h"
 
+// 전방 선언
 class USphereComponent;
 class USkeletalMeshComponent;
-class UEnemyPartyDataAsset;
-class UEnemyDataAsset;
+class UEnemyDataAsset; // EnemyDataAsset만 필요함
 
 USTRUCT(BlueprintType)
 struct FEnemySpawnInfo
@@ -28,9 +28,13 @@ UCLASS()
 class ATELIEROFALCHEMIST_API AEnemySymbol : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	AEnemySymbol();
+
+	// [추가] 에디터에서 적 파티를 직접 설정할 배열 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	TArray<FEnemySpawnInfo> EnemyParty;
 
 protected:
 	virtual void BeginPlay() override;

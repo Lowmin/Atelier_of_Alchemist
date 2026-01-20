@@ -19,7 +19,6 @@ public:
 	AEnemyBattleUnit();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
-	virtual void TurnStart() override;
 
 protected:
 	virtual void BeginPlay() override;

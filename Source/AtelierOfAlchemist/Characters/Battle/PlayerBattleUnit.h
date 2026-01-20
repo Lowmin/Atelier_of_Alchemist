@@ -17,7 +17,7 @@ class ATELIEROFALCHEMIST_API APlayerBattleUnit : public ABattleUnit
 public:
 	APlayerBattleUnit();
 
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;	virtual void TurnStart() override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void Dodge(); 
 
 	UFUNCTION(BlueprintCallable)

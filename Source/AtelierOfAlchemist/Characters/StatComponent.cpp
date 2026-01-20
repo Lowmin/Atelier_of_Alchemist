@@ -1,6 +1,7 @@
 ﻿#include "StatComponent.h"
 #include "../PlayerRuntimeData.h"
 #include "../DataAssets/CharacterDataAsset.h"
+#include "../DataAssets/EnemyDataAsset.h" 
 
 UStatComponent::UStatComponent()
 {
@@ -20,14 +21,18 @@ void UStatComponent::Initialize(UPlayerRuntimeData* InRuntimeData)
 	}
 }
 
-void UStatComponent::InitializeFromEnemy(UCharacterDataAsset* InDataAsset)
+void UStatComponent::InitializeFromEnemy(UEnemyDataAsset* InDataAsset)
 {
 	StaticData = InDataAsset;
 
 	if (StaticData)
 	{
-		CurrentHealth = StaticData->BaseMaxHealth;
-		OnHealthChanged.Broadcast(CurrentHealth, StaticData->BaseMaxHealth);
+		CurrentHealth = GetMaxHealth();
+
+		if (OnHealthChanged.IsBound())
+		{
+			OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+		}
 	}
 }
 
@@ -36,19 +41,21 @@ void UStatComponent::TakeDamage(float Amount)
 	if (LinkedRuntimeData)
 	{
 		LinkedRuntimeData->ApplyDamage(Amount);
-
 		CurrentHealth = LinkedRuntimeData->GetCurrentHealth();
 	}
 	else
 	{
-		CurrentHealth -= Amount;
-		if (OnHealthChanged.IsBound()) OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+		CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, GetMaxHealth());
+		if (OnHealthChanged.IsBound())
+		{
+			OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+		}
 	}
 }
 
 void UStatComponent::Heal(float HealAmount)
 {
-	if (LinkedRuntimeData && StaticData)
+	if (LinkedRuntimeData)
 	{
 		float CurHp = LinkedRuntimeData->GetCurrentHealth();
 		float MaxHp = GetMaxHealth();
@@ -56,12 +63,15 @@ void UStatComponent::Heal(float HealAmount)
 		float AfterHp = FMath::Min(CurHp + HealAmount, MaxHp);
 		LinkedRuntimeData->SetCurrentHealth(AfterHp);
 	}
-	else if (StaticData)
+	else
 	{
 		float MaxHp = GetMaxHealth();
 		CurrentHealth = FMath::Min(CurrentHealth + HealAmount, MaxHp);
 
-		OnHealthChanged.Broadcast(CurrentHealth, MaxHp);
+		if (OnHealthChanged.IsBound())
+		{
+			OnHealthChanged.Broadcast(CurrentHealth, MaxHp);
+		}
 	}
 }
 
@@ -73,6 +83,12 @@ float UStatComponent::GetCurrentHealth() const
 	}
 
 	return CurrentHealth;
+}
+
+float UStatComponent::GetMaxHealth() const
+{
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalMaxHealth();
+	return StaticData ? StaticData->BaseMaxHealth : 0.0f;
 }
 
 float UStatComponent::GetAttackPower() const
@@ -87,12 +103,6 @@ float UStatComponent::GetDefense() const
 	return StaticData ? StaticData->BaseDefensePower : 0.0f;
 }
 
-float UStatComponent::GetMaxHealth() const
-{
-	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalMaxHealth();
-	return StaticData ? StaticData->BaseMaxHealth : 0.0f;
-}
-
 float UStatComponent::GetSpeed() const
 {
 	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalSpeed();
@@ -102,7 +112,7 @@ float UStatComponent::GetSpeed() const
 float UStatComponent::GetLevel() const
 {
 	if (LinkedRuntimeData) return LinkedRuntimeData->GetLevel();
-	return StaticData ? StaticData->BaseLevel : 0.0f;
+	return 1.0f;
 }
 
 UCharacterDataAsset* UStatComponent::GetCharacterData() const
@@ -112,5 +122,8 @@ UCharacterDataAsset* UStatComponent::GetCharacterData() const
 
 void UStatComponent::OnRuntimeDataChanged(float NewCurrent, float NewMax)
 {
-	OnHealthChanged.Broadcast(NewCurrent, NewMax);
+	if (OnHealthChanged.IsBound())
+	{
+		OnHealthChanged.Broadcast(NewCurrent, NewMax);
+	}
 }

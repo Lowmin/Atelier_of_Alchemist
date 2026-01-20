@@ -3,14 +3,16 @@
 #include "../../DataAssets/CharacterDataAsset.h"
 #include "../../DataAssets/SkillListComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
+#include "../../DataAssets/EnemyDataAsset.h"
 #include "../../Characters/StatComponent.h"
+#include "../../Object/BattleProjectile.h"
+#include "../Enemy/BattleAIComponent.h"
 
 ABattleUnit::ABattleUnit()
 {
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	SkillComponent = CreateDefaultSubobject<USkillListComponent>("SkillComponent");
-	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
 	BattleAIComponent = CreateDefaultSubobject<UBattleAIComponent>("BattleAIComponent");
 
 	TargetMarkerWidget = CreateDefaultSubobject<UWidgetComponent>("TargetMarkerWidget");

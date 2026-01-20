@@ -35,9 +35,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Battle")
 	FName SavedFieldLevelName;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Battle")
-	TObjectPtr<UEnemyPartyDataAsset> CurrentEnemyPartyData;
-
 	UFUNCTION(BlueprintPure, Category = "Battle")
 	FName GetBattleLevelName(FName CurrentFieldLevelName) const;
 

@@ -29,45 +29,9 @@ void AEnemyBattleUnit::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (StatComponent)
-	{
-		StatComponent->OnHealthChanged.AddDynamic(this, &AEnemyBattleUnit::UpdateStatusHp);
-	}
-
-	if (HealthBarWidget)
-	{
-		UEnemyStatusWidget* EnemyWidget = Cast<UEnemyStatusWidget>(HealthBarWidget->GetUserWidgetObject());
-
-		if (EnemyWidget && StatComponent)
-		{
-			EnemyWidget->BindStatComponent(StatComponent);
-		}
-	}
-}
-
-void AEnemyBattleUnit::TurnStart()
-{
-	Super::TurnStart();
-
-	if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("SetInputMode_EnemyTurn"));
-		BattleController->SetInputMode_EnemyTurn();
-	}
-
-	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
-	{
-		EnemyAIController->SetTurnStatus(true);
-	}
 }
 
 void AEnemyBattleUnit::UpdateStatusHp(float CurrentHp, float MaxHp)
 {
-	if (HealthBarWidget)
-	{
-		if (UEnemyStatusWidget* HPBar = Cast<UEnemyStatusWidget>(HealthBarWidget->GetUserWidgetObject()))
-		{
-			HPBar->UpdateHp(CurrentHp, MaxHp);
-		}
-	}
+
 }

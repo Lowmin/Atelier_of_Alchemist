@@ -12,10 +12,23 @@ ABattleGameMode::ABattleGameMode()
 
 void ABattleGameMode::BeginPlay()
 {
+	Super::BeginPlay();
+
+	StartBattle();
 }
 
 void ABattleGameMode::StartBattle()
 {
+	SpawnPlayerUnits();
+	SpawnEnemyUnits();
+
+	for (ABattleUnit* Unit : AllUnits)
+	{
+		if (Unit)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Spawned: %s (Location: %s)"), *Unit->GetName(), *Unit->GetActorLocation().ToString());
+		}
+	}
 }
 
 void ABattleGameMode::ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* TargetUnit, USkillDataAsset* SkillAsset)

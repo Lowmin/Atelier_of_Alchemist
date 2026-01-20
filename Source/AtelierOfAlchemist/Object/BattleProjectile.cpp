@@ -94,7 +94,7 @@ void ABattleProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 		{
 			if (Target)
 			{
-				CastUnit->ApplySkillEffect(Target, SkillDataAsset);
+				//CastUnit->ApplySkillEffect(Target, SkillDataAsset);
 			}
 		}
 	}
@@ -103,7 +103,7 @@ void ABattleProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 		if (OtherActor == SingleTarget)
 		{
 			IsHit = true;
-			CastUnit->ApplySkillEffect(SingleTarget, SkillDataAsset);
+			//CastUnit->ApplySkillEffect(SingleTarget, SkillDataAsset);
 		}
 	}
 

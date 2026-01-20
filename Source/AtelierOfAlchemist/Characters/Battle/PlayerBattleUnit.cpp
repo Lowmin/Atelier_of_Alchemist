@@ -16,16 +16,6 @@ float APlayerBattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void APlayerBattleUnit::TurnStart()
-{
-	Super::TurnStart();
-
-	if (ABattleGameMode* BattleGameMode = GetWorld()->GetAuthGameMode<ABattleGameMode>())
-	{
-		BattleGameMode->UndoLastAction();
-	}
-}
-
 void APlayerBattleUnit::Dodge()
 {
 	if (bIsDodge) return;
