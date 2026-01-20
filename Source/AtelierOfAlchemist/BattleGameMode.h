@@ -4,69 +4,63 @@
 #include "GameFramework/GameModeBase.h"
 #include "BattleGameMode.generated.h"
 
-class UBattleMainLayout;
-class ABattleSpawnPoint;
-class ACharacterBase;
 class ABattleUnit;
-class UBattleManagerSubsystem;
-class UGuildMemberManagerSubsystem;
-class UCharacterDataAsset;
+class USkillDataAsset;
+class AAoABattleController;
+
+UENUM(BlueprintType)
+enum class EBattleState : uint8
+{
+    Setup,
+    TurnCalculation,
+    ProcessTurn,
+    PlayerTurn,
+    EnemyTurn,
+    ActionRunning,
+    TurnEnd,
+    Win,
+    Lose
+};
 
 UCLASS()
 class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	virtual void BeginPlay() override;
+    ABattleGameMode();
+    virtual void BeginPlay() override;
 
-	void ProcessPlayerAction(int32 ActionIndex);
-	void ProcessSkillSelection(int32 SkillSlotIndex);
-	void UndoLastAction();
+    void StartBattle();
 
-	void StartBattle();
-	void StartNextTurn();
-	void TurnEnd();
+    void ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* TargetUnit, USkillDataAsset* SkillAsset);
 
-	void ExecutePlayerSkill(int32 SkillIndex);
-	void ExecuteAIAction(ABattleUnit* Attacker, int32 SkillIndex, ABattleUnit* Target);
-
-	const TArray<ABattleUnit*>& GetAllUnits() const { return AllUnits; }
-	const TObjectPtr<ABattleUnit>& GetCurrentUnit() const { return CurrentUnit; }
-
-	TArray<ABattleUnit*> GetPlayerUnits() const;
+    TArray<ABattleUnit*> GetAllUnits() const { return AllUnits; }
+    ABattleUnit* GetCurrentUnit() const { return CurrentActiveUnit; }
 
 protected:
-	void CalculateTurnOrder();
-	void UpdateTurnWidget();
+    void SetBattleState(EBattleState NewState);
 
-	void ExecuteRunAway();
-	void ShowSkillListUI();
+    void SpawnPlayerUnits();
 
-	void FindEnemySpawnPoints();
-	void SpawnPlayerParty();
-	void SpawnEnemyParty();
-	void InitializeBattleUI();
+    void SpawnEnemyUnits();
 
-	UBattleManagerSubsystem* GetBattleManagerSubsystem() const;
-	UGuildMemberManagerSubsystem* GetGuildMemberManagerSubsystem() const;
+    void CalculateTurnOrder();
+
+    void ProcessNextTurn();
+
+    void CheckBattleResult();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
-	TArray<ABattleUnit*> AllUnits;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle State")
+    EBattleState CurrentState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
-	TArray<ABattleUnit*> TurnQueue;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+    TArray<ABattleUnit*> AllUnits;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle|Units")
-	TObjectPtr<ABattleUnit> CurrentUnit;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+    TArray<ABattleUnit*> TurnQueue;
 
-	UPROPERTY()
-	TMap<int32, AActor*> EnemySpawnPointMap;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Battle|UI")
-	TSubclassOf<UBattleMainLayout> MainLayoutClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Battle|UI")
-	TObjectPtr<UBattleMainLayout> MainLayoutInstance;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+    TObjectPtr<ABattleUnit> CurrentActiveUnit;
 };

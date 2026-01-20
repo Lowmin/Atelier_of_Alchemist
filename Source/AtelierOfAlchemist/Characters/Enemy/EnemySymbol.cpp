@@ -10,27 +10,27 @@
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
-// Sets default values
 AEnemySymbol::AEnemySymbol()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MESH"));
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 
 	DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
-	DetectionSphere->SetupAttachment(RootComponent);
+	DetectionSphere->SetupAttachment(Mesh);
 	DetectionSphere->SetSphereRadius(100.0f);
+	DetectionSphere->SetHiddenInGame(false);
 	DetectionSphere->SetCollisionProfileName(TEXT("Sensor"));
 }
 
-// Called when the game starts or when spawned
 void AEnemySymbol::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	if (DetectionSphere)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("DetectionSphere Init."));
 		DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemySymbol::OnOverlapBegin);
 	}
 }
@@ -39,6 +39,7 @@ void AEnemySymbol::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 {
 	if (OtherActor && Cast<APlayerCharacter>(OtherActor))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Player Detected."))
 		UBattleManagerSubsystem* BattleManager = GetGameInstance()->GetSubsystem<UBattleManagerSubsystem>();
 
 		if (BattleManager && EnemyPartyData)

@@ -48,6 +48,7 @@ void AEnemyBattleUnit::BeginPlay()
 void AEnemyBattleUnit::TurnStart()
 {
 	Super::TurnStart();
+
 	if (AAoABattleController* BattleController = Cast<AAoABattleController>(GetWorld()->GetFirstPlayerController()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SetInputMode_EnemyTurn"));

@@ -60,6 +60,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Run;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_UseItem;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Dodge;
 
 	// SkillList 조작
@@ -79,6 +81,7 @@ protected:
 	void Input_Attack();
 	void Input_Skill();
 	void Input_Run();
+	void Input_UseItem();
 	void Input_Dodge();
 
 	void Input_Skill_1();

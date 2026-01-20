@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "SkillDataAsset.h"
 #include "CharacterDataAsset.generated.h"
 
 class ACharacterBase;
@@ -43,5 +44,8 @@ public:
 	float BaseLevel = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
-	TSoftClassPtr<ACharacterBase> BP_Character;
+	TSoftClassPtr<ACharacterBase> CharacterBP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle Info")
+	TArray<TObjectPtr<USkillDataAsset>> DefaultSkills;
 };

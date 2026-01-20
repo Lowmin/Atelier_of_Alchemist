@@ -49,7 +49,7 @@ enum class EProjectileSpawnType : uint8
 
 class ABattleProjectile;
 
-UCLASS()
+UCLASS(BlueprintType)
 class ATELIEROFALCHEMIST_API USkillDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()

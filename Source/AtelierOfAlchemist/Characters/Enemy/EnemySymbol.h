@@ -9,6 +9,20 @@
 class USphereComponent;
 class USkeletalMeshComponent;
 class UEnemyPartyDataAsset;
+class UEnemyDataAsset;
+
+USTRUCT(BlueprintType)
+struct FEnemySpawnInfo
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UEnemyDataAsset> EnemyData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Level = 1;
+};
 
 UCLASS()
 class ATELIEROFALCHEMIST_API AEnemySymbol : public AActor
@@ -26,9 +40,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
-	TObjectPtr<UEnemyPartyDataAsset> EnemyPartyData;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

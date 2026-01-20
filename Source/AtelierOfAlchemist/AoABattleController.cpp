@@ -36,6 +36,7 @@ void AAoABattleController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Started, this, &AAoABattleController::Input_Attack);
 		EnhancedInputComponent->BindAction(IA_Skill, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill);
 		EnhancedInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AAoABattleController::Input_Run);
+		EnhancedInputComponent->BindAction(IA_UseItem, ETriggerEvent::Started, this, &AAoABattleController::Input_UseItem);
 		EnhancedInputComponent->BindAction(IA_Dodge, ETriggerEvent::Started, this, &AAoABattleController::Input_Dodge);
 
 		EnhancedInputComponent->BindAction(IA_Skill_1, ETriggerEvent::Started, this, &AAoABattleController::Input_Skill_1);
@@ -54,12 +55,6 @@ void AAoABattleController::SetInputMode_Main()
 {
 	if (UEnhancedInputLocalPlayerSubsystem* EnhancedInputLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		if (!IMC_Battle_Main)
-		{
-			UE_LOG(LogTemp, Error, TEXT("IMC_Battle_Main is Missing in BP_BattleController!"));
-			return;
-		}
-
 		EnhancedInputLocalPlayerSubsystem->ClearAllMappings();
 		EnhancedInputLocalPlayerSubsystem->AddMappingContext(IMC_Battle_Main, 0);
 		IsTargetingMode = false;
@@ -104,7 +99,6 @@ void AAoABattleController::SetMainCamera()
 	{
 		SetViewTargetWithBlend(MainCamera[0], 0.0f);
 	}
-	else UE_LOG(LogTemp, Warning, TEXT("NO CAMERA!"));
 }
 
 void AAoABattleController::StartTargetingMode(USkillDataAsset* SelectedSkill)
@@ -147,18 +141,26 @@ void AAoABattleController::StartTargetingMode(USkillDataAsset* SelectedSkill)
 
 void AAoABattleController::Input_Attack()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Press A"));
 	BattleGameMode->ProcessPlayerAction(0);
 }
 
 void AAoABattleController::Input_Skill()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Press S"));
 	BattleGameMode->ProcessPlayerAction(1);
+
 	SetInputMode_Skill();
 }
 
 void AAoABattleController::Input_Run()
 {
 	BattleGameMode->ProcessPlayerAction(2);
+}
+
+void AAoABattleController::Input_UseItem()
+{
+
 }
 
 void AAoABattleController::Input_Dodge()
@@ -176,7 +178,6 @@ void AAoABattleController::Input_Dodge()
 		if (APlayerBattleUnit* PlayerTarget = Cast<APlayerBattleUnit>(TargetUnit))
 		{
 			PlayerTarget->Dodge();
-			UE_LOG(LogTemp, Log, TEXT(">> [Counter] Target Player %s Dodged!"), *PlayerTarget->GetName());
 		}
 	}
 }

@@ -10,11 +10,11 @@ void UBattleManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	FieldToBattleMapName.Add(FName("Test"), FName("Map_Battle_Test"));
 }
 
-void UBattleManagerSubsystem::StartBattle(AActor* PlayerActor, AActor* EnemyActor, UEnemyPartyDataAsset* InPartyData, UObject* WorldContextObject)
+void UBattleManagerSubsystem::StartBattle(AActor* PlayerActor, AActor* EnemyActor, const TArray<FEnemySpawnInfo>& InEnemyParty, UObject* WorldContextObject)
 {
-	if (!PlayerActor || !InPartyData) return;
+	if (!PlayerActor) return;
 
-	this->CurrentEnemyPartyData = InPartyData;
+	CurrentEnemyParty = InEnemyParty;
 
 	if (EnemyActor)
 	{
@@ -72,7 +72,6 @@ TArray<FInventorySlotStruct> UBattleManagerSubsystem::GenerateDropItem(UEnemyDat
 
 	for (const FEnemyDropInfo& DropInfo : EnemyData->DropTable)
 	{
-		// 드랍 확률 체크
 		if (FMath::FRand() > DropInfo.DropChance)
 		{
 			continue;

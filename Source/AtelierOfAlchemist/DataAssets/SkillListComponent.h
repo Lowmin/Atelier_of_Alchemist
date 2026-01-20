@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// SkillListComponent.h
 
 #pragma once
 
@@ -8,23 +8,23 @@
 
 class USkillDataAsset;
 
-UCLASS()
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ATELIEROFALCHEMIST_API USkillListComponent : public UActorComponent
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	USkillListComponent();
 
-	void UpdateSkills(int32 CurrentLevel);
+	// 외부에서 데이터를 꽂아주는 함수
+	void InitializeSkills(const TArray<TObjectPtr<USkillDataAsset>>& InDefaultSkills, int32 CurrentLevel);
+
 	USkillDataAsset* GetSkillIndex(int32 Index) const;
 
-	const TArray<USkillDataAsset*>& GetSkillList() const { return arrSkill; }
+	const TArray<TObjectPtr<USkillDataAsset>>& GetSkillList() const { return SkillLists; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
-	TArray<USkillDataAsset*> arrDefaultSkill;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
-	TArray<USkillDataAsset*> arrSkill;
+	// 실제 런타임에 사용할 스킬 리스트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
+	TArray<TObjectPtr<USkillDataAsset>> SkillLists;
 };
