@@ -1,5 +1,4 @@
 ﻿#include "StatComponent.h"
-#include "../PlayerRuntimeData.h"
 #include "../DataAssets/CharacterDataAsset.h"
 #include "../DataAssets/EnemyDataAsset.h" 
 
@@ -12,10 +11,10 @@ UStatComponent::UStatComponent()
 void UStatComponent::Initialize(UPlayerRuntimeData* InRuntimeData)
 {
 	LinkedRuntimeData = InRuntimeData;
+
 	if (LinkedRuntimeData)
 	{
 		StaticData = LinkedRuntimeData->GetCharacterDataAsset();
-
 		LinkedRuntimeData->OnHealthChanged.RemoveDynamic(this, &UStatComponent::OnRuntimeDataChanged);
 		LinkedRuntimeData->OnHealthChanged.AddDynamic(this, &UStatComponent::OnRuntimeDataChanged);
 	}
@@ -28,7 +27,6 @@ void UStatComponent::InitializeFromEnemy(UEnemyDataAsset* InDataAsset)
 	if (StaticData)
 	{
 		CurrentHealth = GetMaxHealth();
-
 		if (OnHealthChanged.IsBound())
 		{
 			OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
@@ -36,52 +34,52 @@ void UStatComponent::InitializeFromEnemy(UEnemyDataAsset* InDataAsset)
 	}
 }
 
-void UStatComponent::TakeDamage(float Amount)
+float UStatComponent::ApplyDamage(float InDamage)
 {
+	float PrevHP = GetCurrentHealth();
+	float MaxHP = GetMaxHealth();
+	float NewHP = FMath::Clamp(PrevHP - InDamage, 0.0f, MaxHP);
+	float ActualDamage = PrevHP - NewHP;
+
 	if (LinkedRuntimeData)
 	{
-		LinkedRuntimeData->ApplyDamage(Amount);
-		CurrentHealth = LinkedRuntimeData->GetCurrentHealth();
+		LinkedRuntimeData->SetCurrentHealth(NewHP);
 	}
 	else
 	{
-		CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, GetMaxHealth());
+		CurrentHealth = NewHP;
 		if (OnHealthChanged.IsBound())
 		{
-			OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
+			OnHealthChanged.Broadcast(CurrentHealth, MaxHP);
 		}
 	}
+
+	return ActualDamage;
 }
 
 void UStatComponent::Heal(float HealAmount)
 {
+	float PrevHP = GetCurrentHealth();
+	float MaxHP = GetMaxHealth();
+	float NewHP = FMath::Clamp(PrevHP + HealAmount, 0.0f, MaxHP);
+
 	if (LinkedRuntimeData)
 	{
-		float CurHp = LinkedRuntimeData->GetCurrentHealth();
-		float MaxHp = GetMaxHealth();
-
-		float AfterHp = FMath::Min(CurHp + HealAmount, MaxHp);
-		LinkedRuntimeData->SetCurrentHealth(AfterHp);
+		LinkedRuntimeData->SetCurrentHealth(NewHP);
 	}
 	else
 	{
-		float MaxHp = GetMaxHealth();
-		CurrentHealth = FMath::Min(CurrentHealth + HealAmount, MaxHp);
-
+		CurrentHealth = NewHP;
 		if (OnHealthChanged.IsBound())
 		{
-			OnHealthChanged.Broadcast(CurrentHealth, MaxHp);
+			OnHealthChanged.Broadcast(CurrentHealth, MaxHP);
 		}
 	}
 }
 
 float UStatComponent::GetCurrentHealth() const
 {
-	if (LinkedRuntimeData)
-	{
-		return LinkedRuntimeData->GetCurrentHealth();
-	}
-
+	if (LinkedRuntimeData) return LinkedRuntimeData->GetCurrentHealth();
 	return CurrentHealth;
 }
 

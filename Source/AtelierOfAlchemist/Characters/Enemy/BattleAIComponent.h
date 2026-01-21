@@ -15,18 +15,11 @@ class ATELIEROFALCHEMIST_API UBattleAIComponent : public UActorComponent
 public:
 	UBattleAIComponent();
 
-	void InitializeAI(UCharacterDataAsset* InDataAsset);
-	void ProcessAITurn(ABattleUnit* InOwnerUnit);
+	TArray<FAIPattern> AIPatterns;
+	TSet<int32> UsedPatternIndices;
 
-protected:
+	void RunAI();
 	void DecideAction();
-	bool CheckCondition(const FAIPattern& Pattern);
-	ABattleUnit* FindTarget(EAITargetType TargetType, const TArray<ABattleUnit*>& Candidates);
-
-private:
-	UPROPERTY()
-	ABattleUnit* OwnerUnit;
-
-	UPROPERTY()
-	UEnemyDataAsset* EnemyData;
+	bool CheckCondition(FAIPattern Pattern);
+	ABattleUnit* FindTarget(EAITargetType TargetType);
 };

@@ -1,103 +1,183 @@
 #include "BattleAIComponent.h"
 #include "../../BattleGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 UBattleAIComponent::UBattleAIComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UBattleAIComponent::InitializeAI(UCharacterDataAsset* InDataAsset)
+void UBattleAIComponent::RunAI()
 {
-	EnemyData = Cast<UEnemyDataAsset>(InDataAsset);
-}
-
-void UBattleAIComponent::ProcessAITurn(ABattleUnit* InOwnerUnit)
-{
-	OwnerUnit = InOwnerUnit;
-
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UBattleAIComponent::DecideAction, 1.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UBattleAIComponent::DecideAction, 1.0f, false);
 }
 
 void UBattleAIComponent::DecideAction()
 {
+	ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
+	ABattleUnit* Owner = Cast<ABattleUnit>(GetOwner());
 
+	for (int32 i = 0; i < AIPatterns.Num(); i++)
+	{
+		FAIPattern Pattern = AIPatterns[i];
+
+		// 한 번만 실행하는 패턴 && 사용한 패턴 목록에 이 패턴이 포함되어 있는가? 
+		if (AIPatterns[i].bIsOneTimeOnly == true && UsedPatternIndices.Contains(i)) continue;
+
+		// AI 패턴에 해당하는 조건이 있는가?
+		if (CheckCondition(AIPatterns[i]) == false) continue;
+
+		ABattleUnit* FinalTarget = FindTarget(Pattern.TargetType);
+
+		// 대상을 찾을 수 있는가?
+		if (FinalTarget == nullptr) continue;
+
+		UE_LOG(LogTemp, Warning, TEXT("[AI] Action: %s uses %s on %s"),
+			*Owner->GetActorLabel(),
+			*Pattern.SkillAsset->GetName(),
+			*FinalTarget->GetActorLabel());
+
+		BattleGameMode->ExecuteAction(Owner, FinalTarget, Pattern.SkillAsset);
+		if (Pattern.bIsOneTimeOnly == true) UsedPatternIndices.Add(i);
+
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[AI] No Action. Skipping Turn."));
+	BattleGameMode->ProcessNextTurn();
 }
 
-bool UBattleAIComponent::CheckCondition(const FAIPattern& Pattern)
+bool UBattleAIComponent::CheckCondition(FAIPattern Pattern)
 {
+	ABattleUnit* OwnerUnit = Cast<ABattleUnit>(GetOwner());
 	if (!OwnerUnit) return false;
 
-	float HPRatio = 1.0f;
+	UStatComponent* MyStat = OwnerUnit->GetStatComponent();
+	if (!MyStat) return false;
+	
+	ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
 
-	if (UStatComponent* StatComp = OwnerUnit->FindComponentByClass<UStatComponent>())
+	switch (Pattern.ConditionType)
 	{
-		float MaxHP = StatComp->GetMaxHealth();
-		float CurHP = StatComp->GetCurrentHealth();
-
-		if (MaxHP > 0.0f)
-		{
-			HPRatio = CurHP / MaxHP;
-		}
-	}
-
-	switch (Pattern.Condition)
-	{
-	case EAICondition::Always:
+	case EAIConditionType::None:
 		return true;
-	case EAICondition::HP_LessThan:
-		return HPRatio <= Pattern.ConditionValue;
-	case EAICondition::Random_Chance:
-		return FMath::FRand() <= Pattern.ConditionValue;
-	default:
+	case EAIConditionType::Chance:
+		return (FMath::RandRange(0.0f, 100.0f) <= Pattern.ConditionValue);
+	case EAIConditionType::SelfHP_Under:
+	{
+		float CurrentHPPercent = (MyStat->GetCurrentHealth() / MyStat->GetMaxHealth()) * 100.0f;;
+		return (CurrentHPPercent <= Pattern.ConditionValue);
+	}
+	case EAIConditionType::AllyHP_Under:
+	{
+		for (ABattleUnit* Unit : BattleGameMode->GetAllUnits())
+		{
+			if (Unit && Unit->GetStatComponent()->GetCurrentHealth() > 0 && Unit->IsPlayerTeam() == OwnerUnit->IsPlayerTeam())
+			{
+				UStatComponent* AllyStat = Unit->GetStatComponent();
+				float AllyHPPercent = (AllyStat->GetCurrentHealth() / AllyStat->GetMaxHealth()) * 100.0f;
+
+				if (AllyHPPercent <= Pattern.ConditionValue) return true;
+			}
+		}
 		return false;
 	}
-}
-
-ABattleUnit* UBattleAIComponent::FindTarget(EAITargetType TargetType, const TArray<ABattleUnit*>& Candidates)
-{
-	TArray<ABattleUnit*> ValidCandidates;
-	for (ABattleUnit* Unit : Candidates)
-	{
-		if (Unit)
-		{
-			float CurrentHP = 0.f;
-			if (UStatComponent* Stat = Unit->FindComponentByClass<UStatComponent>())
-			{
-				CurrentHP = Stat->GetCurrentHealth();
-			}
-
-			if (CurrentHP > 0)
-				ValidCandidates.Add(Unit);
-		}
+	case EAIConditionType::Turn_Multiple:
+		return false;
+	case EAIConditionType::Turn_Special:
+		return false;
 	}
 
-	if (ValidCandidates.IsEmpty()) return nullptr;
+	return false;
+}
+
+ABattleUnit* UBattleAIComponent::FindTarget(EAITargetType TargetType)
+{
+	ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
+	ABattleUnit* OwnerUnit = Cast<ABattleUnit>(GetOwner());
+	if (!OwnerUnit) return nullptr;
+
+	TArray<ABattleUnit*> Candidates;
+	ABattleUnit* BestUnit = nullptr;
+	float LowHPPercent = 200.0f;
 
 	switch (TargetType)
 	{
-	case EAITargetType::Random:
-		return ValidCandidates[FMath::RandRange(0, ValidCandidates.Num() - 1)];
+	case EAITargetType::Self:
+		return Cast<ABattleUnit>(GetOwner());
+	case EAITargetType::Player_Random:
+	{
+		for (ABattleUnit* Unit : BattleGameMode->GetAllUnits())
+		{
+			if (Unit && Unit->GetStatComponent()->GetCurrentHealth() > 0 && Unit->IsPlayerTeam() != OwnerUnit->IsPlayerTeam())
+			{
+				Candidates.Add(Unit);
+			}
+		}
 
-	case EAITargetType::Weakest_HP:
-		ValidCandidates.Sort([](const ABattleUnit& A, const ABattleUnit& B) {
-			float HPA = 0.f; float HPB = 0.f;
-			if (auto* StatA = A.FindComponentByClass<UStatComponent>()) HPA = StatA->GetCurrentHealth();
-			if (auto* StatB = B.FindComponentByClass<UStatComponent>()) HPB = StatB->GetCurrentHealth();
-			return HPA < HPB;
-			});
-		return ValidCandidates[0];
+		float RandomIndex = FMath::RandRange(0, Candidates.Num() - 1);
+		BestUnit = Candidates[RandomIndex];
 
-	case EAITargetType::Highest_HP:
-		ValidCandidates.Sort([](const ABattleUnit& A, const ABattleUnit& B) {
-			float HPA = 0.f; float HPB = 0.f;
-			if (auto* StatA = A.FindComponentByClass<UStatComponent>()) HPA = StatA->GetCurrentHealth();
-			if (auto* StatB = B.FindComponentByClass<UStatComponent>()) HPB = StatB->GetCurrentHealth();
-			return HPA > HPB;
-			});
-		return ValidCandidates[0];
-
-	default:
-		return ValidCandidates[0];
+		return BestUnit;
 	}
+	case EAITargetType::Player_Weakest:
+	{
+		for (ABattleUnit* Unit : BattleGameMode->GetAllUnits())
+		{
+			if (Unit && Unit->GetStatComponent()->GetCurrentHealth() > 0 && Unit->IsPlayerTeam() != OwnerUnit->IsPlayerTeam())
+			{
+				float UnitHPPercent = (Unit->GetStatComponent()->GetCurrentHealth() / Unit->GetStatComponent()->GetMaxHealth());
+				if (LowHPPercent > UnitHPPercent)
+				{
+					LowHPPercent = UnitHPPercent;
+					Candidates.Empty();
+					Candidates.Add(Unit);
+				}
+				else if (LowHPPercent == UnitHPPercent)
+				{
+					Candidates.Add(Unit);
+				}
+			}
+		}
+
+		if (Candidates.Num() > 0)
+		{
+			float RandomIndex = FMath::RandRange(0, Candidates.Num() - 1);
+			BestUnit = Candidates[RandomIndex];
+		}
+
+		return BestUnit;
+	}
+	case EAITargetType::Ally_Weakest:
+	{
+		for (ABattleUnit* Unit : BattleGameMode->GetAllUnits())
+		{
+			if (Unit && Unit->GetStatComponent()->GetCurrentHealth() > 0 && Unit->IsPlayerTeam() == OwnerUnit->IsPlayerTeam())
+			{
+				float UnitHPPercent = (Unit->GetStatComponent()->GetCurrentHealth() / Unit->GetStatComponent()->GetMaxHealth());
+				if (LowHPPercent > UnitHPPercent)
+				{
+					LowHPPercent = UnitHPPercent;
+					Candidates.Empty();
+					Candidates.Add(Unit);
+				}
+				else if (LowHPPercent == UnitHPPercent)
+				{
+					Candidates.Add(Unit);
+				}
+			}
+		}
+
+		if (Candidates.Num() > 0)
+		{
+			float RandomIndex = FMath::RandRange(0, Candidates.Num() - 1);
+			BestUnit = Candidates[RandomIndex];
+		}
+
+		return BestUnit;
+	}
+	}
+	return nullptr;
 }
+

@@ -25,6 +25,7 @@ public:
 
 	void SetMainCamera();
 
+	void StartPlayerTurn();
 	void StartTargetingMode(USkillDataAsset* SelectedSkill);
 
 protected:

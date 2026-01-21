@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "SkillDataAsset.h"
+#include "../Characters/Battle/BattleUnit.h"
 #include "CharacterDataAsset.generated.h"
 
 class ACharacterBase;
+class ABattleUnit;
 /**
  * 
  */
@@ -28,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	TSoftObjectPtr<UTexture2D> CharacterImage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Class")
+	TSoftClassPtr<ABattleUnit> CharacterBP;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	float BaseMaxHealth = 100.0f;
 
@@ -42,9 +47,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	float BaseLevel = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
-	TSoftClassPtr<ACharacterBase> CharacterBP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle Info")
 	TArray<TObjectPtr<USkillDataAsset>> DefaultSkills;

@@ -3,9 +3,9 @@
 
 void UPlayerRuntimeData::Initialize(UCharacterDataAsset* NewCharacterDataAsset)
 {
-	this->CharacterDataAsset = NewCharacterDataAsset;
+	CharacterDataAsset = NewCharacterDataAsset;
 
-	if (CharacterDataAsset != nullptr)
+	if (CharacterDataAsset)
 	{
 		MaxHealth = CharacterDataAsset->BaseMaxHealth;
 		CurrentHealth = MaxHealth;
@@ -14,17 +14,14 @@ void UPlayerRuntimeData::Initialize(UCharacterDataAsset* NewCharacterDataAsset)
 	}
 }
 
-void UPlayerRuntimeData::ApplyDamage(float dmg)
-{
-	CurrentHealth -= dmg;
-	OnHealthChanged.Broadcast(CurrentHealth, GetTotalMaxHealth());
-}
-
 void UPlayerRuntimeData::SetCurrentHealth(float NewHp)
 {
-	if (CurrentHealth != NewHp)
-		CurrentHealth = NewHp;
-	OnHealthChanged.Broadcast(CurrentHealth, GetTotalMaxHealth());
+	CurrentHealth = FMath::Clamp(NewHp, 0.0f, GetTotalMaxHealth());
+
+	if (OnHealthChanged.IsBound())
+	{
+		OnHealthChanged.Broadcast(CurrentHealth, GetTotalMaxHealth());
+	}
 }
 
 UItemDataAsset* UPlayerRuntimeData::GetEquipItem(EEquipPart Part) const
@@ -52,7 +49,10 @@ void UPlayerRuntimeData::SetEquipItem(EEquipPart Part, UItemDataAsset* Item)
 		OnEquipChanged.Broadcast();
 	}
 
-	OnHealthChanged.Broadcast(CurrentHealth, GetTotalMaxHealth());
+	if (OnHealthChanged.IsBound())
+	{
+		OnHealthChanged.Broadcast(CurrentHealth, GetTotalMaxHealth());
+	}
 }
 
 float UPlayerRuntimeData::GetTotalAttack() const
@@ -60,7 +60,6 @@ float UPlayerRuntimeData::GetTotalAttack() const
 	if (!CharacterDataAsset) return 0.0f;
 
 	float Total = CharacterDataAsset->BaseAttackPower;
-
 	for (const auto& Pair : EquippedItems)
 	{
 		if (Pair.Value) Total += Pair.Value->EquipAttackPower;
@@ -73,7 +72,6 @@ float UPlayerRuntimeData::GetTotalDefense() const
 	if (!CharacterDataAsset) return 0.0f;
 
 	float Total = CharacterDataAsset->BaseDefensePower;
-
 	for (const auto& Pair : EquippedItems)
 	{
 		if (Pair.Value) Total += Pair.Value->EquipDefense;
@@ -86,7 +84,6 @@ float UPlayerRuntimeData::GetTotalMaxHealth() const
 	if (!CharacterDataAsset) return 0.0f;
 
 	float Total = CharacterDataAsset->BaseMaxHealth;
-
 	for (const auto& Pair : EquippedItems)
 	{
 		if (Pair.Value) Total += Pair.Value->EquipMaxHealth;

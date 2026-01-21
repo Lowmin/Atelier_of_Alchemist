@@ -26,9 +26,6 @@ public:
 	void AddPartyMember(FName CharacterID);
 	void RemovePartyMember(FName CharacterID);
 
-	UFUNCTION(BlueprintCallable, Category = "Guild|Party")
-	void ApplyDamageToAllPartyMembers(float DamageAmount);
-
 	UFUNCTION(BlueprintPure, Category = "Guild")
 	UPlayerRuntimeData* GetPlayerRuntimeData(FName CharacterID) const;
 

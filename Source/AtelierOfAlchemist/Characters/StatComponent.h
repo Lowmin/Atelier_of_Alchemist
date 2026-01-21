@@ -5,7 +5,6 @@
 #include "../PlayerRuntimeData.h" 
 #include "StatComponent.generated.h"
 
-class UCharacterDataAsset;
 class UEnemyDataAsset;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -19,7 +18,7 @@ public:
 	void Initialize(UPlayerRuntimeData* InRuntimeData);
 	void InitializeFromEnemy(UEnemyDataAsset* InDataAsset);
 
-	void TakeDamage(float DamageAmount);
+	float ApplyDamage(float InDamage);
 	void Heal(float HealAmount);
 
 	float GetCurrentHealth() const;
@@ -29,12 +28,11 @@ public:
 	float GetSpeed() const;
 	float GetLevel() const;
 
+	UCharacterDataAsset* GetCharacterData() const;
+	UPlayerRuntimeData* GetRuntimeData() const { return LinkedRuntimeData; }
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
-
-	UCharacterDataAsset* GetCharacterData() const;
-
-	UPlayerRuntimeData* GetRuntimeData() { return LinkedRuntimeData; }
 
 protected:
 	UPROPERTY()

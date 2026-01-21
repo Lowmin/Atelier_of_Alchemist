@@ -33,6 +33,8 @@ public:
 
     void StartBattle();
 
+    void ProcessNextTurn();
+
     void ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* TargetUnit, USkillDataAsset* SkillAsset);
 
     TArray<ABattleUnit*> GetAllUnits() const { return AllUnits; }
@@ -46,8 +48,6 @@ protected:
     void SpawnEnemyUnits();
 
     void CalculateTurnOrder();
-
-    void ProcessNextTurn();
 
     void CheckBattleResult();
 

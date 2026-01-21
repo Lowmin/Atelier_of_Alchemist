@@ -59,25 +59,6 @@ void UGuildMemberManagerSubsystem::RemovePartyMember(FName CharacterID)
 	}
 }
 
-void UGuildMemberManagerSubsystem::ApplyDamageToAllPartyMembers(float DamageAmount)
-{
-	if (DamageAmount <= 0.f) return;
-
-	// 1. 현재 파티 ID 목록을 가져옵니다.
-	for (const FName& CharacterID : PartyMemberIDs)
-	{
-		// 2. 맵에서 해당 ID의 '실시간 데이터 객체'를 찾습니다.
-		UPlayerRuntimeData* RuntimeData = GetPlayerRuntimeData(CharacterID); // 이미 만들어둔 헬퍼 함수 사용
-
-		if (RuntimeData)
-		{
-			// 3. 데이터 객체의 데미지 함수를 호출합니다.
-			//    (이 함수가 델리게이트를 호출하여 UI를 자동으로 업데이트합니다.)
-			RuntimeData->ApplyDamage(DamageAmount);
-		}
-	}
-}
-
 UPlayerRuntimeData* UGuildMemberManagerSubsystem::GetPlayerRuntimeData(FName CharacterID) const
 {
 	return GuildMemberDataMap.FindRef(CharacterID);
