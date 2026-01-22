@@ -12,13 +12,14 @@ class UWidgetComponent;
 class UPlayerRuntimeData;
 class USkillDataAsset;
 
-UENUM()
+UENUM(BlueprintType)
 enum class EUnitActionState : uint8
 {
 	Idle,
 	MoveToTarget,
 	Attacking,
-	ReturnToPos
+	ReturnToPos,
+	Die
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -29,6 +30,30 @@ class ATELIEROFALCHEMIST_API ABattleUnit : public ACharacterBase
 public:
 	ABattleUnit();
 	virtual void Tick(float DeltaTime) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	void InitializeAsPlayerUnit(UPlayerRuntimeData* RuntimeData);
+	void InitializeAsEnemyUnit(UEnemyDataAsset* DataAsset, int32 Level);
+
+	void SetTargetSelected(bool bIsSelected);
+	void StartAttack(ABattleUnit* Target, float FinalDamage, USkillDataAsset* SkillAsset);
+	void Die();
+
+	void Dodge();
+
+	UFUNCTION(BlueprintCallable)
+	void OnAttackHit();
+
+	UFUNCTION(BlueprintCallable)
+	void OnDodgeBegin();
+
+	UFUNCTION(BlueprintCallable)
+	void OnDodgeEnd();
+
+	UFUNCTION(BlueprintCallable)
+	EUnitActionState GetUnitActionState() { return ActionState; }
+
+	USkillListComponent* GetSkillComponent() { return SkillComponent; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkillListComponent> SkillComponent;
@@ -42,20 +67,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
-	void InitializeAsPlayerUnit(UPlayerRuntimeData* RuntimeData);
-	void InitializeAsEnemyUnit(UEnemyDataAsset* DataAsset, int32 Level);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class USpringArmComponent> CameraBoom;
 
-	void SetTargetSelected(bool bIsSelected);
-
-	void StartAttack(ABattleUnit* Target, float FinalDamage, USkillDataAsset* SkillAsset);
-
-	UFUNCTION(BlueprintCallable)
-	void OnAttackHit();
-
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	void Die();
-
-	USkillListComponent* GetSkillComponent() { return SkillComponent; }
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class UCameraComponent> UnitCamera;
 
 protected:
 	UFUNCTION()
@@ -70,9 +86,13 @@ protected:
 	UPROPERTY()
 	TObjectPtr<USkillDataAsset> CurrentSkill;
 
+	FVector MoveDestination;
 	float PendingDamage;
 	FVector OriginalLocation;
+	FRotator OriginalRotation;
 	EUnitActionState ActionState;
 
 	TArray<UObject*> PreloadedAssets;
+	UCharacterDataAsset* CachedCharacterDataAsset;
+	bool bIsDodge = false;
 };

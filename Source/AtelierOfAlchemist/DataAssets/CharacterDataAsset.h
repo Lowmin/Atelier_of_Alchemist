@@ -37,6 +37,12 @@ public:
 	float BaseMaxHealth = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
+	TSoftObjectPtr<UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
+	TSoftObjectPtr<UAnimMontage> DodgeMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	float BaseAttackPower = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")

@@ -2,6 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "InventoryManagerSubsystem.h"
+#include "LevelSequence.h"
+#include "LevelSequencePlayer.h"
+#include "LevelSequenceActor.h"
 #include "BattleGameMode.generated.h"
 
 class ABattleUnit;
@@ -11,56 +15,74 @@ class AAoABattleController;
 UENUM(BlueprintType)
 enum class EBattleState : uint8
 {
-    Setup,
-    TurnCalculation,
-    ProcessTurn,
-    PlayerTurn,
-    EnemyTurn,
-    ActionRunning,
-    TurnEnd,
-    Win,
-    Lose
+	Setup,
+	TurnCalculation,
+	ProcessTurn,
+	PlayerTurn,
+	EnemyTurn,
+	ActionRunning,
+	TurnEnd,
+	Win,
+	Lose
 };
 
 UCLASS()
 class ATELIEROFALCHEMIST_API ABattleGameMode : public AGameModeBase
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    ABattleGameMode();
-    virtual void BeginPlay() override;
+	ABattleGameMode();
+	virtual void BeginPlay() override;
 
-    void StartBattle();
+	void StartBattle();
 
-    void ProcessNextTurn();
+	void ProcessNextTurn();
 
-    void ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* TargetUnit, USkillDataAsset* SkillAsset);
+	void ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* TargetUnit, USkillDataAsset* SkillAsset);
 
-    TArray<ABattleUnit*> GetAllUnits() const { return AllUnits; }
-    ABattleUnit* GetCurrentUnit() const { return CurrentActiveUnit; }
+	void OnUnitDead(ABattleUnit* Unit);
 
-protected:
-    void SetBattleState(EBattleState NewState);
+	void PlayBattleLoopSequence();
 
-    void SpawnPlayerUnits();
-
-    void SpawnEnemyUnits();
-
-    void CalculateTurnOrder();
-
-    void CheckBattleResult();
+	TArray<ABattleUnit*> GetAllUnits() const { return AllUnits; }
+	ABattleUnit* GetCurrentUnit() const { return CurrentActiveUnit; }
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle State")
-    EBattleState CurrentState;
+	void SetBattleState(EBattleState NewState);
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
-    TArray<ABattleUnit*> AllUnits;
+	void SpawnPlayerUnits();
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
-    TArray<ABattleUnit*> TurnQueue;
+	void SpawnEnemyUnits();
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
-    TObjectPtr<ABattleUnit> CurrentActiveUnit;
+	void CalculateTurnOrder();
+
+	void CheckBattleResult();
+
+	void EndBattle(bool bIsPlayerWin);
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle State")
+	EBattleState CurrentState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+	TArray<ABattleUnit*> AllUnits;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+	TArray<ABattleUnit*> TurnQueue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+	TObjectPtr<ABattleUnit> CurrentActiveUnit;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle Data")
+	TArray<FInventorySlotStruct> BattleRewards;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sequences")
+	TObjectPtr<ULevelSequence> BattleLoopSequenceAsset;
+
+	UPROPERTY()
+	TObjectPtr<ALevelSequenceActor> LoopSequenceActor;
+
+	UPROPERTY()
+	TObjectPtr<ULevelSequencePlayer> LoopSequencePlayer;
 };

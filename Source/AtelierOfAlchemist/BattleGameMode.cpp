@@ -9,6 +9,9 @@
 #include "Characters/Enemy/BattleAIComponent.h"
 #include "Characters/StatComponent.h"
 #include "DataAssets/SkillDataAsset.h"
+#include "LevelSequenceActor.h"
+#include "LevelSequencePlayer.h"
+#include "Engine/DamageEvents.h"
 
 ABattleGameMode::ABattleGameMode()
 {
@@ -27,6 +30,7 @@ void ABattleGameMode::StartBattle()
 	SpawnPlayerUnits();
 	SpawnEnemyUnits();
 	CalculateTurnOrder();
+	PlayBattleLoopSequence();
 }
 
 void ABattleGameMode::ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* TargetUnit, USkillDataAsset* SkillAsset)
@@ -38,11 +42,70 @@ void ABattleGameMode::ExecuteAction(ABattleUnit* SourceUnit, ABattleUnit* Target
 	float AttackPower = SourceUnit->GetStatComponent()->GetAttackPower();
 	float DefensePower = TargetUnit->GetStatComponent()->GetDefense();
 	float SkillRatio = SkillAsset->Power;
-
 	float RawDamage = (AttackPower * SkillRatio) - DefensePower;
 	float FinalDamage = FMath::Max(RawDamage, 1.0f);
 
 	SourceUnit->StartAttack(TargetUnit, FinalDamage, SkillAsset);
+}
+
+void ABattleGameMode::OnUnitDead(ABattleUnit* Unit)
+{
+	if (!Unit) return;
+
+	if (Unit->Type == ECharacterType::Enemy)
+	{
+		UBattleManagerSubsystem* BattleManager = GetGameInstance()->GetSubsystem<UBattleManagerSubsystem>();
+
+		/*if (BattleManager && Unit->EnemyDataAsset)
+		{
+			TArray<FInventorySlotStruct> Drops = BattleManager->GenerateDropItem(Unit->EnemyDataAsset);
+			BattleRewards.Append(Drops);
+		}*/
+	}
+
+	if (AllUnits.Contains(Unit))
+	{
+		AllUnits.Remove(Unit);
+	}
+	if (TurnQueue.Contains(Unit))
+	{
+		TurnQueue.Remove(Unit);
+	}
+
+	CheckBattleResult();
+}
+
+void ABattleGameMode::PlayBattleLoopSequence()
+{
+	if (!BattleLoopSequenceAsset) return;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC) return;
+
+	if (LoopSequencePlayer)
+	{
+		LoopSequencePlayer->PlayLooping();
+		if (LoopSequenceActor)
+		{
+			PC->SetViewTargetWithBlend(LoopSequenceActor, 0.5f);
+		}
+		return;
+	}
+
+	ALevelSequenceActor* OutActor = nullptr;
+	LoopSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
+		GetWorld(),
+		BattleLoopSequenceAsset,
+		FMovieSceneSequencePlaybackSettings(),
+		OutActor
+	);
+
+	if (LoopSequencePlayer && OutActor)
+	{
+		LoopSequenceActor = OutActor;
+		LoopSequencePlayer->PlayLooping();
+		PC->SetViewTargetWithBlend(OutActor, 0.0f);
+	}
 }
 
 void ABattleGameMode::SetBattleState(EBattleState NewState)
@@ -182,10 +245,6 @@ void ABattleGameMode::ProcessNextTurn()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT(">>> Current Turn: %s (Team: %s) <<<"),
-		*CurrentActiveUnit->GetActorLabel(),
-		CurrentActiveUnit->IsPlayerTeam() ? TEXT("Player") : TEXT("Enemy"));
-
 	if (CurrentActiveUnit->IsPlayerTeam())
 	{
 		SetBattleState(EBattleState::PlayerTurn);
@@ -203,13 +262,10 @@ void ABattleGameMode::ProcessNextTurn()
 		UBattleAIComponent* AI = CurrentActiveUnit->FindComponentByClass<UBattleAIComponent>();
 		if (AI)
 		{
-			UE_LOG(LogTemp, Log, TEXT("-> Enemy AI Running..."));
 			AI->RunAI();
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("CRITICAL: Enemy %s has no AI Component! Skipping Turn."), *CurrentActiveUnit->GetName());
-
 			FTimerHandle TimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 				{
@@ -221,4 +277,45 @@ void ABattleGameMode::ProcessNextTurn()
 
 void ABattleGameMode::CheckBattleResult()
 {
+	int32 PlayerCount = 0;
+	int32 EnemyCount = 0;
+
+	for (ABattleUnit* Unit : AllUnits)
+	{
+		if (Unit && Unit->IsPlayerTeam())
+		{
+			PlayerCount++;
+		}
+		else if (Unit && !Unit->IsPlayerTeam())
+		{
+			EnemyCount++;
+		}
+	}
+
+	if (EnemyCount == 0)
+	{
+		EndBattle(true);
+	}
+	else if (PlayerCount == 0)
+	{
+		EndBattle(false);
+	}
+}
+
+void ABattleGameMode::EndBattle(bool bIsPlayerWin)
+{
+	if (bIsPlayerWin)
+	{
+		SetBattleState(EBattleState::Win);
+
+		UBattleManagerSubsystem* BattleManager = GetGameInstance()->GetSubsystem<UBattleManagerSubsystem>();
+		if (BattleManager)
+		{
+			//BattleManager->EndBattleWithVictory(BattleRewards);
+		}
+	}
+	else
+	{
+		SetBattleState(EBattleState::Lose);
+	}
 }

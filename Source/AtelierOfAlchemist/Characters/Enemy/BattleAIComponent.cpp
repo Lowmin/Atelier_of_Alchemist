@@ -110,14 +110,17 @@ ABattleUnit* UBattleAIComponent::FindTarget(EAITargetType TargetType)
 	{
 		for (ABattleUnit* Unit : BattleGameMode->GetAllUnits())
 		{
-			if (Unit && Unit->GetStatComponent()->GetCurrentHealth() > 0 && Unit->IsPlayerTeam() != OwnerUnit->IsPlayerTeam())
+			if (Unit && Unit->GetStatComponent()->GetCurrentHealth() > 0 && Unit->IsPlayerTeam() != OwnerUnit->IsPlayerTeam()) 
 			{
 				Candidates.Add(Unit);
 			}
 		}
 
-		float RandomIndex = FMath::RandRange(0, Candidates.Num() - 1);
-		BestUnit = Candidates[RandomIndex];
+		if (Candidates.Num() > 0)
+		{
+			int32 RandomIndex = FMath::RandRange(0, Candidates.Num() - 1);
+			BestUnit = Candidates[RandomIndex];
+		}
 
 		return BestUnit;
 	}
@@ -178,6 +181,7 @@ ABattleUnit* UBattleAIComponent::FindTarget(EAITargetType TargetType)
 		return BestUnit;
 	}
 	}
+
 	return nullptr;
 }
 

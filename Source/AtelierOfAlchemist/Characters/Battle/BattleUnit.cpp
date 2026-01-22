@@ -71,27 +71,21 @@ void ABattleUnit::Tick(float DeltaTime)
 
 	if (ActionState == EUnitActionState::MoveToTarget)
 	{
-		if (!PendingTarget)
-		{
-			ActionState = EUnitActionState::Idle;
-			return;
-		}
+		FVector CurrentLoc = GetActorLocation();
+		FVector NewLoc = FMath::VInterpConstantTo(CurrentLoc, MoveDestination, DeltaTime, 600.0f);
 
-		FVector TargetLoc = PendingTarget->GetActorLocation();
-		FVector Direction = (TargetLoc - GetActorLocation()).GetSafeNormal();
-
-		TargetLoc.Z = GetActorLocation().Z;
-		FVector StopLocation = TargetLoc - (Direction * 100.0f);
-
-		FVector NewLoc = FMath::VInterpTo(GetActorLocation(), StopLocation, DeltaTime, 15.0f);
 		SetActorLocation(NewLoc);
 
-		FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
-		TargetRot.Pitch = 0.0f;
-		TargetRot.Roll = 0.0f;
-		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 20.0f));
+		FVector Direction = (MoveDestination - CurrentLoc).GetSafeNormal();
+		if (!Direction.IsNearlyZero())
+		{
+			FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
+			TargetRot.Pitch = 0.0f;
+			TargetRot.Roll = 0.0f;
+			SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 15.0f));
+		}
 
-		if (FVector::Dist(GetActorLocation(), StopLocation) < 10.0f)
+		if (NewLoc.Equals(MoveDestination, 1.0f))
 		{
 			ActionState = EUnitActionState::Attacking;
 			PlayAttackMontage();
@@ -99,20 +93,25 @@ void ABattleUnit::Tick(float DeltaTime)
 	}
 	else if (ActionState == EUnitActionState::ReturnToPos)
 	{
-		FVector TargetLoc = OriginalLocation;
-		FVector Direction = (TargetLoc - GetActorLocation()).GetSafeNormal();
+		FVector CurrentLoc = GetActorLocation();
+		FVector NewLoc = FMath::VInterpConstantTo(CurrentLoc, OriginalLocation, DeltaTime, 600.0f);
 
-		FVector NewLoc = FMath::VInterpTo(GetActorLocation(), TargetLoc, DeltaTime, 15.0f);
 		SetActorLocation(NewLoc);
 
-		FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
-		TargetRot.Pitch = 0.0f;
-		TargetRot.Roll = 0.0f;
-		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 20.0f));
+		FVector Direction = (OriginalLocation - CurrentLoc).GetSafeNormal();
+		if (!Direction.IsNearlyZero())
+		{
+			FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
+			TargetRot.Pitch = 0.0f;
+			TargetRot.Roll = 0.0f;
+			SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 15.0f));
+		}
 
-		if (FVector::Dist(GetActorLocation(), TargetLoc) < 5.0f)
+		if (NewLoc.Equals(OriginalLocation, 1.0f))
 		{
 			SetActorLocation(OriginalLocation);
+			SetActorRotation(OriginalRotation);
+
 			ActionState = EUnitActionState::Idle;
 
 			ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
@@ -140,9 +139,21 @@ void ABattleUnit::StartAttack(ABattleUnit* Target, float FinalDamage, USkillData
 	PendingDamage = FinalDamage;
 	CurrentSkill = SkillAsset;
 	OriginalLocation = GetActorLocation();
+	OriginalRotation = GetActorRotation();
 
 	if (SkillAsset->SkillType == ESkillType::Melee)
 	{
+		FVector TargetLoc = Target->GetActorLocation();
+		TargetLoc.Z = GetActorLocation().Z;
+
+		FVector Direction = (TargetLoc - GetActorLocation()).GetSafeNormal();
+
+		float MyRadius = GetCapsuleComponent()->GetScaledCapsuleRadius();
+		float TargetRadius = Target->GetCapsuleComponent()->GetScaledCapsuleRadius();
+		float StopDist = MyRadius + TargetRadius + 50.0f;
+
+		MoveDestination = TargetLoc - (Direction * StopDist);
+
 		ActionState = EUnitActionState::MoveToTarget;
 	}
 	else
@@ -152,36 +163,23 @@ void ABattleUnit::StartAttack(ABattleUnit* Target, float FinalDamage, USkillData
 	}
 }
 
-void ABattleUnit::PlayAttackMontage()
-{
-	if (CurrentSkill && !CurrentSkill->SkillMontage.IsNull())
-	{
-		UAnimMontage* Montage = CurrentSkill->SkillMontage.LoadSynchronous();
-		if (Montage)
-		{
-			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			if (AnimInstance)
-			{
-				PlayAnimMontage(Montage);
-
-				FOnMontageEnded EndDelegate;
-				EndDelegate.BindUObject(this, &ABattleUnit::OnAttackAnimationEnd);
-				AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
-				return;
-			}
-		}
-	}
-
-	OnAttackHit();
-	OnAttackAnimationEnd(nullptr, false);
-}
-
 void ABattleUnit::OnAttackHit()
 {
 	if (PendingTarget && PendingTarget->IsValidLowLevel())
 	{
 		PendingTarget->TakeDamage(PendingDamage, FDamageEvent(), GetController(), this);
+		UE_LOG(LogTemp, Warning, TEXT("Attack! %f Damage"), PendingDamage);
 	}
+}
+
+void ABattleUnit::OnDodgeBegin()
+{
+	bIsDodge = true;
+}
+
+void ABattleUnit::OnDodgeEnd()
+{
+	bIsDodge = false;
 }
 
 void ABattleUnit::OnAttackAnimationEnd(UAnimMontage* Montage, bool bInterrupted)
@@ -204,8 +202,13 @@ void ABattleUnit::OnAttackAnimationEnd(UAnimMontage* Montage, bool bInterrupted)
 float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (!StatComponent) return 0.0f;
+	if (bIsDodge) return 0.0f;
 
 	float ActualDamage = StatComponent->ApplyDamage(DamageAmount);
+	
+	UAnimMontage* HitMontage = CachedCharacterDataAsset->HitMontage.LoadSynchronous();
+	if (!HitMontage) return ActualDamage;
+	PlayAnimMontage(HitMontage);
 
 	UE_LOG(LogTemp, Warning, TEXT("[%s] Took %.1f Damage! Left HP: %.1f"), *GetName(), ActualDamage, StatComponent->GetCurrentHealth());
 
@@ -220,7 +223,56 @@ float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 void ABattleUnit::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Die: %s"), *GetName());
+
+	ActionState = EUnitActionState::Die;
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
+}
+
+void ABattleUnit::Dodge()
+{
+	UAnimMontage* DodgeMontage = CachedCharacterDataAsset->DodgeMontage.LoadSynchronous();
+	if (!DodgeMontage) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance) return;
+
+	OnDodgeBegin();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted)
+		{
+			this->OnDodgeEnd();
+		});
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
+}
+
+void ABattleUnit::PlayAttackMontage()
+{
+	if (!CurrentSkill || CurrentSkill->SkillMontage.IsNull())
+	{
+		OnAttackHit();
+		OnAttackAnimationEnd(nullptr, false);
+		return;
+	}
+
+	UAnimMontage* Montage = CurrentSkill->SkillMontage.LoadSynchronous();
+	if (Montage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(Montage);
+
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindUObject(this, &ABattleUnit::OnAttackAnimationEnd);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+			return;
+		}
+	}
+
+	OnAttackHit();
+	OnAttackAnimationEnd(nullptr, false);
 }
 
 void ABattleUnit::PreloadAssetsFromSkills()
