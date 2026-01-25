@@ -8,12 +8,23 @@
 #include "Characters/StatComponent.h"
 #include "DataAssets/SkillDataAsset.h"
 #include "DataAssets/SkillListComponent.h"
+#include "UI/Battle/BattleMainWidget.h"
 
 void AAoABattleController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (BattleUIClass)
+	{
+		BattleUIInstance = CreateWidget<UBattleMainWidget>(this, BattleUIClass);
+		if (BattleUIInstance)
+		{
+			BattleUIInstance->AddToViewport();
+			BattleUIInstance->ShowMainMenu(false);
+		}
+	}
 
 	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -56,6 +67,13 @@ void AAoABattleController::SetInputMode_Main()
 		Subsystem->ClearAllMappings();
 		if (IMC_Battle_Main) Subsystem->AddMappingContext(IMC_Battle_Main, 0);
 	}
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetHideCursorDuringCapture(false);
+	if (BattleUIInstance) InputMode.SetWidgetToFocus(BattleUIInstance->TakeWidget());
+	SetInputMode(InputMode);
+
 	IsTargetingMode = false;
 }
 
@@ -76,6 +94,10 @@ void AAoABattleController::SetInputMode_Targeting()
 		Subsystem->ClearAllMappings();
 		if (IMC_Battle_Targeting) Subsystem->AddMappingContext(IMC_Battle_Targeting, 0);
 	}
+
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+
 	IsTargetingMode = true;
 }
 
@@ -97,6 +119,10 @@ void AAoABattleController::SetMainCamera()
 	{
 		SetViewTargetWithBlend(Cameras[0], 0.0f);
 	}
+	else if (BattleGameMode)
+	{
+		BattleGameMode->PlayBattleLoopSequence();
+	}
 }
 
 void AAoABattleController::StartPlayerTurn()
@@ -114,6 +140,15 @@ void AAoABattleController::StartPlayerTurn()
 		}
 	}
 
+	if (BattleUIInstance)
+	{
+		if (BattleGameMode)
+		{
+			BattleUIInstance->InitSkillList(BattleGameMode->GetCurrentUnit());
+		}
+		BattleUIInstance->ShowMainMenu(true);
+	}
+
 	SetInputMode_Main();
 }
 
@@ -125,7 +160,6 @@ void AAoABattleController::StartTargetingMode(USkillDataAsset* SelectedSkill)
 	PossibleTargets.Empty();
 
 	TArray<ABattleUnit*> AllUnits = BattleGameMode->GetAllUnits();
-
 
 	for (ABattleUnit* Unit : AllUnits)
 	{
@@ -142,16 +176,27 @@ void AAoABattleController::StartTargetingMode(USkillDataAsset* SelectedSkill)
 		{
 			PossibleTargets.Add(Unit);
 		}
+		else if (CachedSkill->Target == ESkillTarget::Self && bIsSelf)
+		{
+			PossibleTargets.Add(Unit);
+		}
 	}
 
+	if (PossibleTargets.Num() == 0) return;
+
 	TargetIndex = 0;
+
+	if (BattleUIInstance)
+	{
+		BattleUIInstance->ShowMainMenu(false);
+	}
+
 	SetInputMode_Targeting();
 	UpdateTargetWidget();
 }
 
 void AAoABattleController::Input_Attack()
 {
-
 	if (!BattleGameMode) return;
 
 	ABattleUnit* CurrentUnit = BattleGameMode->GetCurrentUnit();
@@ -170,11 +215,15 @@ void AAoABattleController::Input_Attack()
 
 void AAoABattleController::Input_Skill()
 {
-	SetInputMode_Skill();
+	if (BattleUIInstance)
+	{
+		BattleUIInstance->OnSkillClicked();
+	}
 }
 
 void AAoABattleController::Input_Run()
 {
+	UE_LOG(LogTemp, Log, TEXT("Try Run..."));
 }
 
 void AAoABattleController::Input_UseItem()
@@ -201,7 +250,8 @@ void AAoABattleController::Input_Left()
 {
 	if (!IsTargetingMode || PossibleTargets.IsEmpty()) return;
 
-	TargetIndex = (TargetIndex + 1) % PossibleTargets.Num();
+	TargetIndex--;
+	if (TargetIndex < 0) TargetIndex = PossibleTargets.Num() - 1;
 
 	UpdateTargetWidget();
 }
@@ -210,9 +260,8 @@ void AAoABattleController::Input_Right()
 {
 	if (!IsTargetingMode || PossibleTargets.IsEmpty()) return;
 
-	TargetIndex--;
-	if (TargetIndex < 0) TargetIndex = PossibleTargets.Num() - 1;
-	
+	TargetIndex = (TargetIndex + 1) % PossibleTargets.Num();
+
 	UpdateTargetWidget();
 }
 
@@ -249,11 +298,22 @@ void AAoABattleController::Input_Cancel()
 		{
 			if (Unit) Unit->SetTargetSelected(false);
 		}
+
+		SetMainCamera();
+
+		if (BattleUIInstance)
+		{
+			BattleUIInstance->ShowMainMenu(true);
+		}
+
 		SetInputMode_Main();
 	}
 	else
 	{
-		SetInputMode_Main();
+		if (BattleUIInstance)
+		{
+			BattleUIInstance->ShowSkillMenu(false);
+		}
 	}
 }
 

@@ -32,6 +32,16 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void NativePreConstruct() override;
+
+	UPROPERTY(EditAnywhere, Category = "Design Preview", meta = (ClampMin = "1"))
+	int32 PreviewColumns = 8;
+
+	UPROPERTY(EditAnywhere, Category = "Design Preview", meta = (ClampMin = "1"))
+	int32 PreviewRows = 4;
+
+	UPROPERTY(EditAnywhere, Category = "Design Preview")
+	FMargin SlotPadding = FMargin(4.0f);
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UGridPanel> InventoryGrid;

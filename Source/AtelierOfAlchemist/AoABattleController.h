@@ -77,6 +77,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Right;
 
+	// 배틀 UI 관련
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UBattleMainWidget> BattleUIClass;
+	UPROPERTY()
+	TObjectPtr<class UBattleMainWidget> BattleUIInstance;
+
+public:
 	void Input_Attack();
 	void Input_Skill();
 	void Input_Run();

@@ -4,6 +4,7 @@
 #include "Components/Button.h"
 #include "../InventorySlot.h"
 #include "InventoryItemInfo.h"
+#include "Components/GridSlot.h"
 #include "../../UI/MyHUD.h"
 #include "GameFramework/PlayerController.h"
 
@@ -34,6 +35,37 @@ void UInventory::NativeDestruct()
 	Super::NativeDestruct();
 }
 
+void UInventory::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	if (IsDesignTime())
+	{
+		if (!InventoryGrid || !InventorySlotClass) return;
+
+		InventoryGrid->ClearChildren();
+
+		for (int32 R = 0; R < PreviewRows; ++R)
+		{
+			for (int32 C = 0; C < PreviewColumns; ++C)
+			{
+				UInventorySlot* PreviewSlot = CreateWidget<UInventorySlot>(this, InventorySlotClass);
+				if (PreviewSlot)
+				{
+					UGridSlot* GridSlot = InventoryGrid->AddChildToGrid(PreviewSlot, R, C);
+
+					if (GridSlot)
+					{
+						GridSlot->SetPadding(SlotPadding);
+						GridSlot->SetHorizontalAlignment(HAlign_Fill);
+						GridSlot->SetVerticalAlignment(VAlign_Fill);
+					}
+				}
+			}
+		}
+	}
+}
+
 void UInventory::RefreshInventory()
 {
 	UpdateInventory();
@@ -53,27 +85,14 @@ void UInventory::UpdateInventory()
 	InventoryGrid->ClearChildren();
 
 	const TArray<FInventorySlotStruct>& Slots = InventoryManager->GetInventorySlot();
-	const int32 Columns = 8;
+
+	const int32 Columns = PreviewColumns > 0 ? PreviewColumns : 8;
 
 	int32 VisibleIndex = 0;
 
 	for (int32 i = 0; i < Slots.Num(); ++i)
 	{
 		const FInventorySlotStruct& SlotData = Slots[i];
-		bool bIsEmpty = (!SlotData.ItemData);
-
-		if (bIsSelectionMode)
-		{
-			if (!bIsEmpty)
-			{
-				UItemDataAsset* Asset = SlotData.ItemData;
-
-				if (!Asset || Asset->ItemType != EItemType::EIT_Equip || Asset->Part != FilterPart)
-				{
-					continue;
-				}
-			}
-		}
 
 		UInventorySlot* NewSlotWidget = CreateWidget<UInventorySlot>(this, InventorySlotClass);
 		if (NewSlotWidget)
@@ -84,7 +103,16 @@ void UInventory::UpdateInventory()
 
 			const int32 Row = VisibleIndex / Columns;
 			const int32 Column = VisibleIndex % Columns;
-			InventoryGrid->AddChildToGrid(NewSlotWidget, Row, Column);
+
+			UGridSlot* GridSlot = InventoryGrid->AddChildToGrid(NewSlotWidget, Row, Column);
+
+			if (GridSlot)
+			{
+				GridSlot->SetPadding(SlotPadding);
+
+				GridSlot->SetHorizontalAlignment(HAlign_Fill);
+				GridSlot->SetVerticalAlignment(VAlign_Fill);
+			}
 
 			VisibleIndex++;
 		}
