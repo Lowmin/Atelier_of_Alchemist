@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -13,7 +11,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSelected, TSoftObjectPtr<UR
 class UImage;
 class UTextBlock;
 class UButton;
-class UUniformGridPanel;
 class UScrollBox;
 class URecipeListSlot;
 class URecipeManagerSubsystem;
@@ -22,9 +19,6 @@ class UHorizontalBox;
 class UIngredientSlot;
 class UIngredientSelectWidget;
 
-/**
- *
- */
 UCLASS()
 class ATELIEROFALCHEMIST_API URecipeList : public UUserWidget
 {
@@ -36,12 +30,13 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_Close;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UUniformGridPanel> GridPanel_RecipeList;
+	TObjectPtr<UScrollBox> ScrollBox_RecipeList;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_Craft;
@@ -67,6 +62,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UIngredientSelectWidget> PopupClass;
 
+	UPROPERTY(EditAnywhere, Category = "Design Preview")
+	int32 PreviewItemCount = 5;
+
 private:
 	UPROPERTY()
 	URecipeDataAsset* RecipeData;
@@ -78,10 +76,6 @@ private:
 
 	void RefreshRecipeList();
 	void HandleRecipeSelected(const FAlchemyRecipe& InRecipe);
-
-	const int32 MaxColumns = 8;
-	const int32 MaxRows = 3;
-	const int32 TotalSlots = MaxColumns * MaxRows;
 
 	UPROPERTY()
 	TArray<UIngredientSlot*> CreatedSlots;

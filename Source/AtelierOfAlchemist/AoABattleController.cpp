@@ -16,16 +16,6 @@ void AAoABattleController::BeginPlay()
 
 	BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
 
-	if (BattleUIClass)
-	{
-		BattleUIInstance = CreateWidget<UBattleMainWidget>(this, BattleUIClass);
-		if (BattleUIInstance)
-		{
-			BattleUIInstance->AddToViewport();
-			BattleUIInstance->ShowMainMenu(false);
-		}
-	}
-
 	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetHideCursorDuringCapture(false);
@@ -140,6 +130,15 @@ void AAoABattleController::StartPlayerTurn()
 		}
 	}
 
+	if (!BattleUIInstance && BattleUIClass)
+	{
+		BattleUIInstance = CreateWidget<UBattleMainWidget>(this, BattleUIClass);
+		if (BattleUIInstance)
+		{
+			BattleUIInstance->AddToViewport();
+		}
+	}
+
 	if (BattleUIInstance)
 	{
 		if (BattleGameMode)
@@ -250,8 +249,7 @@ void AAoABattleController::Input_Left()
 {
 	if (!IsTargetingMode || PossibleTargets.IsEmpty()) return;
 
-	TargetIndex--;
-	if (TargetIndex < 0) TargetIndex = PossibleTargets.Num() - 1;
+	TargetIndex = (TargetIndex + 1) % PossibleTargets.Num();
 
 	UpdateTargetWidget();
 }
@@ -260,7 +258,8 @@ void AAoABattleController::Input_Right()
 {
 	if (!IsTargetingMode || PossibleTargets.IsEmpty()) return;
 
-	TargetIndex = (TargetIndex + 1) % PossibleTargets.Num();
+	TargetIndex--;
+	if (TargetIndex < 0) TargetIndex = PossibleTargets.Num() - 1;
 
 	UpdateTargetWidget();
 }

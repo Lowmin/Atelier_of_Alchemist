@@ -6,9 +6,11 @@
 #include "../../DataAssets/SkillListComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
 #include "../../BattleGameMode.h"
-#include "Kismet/GameplayStatics.h"
-#include "SkillSlotWidget.h"
 #include "../../AoABattleController.h"
+#include "SkillSlotWidget.h"
+#include "Kismet/GameplayStatics.h"
+
+#define SCREEN_LOG(Text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Text)
 
 void UBattleMainWidget::NativeConstruct()
 {
@@ -51,6 +53,12 @@ void UBattleMainWidget::OnAttackClicked()
 
 void UBattleMainWidget::OnSkillClicked()
 {
+	if (!OwnerUnit)
+	{
+		ABattleGameMode* GM = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
+		if (GM) InitSkillList(GM->GetCurrentUnit());
+	}
+
 	if (SkillListScrollBox->GetVisibility() == ESlateVisibility::Visible)
 	{
 		ShowSkillMenu(false);
@@ -73,15 +81,39 @@ void UBattleMainWidget::OnRunClicked()
 
 void UBattleMainWidget::InitSkillList(ABattleUnit* Unit)
 {
-	if (!Unit || !SkillListScrollBox || !SkillSlotWidgetClass) return;
+	if (!Unit)
+	{
+		SCREEN_LOG(TEXT("Error: OwnerUnit is NULL!"));
+		return;
+	}
+	if (!SkillListScrollBox)
+	{
+		SCREEN_LOG(TEXT("Error: ScrollBox is Not Bound!"));
+		return;
+	}
+	if (!SkillSlotWidgetClass)
+	{
+		SCREEN_LOG(TEXT("Error: SkillSlotWidgetClass is NONE! Check Blueprint!"));
+		return;
+	}
 
 	OwnerUnit = Unit;
 	SkillListScrollBox->ClearChildren();
 
 	USkillListComponent* SkillComp = Unit->GetSkillComponent();
-	if (!SkillComp) return;
+	if (!SkillComp)
+	{
+		SCREEN_LOG(TEXT("Error: Unit has no SkillComponent!"));
+		return;
+	}
 
-	for (USkillDataAsset* Skill : SkillComp->GetSkillList())
+	const TArray<USkillDataAsset*>& Skills = SkillComp->GetSkillList();
+	if (Skills.Num() == 0)
+	{
+		SCREEN_LOG(TEXT("Warning: Unit has 0 Skills."));
+	}
+
+	for (USkillDataAsset* Skill : Skills)
 	{
 		if (!Skill) continue;
 
@@ -90,9 +122,7 @@ void UBattleMainWidget::InitSkillList(ABattleUnit* Unit)
 		if (NewSlot)
 		{
 			NewSlot->Setup(Skill);
-
 			NewSlot->OnSkillSelected.BindUObject(this, &UBattleMainWidget::OnSkillSelected);
-
 			SkillListScrollBox->AddChild(NewSlot);
 		}
 	}

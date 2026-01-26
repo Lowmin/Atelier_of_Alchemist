@@ -17,21 +17,25 @@ class ATELIEROFALCHEMIST_API UBattleMainWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void ShowMainMenu(bool bVisible);
 
+	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void ShowSkillMenu(bool bVisible);
 
+	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void InitSkillList(ABattleUnit* Unit);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void OnAttackClicked();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void OnSkillClicked();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void OnRunClicked();
 
+protected:
 	UFUNCTION()
 	void OnSkillSelected(USkillDataAsset* SkillAsset);
 
@@ -48,13 +52,13 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Btn_Run;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Battle UI")
 	TObjectPtr<UScrollBox> SkillListScrollBox;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle UI")
 	TSubclassOf<UUserWidget> SkillSlotWidgetClass;
 
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Battle UI", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ABattleUnit> OwnerUnit;
 };

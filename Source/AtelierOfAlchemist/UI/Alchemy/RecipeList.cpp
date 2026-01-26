@@ -9,8 +9,7 @@
 #include "../../DataAssets/GradeHelper.h"
 #include "../../UI/MyHUD.h"
 
-#include "Components/UniformGridPanel.h"
-#include "Components/UniformGridSlot.h"
+#include "Components/ScrollBox.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -45,45 +44,52 @@ void URecipeList::NativeConstruct()
 	}
 }
 
+void URecipeList::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	if (IsDesignTime())
+	{
+		if (!ScrollBox_RecipeList || !RecipeSlotClass) return;
+
+		ScrollBox_RecipeList->ClearChildren();
+
+		for (int32 i = 0; i < PreviewItemCount; ++i)
+		{
+			UUserWidget* Widget = CreateWidget<UUserWidget>(this, RecipeSlotClass);
+			if (Widget)
+			{
+				ScrollBox_RecipeList->AddChild(Widget);
+			}
+		}
+	}
+}
+
 void URecipeList::RefreshRecipeList()
 {
-	if (!GridPanel_RecipeList || !RecipeSlotClass) return;
+	if (!ScrollBox_RecipeList || !RecipeSlotClass) return;
 
-	GridPanel_RecipeList->ClearChildren();
+	ScrollBox_RecipeList->ClearChildren();
 
 	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
 	URecipeManagerSubsystem* RecipeManager = GameInst ? GameInst->GetSubsystem<URecipeManagerSubsystem>() : nullptr;
 
-	for (int32 i = 0; i < TotalSlots; ++i)
+	if (!RecipeData) return;
+
+	for (int32 i = 0; i < RecipeData->Recipes.Num(); ++i)
 	{
 		UUserWidget* Widget = CreateWidget<UUserWidget>(this, RecipeSlotClass);
 		URecipeListSlot* NewSlot = Cast<URecipeListSlot>(Widget);
 
 		if (!NewSlot) continue;
 
-		int32 Row = i / MaxColumns;
-		int32 Col = i % MaxColumns;
+		const FAlchemyRecipe& Recipe = RecipeData->Recipes[i];
+		bool bIsKnown = RecipeManager ? RecipeManager->IsRecipeUnlocked(Recipe.RecipeID) : false;
 
-		if (RecipeData && i < RecipeData->Recipes.Num())
-		{
-			const FAlchemyRecipe& Recipe = RecipeData->Recipes[i];
-			bool bIsKnown = RecipeManager ? RecipeManager->IsRecipeUnlocked(Recipe.RecipeID) : false;
+		NewSlot->InitSlot(Recipe, bIsKnown);
+		NewSlot->OnRecipeSelected.AddUObject(this, &URecipeList::HandleRecipeSelected);
 
-			NewSlot->InitSlot(Recipe, bIsKnown);
-			NewSlot->OnRecipeSelected.AddUObject(this, &URecipeList::HandleRecipeSelected);
-		}
-		else
-		{
-			NewSlot->InitEmpty();
-		}
-
-		UUniformGridSlot* GridSlot = GridPanel_RecipeList->AddChildToUniformGrid(NewSlot, Row, Col);
-
-		if (GridSlot)
-		{
-			GridSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
-			GridSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
-		}
+		ScrollBox_RecipeList->AddChild(NewSlot);
 	}
 }
 

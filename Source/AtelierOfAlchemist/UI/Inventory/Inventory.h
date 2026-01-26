@@ -29,11 +29,6 @@ public:
 
 	UInventoryItemInfo* GetItemInfoWidget() const { return ItemInfoWidget; }
 
-protected:
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-	virtual void NativePreConstruct() override;
-
 	UPROPERTY(EditAnywhere, Category = "Design Preview", meta = (ClampMin = "1"))
 	int32 PreviewColumns = 8;
 
@@ -42,6 +37,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Design Preview")
 	FMargin SlotPadding = FMargin(4.0f);
+
+protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	virtual void NativePreConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UGridPanel> InventoryGrid;
