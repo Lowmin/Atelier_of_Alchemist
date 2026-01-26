@@ -22,7 +22,7 @@ void UStatComponent::Initialize(UPlayerRuntimeData* InRuntimeData)
 
 void UStatComponent::InitializeFromEnemy(UEnemyDataAsset* InDataAsset)
 {
-	StaticData = InDataAsset;
+	StaticData = Cast<UCharacterDataAsset>(InDataAsset);
 
 	if (StaticData)
 	{
@@ -86,25 +86,25 @@ float UStatComponent::GetCurrentHealth() const
 float UStatComponent::GetMaxHealth() const
 {
 	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalMaxHealth();
-	return StaticData ? StaticData->BaseMaxHealth : 0.0f;
+	return StaticData ? StaticData->MaxHealth : 0.0f;
 }
 
 float UStatComponent::GetAttackPower() const
 {
 	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalAttack();
-	return StaticData ? StaticData->BaseAttackPower : 0.0f;
+	return StaticData ? StaticData->AttackPower : 0.0f;
 }
 
 float UStatComponent::GetDefense() const
 {
 	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalDefense();
-	return StaticData ? StaticData->BaseDefensePower : 0.0f;
+	return StaticData ? StaticData->DefensePower : 0.0f;
 }
 
 float UStatComponent::GetSpeed() const
 {
 	if (LinkedRuntimeData) return LinkedRuntimeData->GetTotalSpeed();
-	return StaticData ? StaticData->BaseSpeed : 0.0f;
+	return StaticData ? StaticData->Speed : 0.0f;
 }
 
 float UStatComponent::GetLevel() const

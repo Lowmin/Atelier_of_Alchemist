@@ -6,54 +6,57 @@
 #include "InventorySlot.generated.h"
 
 class UImage;
-class UTextBlock;
-class UInventoryItemInfo;
-class UInventory;
 class UButton;
+class UTextBlock;
+class UInventory;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlotClicked, int32, SlotIndex);
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlotHovered, const FInventorySlotStruct&, SlotData);
+
 UCLASS()
 class ATELIEROFALCHEMIST_API UInventorySlot : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
-	void UpdateSlot(const FInventorySlotStruct& SlotData, int32 InIndex);
-	void SetOwningInventory(UInventory* OwningInventory);
+	virtual void NativeConstruct() override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+
+	void UpdateSlot(const FInventorySlotStruct& InSlotData, int32 InIndex);
+	void InitAsUnequipSlot();
+
+	void SetOwningInventory(UInventory* InInventory) { OwningInventory = InInventory; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnSlotClicked OnSlotClicked;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnSlotHovered OnSlotHovered;
+
 protected:
-	virtual void NativeConstruct() override;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Button_Slot;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UImage> ItemImage;
+	TObjectPtr<UImage> Image_Icon;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> ItemGrade;
+	TObjectPtr<UTextBlock> Text_Count;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> ItemQuantity;
+	TObjectPtr<UTextBlock> Text_Grade;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Button_ItemSlot;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TObjectPtr<UTexture2D> UnequipIconTexture;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
-	FInventorySlotStruct ItemSlotData;
-
-	UPROPERTY()
-	TObjectPtr<UInventoryItemInfo> ItemInfo;
-
-	int32 MyIndex = -1;
-
-	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
-
-private:
 	UFUNCTION()
 	void OnButtonClicked();
+
+private:
+	int32 SlotIndex;
+	FInventorySlotStruct SlotData;
+
+	UPROPERTY()
+	TObjectPtr<UInventory> OwningInventory;
 };

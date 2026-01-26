@@ -5,21 +5,22 @@
 #include "DataAssets/ItemDataAsset.h"
 #include "InventoryManagerSubsystem.generated.h"
 
-class UItemDataAsset;
+class UPlayerRuntimeData;
 
 USTRUCT(BlueprintType)
 struct FInventorySlotStruct
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UItemDataAsset* ItemData = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EItemGrade Grade = EItemGrade::EIG_E;
+	int32 Quantity = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Quantity = 0;
+	EItemGrade Grade = EItemGrade::EIG_E;
 };
 
 USTRUCT(BlueprintType)
@@ -27,8 +28,9 @@ struct FInventorySearchResult
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(BlueprintReadOnly)
-	int32 SlotIndex;
+	int32 SlotIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly)
 	FInventorySlotStruct SlotData;
@@ -45,13 +47,26 @@ class ATELIEROFALCHEMIST_API UInventoryManagerSubsystem : public UGameInstanceSu
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
-	bool AddItem(const UObject* WorldContextObject, UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount = 1);
+	UFUNCTION(BlueprintCallable)
+	bool AddItem(const UObject* WorldContextObject, UItemDataAsset* ItemDataAsset, EItemGrade ItemGrade, int32 Amount);
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
-	bool RemoveItemByIndex(const UObject* WorldContextObject, int32 SlotIndex, int32 Amount = 1);
+	UFUNCTION(BlueprintCallable)
+	bool RemoveItemByIndex(const UObject* WorldContextObject, int32 SlotIndex, int32 Amount);
 
-	const TArray<FInventorySlotStruct>& GetInventorySlot() const { return InventorySlot; };
+	UFUNCTION(BlueprintCallable)
+	void EquipItemToCharacter(FName CharacterID, int32 InvSlotIndex, EEquipPart TargetPart);
+
+	UFUNCTION(BlueprintCallable)
+	void UnequipItemFromCharacter(FName CharacterID, EEquipPart TargetPart);
+
+	UFUNCTION(BlueprintCallable)
+	const TArray<FInventorySlotStruct>& GetInventorySlot() const { return InventorySlot; }
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FInventorySearchResult> FindItemsByAsset(UItemDataAsset* TargetAsset);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetItemCount(UItemDataAsset* TargetItemAsset) const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
@@ -59,19 +74,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnItemAdded OnItemAdded;
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	TArray<FInventorySearchResult> FindItemsByAsset(UItemDataAsset* TargetAsset);
-
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void EquipItemToCharacter(FName CharacterID, int32 InvSlotIndex, EEquipPart TargetPart);
-
-	UFUNCTION(BlueprintPure, Category = "Inventory")
-	int32 GetItemCount(UItemDataAsset* TargetItemAsset) const;
-
 protected:
-	UPROPERTY(SaveGame)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FInventorySlotStruct> InventorySlot;
 
-	UPROPERTY(EditAnywhere, Category = "Inventory")
-	int32 MaxInventorySlot = 35;
+	const int32 MaxInventorySlot = 30;
 };

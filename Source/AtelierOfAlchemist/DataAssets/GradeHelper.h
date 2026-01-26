@@ -1,47 +1,46 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "ItemDataAsset.h"
 
-/**
- * 
- */
 class AlchemyMath
 {
 public:
-	static int32 GetGradeScore(EItemGrade Grade)
-	{
-		switch (Grade)
-		{
-		case EItemGrade::EIG_S: return 5;
-		case EItemGrade::EIG_A: return 4;
-		case EItemGrade::EIG_B: return 3;
-		case EItemGrade::EIG_C: return 2;
-		case EItemGrade::EIG_D: return 1;
-		default: return 0;
-		}
-	}
-	static EItemGrade GetGradeFromScore(int32 Score)
-	{
-		if (Score >= 5) return EItemGrade::EIG_S;
-		else if (Score >= 4) return EItemGrade::EIG_A;
-		else if (Score >= 3) return EItemGrade::EIG_B;
-		else if (Score >= 2) return EItemGrade::EIG_C;
-		else if (Score >= 1) return EItemGrade::EIG_D;
-		else return EItemGrade::EIG_E;
-	}
-	static float GetStatMultiplier(EItemGrade Grade)
+	static float GetGradeMultiplier(EItemGrade Grade)
 	{
 		switch (Grade)
 		{
 		case EItemGrade::EIG_S: return 1.5f;
-		case EItemGrade::EIG_A: return 1.2f;
-		case EItemGrade::EIG_B: return 1.0f;
-		case EItemGrade::EIG_C: return 0.8f;
-		case EItemGrade::EIG_D: return 0.6f;
-		default: return 0.5f;
+		case EItemGrade::EIG_A: return 1.3f;
+		case EItemGrade::EIG_B: return 1.1f;
+		case EItemGrade::EIG_C: return 1.0f;
+		case EItemGrade::EIG_D: return 0.8f;
+		case EItemGrade::EIG_E: return 0.5f;
+		default: return 1.0f;
 		}
+	}
+
+	static int32 GetGradeScore(EItemGrade Grade)
+	{
+		switch (Grade)
+		{
+		case EItemGrade::EIG_S: return 100;
+		case EItemGrade::EIG_A: return 80;
+		case EItemGrade::EIG_B: return 60;
+		case EItemGrade::EIG_C: return 40;
+		case EItemGrade::EIG_D: return 20;
+		case EItemGrade::EIG_E: return 10;
+		default: return 0;
+		}
+	}
+
+	static EItemGrade GetGradeFromScore(int32 Score)
+	{
+		if (Score >= 90) return EItemGrade::EIG_S;
+		if (Score >= 70) return EItemGrade::EIG_A;
+		if (Score >= 50) return EItemGrade::EIG_B;
+		if (Score >= 30) return EItemGrade::EIG_C;
+		if (Score >= 15) return EItemGrade::EIG_D;
+		return EItemGrade::EIG_E;
 	}
 };

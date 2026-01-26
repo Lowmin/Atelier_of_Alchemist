@@ -10,6 +10,7 @@ class UInventorySlot;
 class UGridPanel;
 class UInventoryItemInfo;
 class UButton;
+struct FInventorySlotStruct;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryItemSelected, int32, SelectedIndex);
 
@@ -22,7 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RefreshInventory();
 
-	void SetSelectionMode(bool bIsSelection, EEquipPart InPart = EEquipPart::PET_Weapon);
+	void SetSelectionMode(bool bIsSelection, EEquipPart InPart, FName InCharacterID = NAME_None);
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnInventoryItemSelected OnItemSelected;
@@ -38,6 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Design Preview")
 	FMargin SlotPadding = FMargin(4.0f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Design Preview")
+	TSubclassOf<UInventorySlot> InventorySlotClass;
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -48,9 +52,6 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_Cancel;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<UInventorySlot> InventorySlotClass;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UInventoryItemInfo> ItemInfoWidget;
@@ -64,10 +65,14 @@ protected:
 	UFUNCTION()
 	void OnCloseClicked();
 
+	UFUNCTION()
+	void OnItemHovered(const FInventorySlotStruct& SlotData);
+
 	UPROPERTY()
 	TObjectPtr<UInventoryManagerSubsystem> InventoryManager;
 
 private:
 	bool bIsSelectionMode = false;
 	EEquipPart FilterPart = EEquipPart::PET_Weapon;
+	FName TargetCharacterID = NAME_None;
 };

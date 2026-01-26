@@ -1,15 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "Notification/NotificationData.h"
+#include "../DataAssets/ItemDataAsset.h" 
 #include "MyHUD.generated.h"
-
-class UMainUI;
-class AActor;
-class UNotificationContainer;
 
 UENUM(BlueprintType)
 enum class EWidgetType : uint8
@@ -17,6 +11,9 @@ enum class EWidgetType : uint8
 	None,
 	MainHUD,
 	Inventory,
+	Status,
+	Recipe,
+	Interaction,
 	PartyManage,
 	Dialogue
 };
@@ -27,6 +24,8 @@ class ATELIEROFALCHEMIST_API AMyHUD : public AHUD
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintCallable)
 	void OpenWidget(EWidgetType Type);
 
@@ -39,18 +38,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleWidget(EWidgetType Type);
 
-	UUserWidget* GetWidget(EWidgetType Type);
-	bool IsAnyUIMode() const { return CurrentPopupType != EWidgetType::None; }
+	UFUNCTION(BlueprintCallable)
+	class UUserWidget* GetWidget(EWidgetType Type);
+
+	UFUNCTION(BlueprintCallable)
+	void OpenInventoryForSelection(EEquipPart TargetPart, FName CharacterID);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsAnyUIMode() const;
 
 protected:
-	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY(EditDefaultsOnly, Category = "UI Config")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TMap<EWidgetType, TSubclassOf<UUserWidget>> WidgetClasses;
 
 	UPROPERTY()
-	TMap<EWidgetType, TObjectPtr<UUserWidget>> CreatedWidgets;
+	TMap<EWidgetType, UUserWidget*> CreatedWidgets;
 
 	EWidgetType CurrentPopupType = EWidgetType::None;
 

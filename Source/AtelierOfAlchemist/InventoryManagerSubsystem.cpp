@@ -106,14 +106,15 @@ void UInventoryManagerSubsystem::EquipItemToCharacter(FName CharacterID, int32 I
 	if (!NewItemAsset || NewItemAsset->Part != TargetPart) return;
 
 	UItemDataAsset* OldItem = CharacterData->GetEquipItem(TargetPart);
+	EItemGrade OldGrade = CharacterData->GetEquipGrade(TargetPart);
 
-	CharacterData->SetEquipItem(TargetPart, NewItemAsset);
+	CharacterData->SetEquipItem(TargetPart, NewItemAsset, NewItemSlot.Grade);
 
 	if (OldItem)
 	{
 		InventorySlot[InvSlotIndex].ItemData = OldItem;
 		InventorySlot[InvSlotIndex].Quantity = 1;
-		InventorySlot[InvSlotIndex].Grade = NewItemSlot.Grade;
+		InventorySlot[InvSlotIndex].Grade = OldGrade;
 	}
 	else
 	{
@@ -121,6 +122,26 @@ void UInventoryManagerSubsystem::EquipItemToCharacter(FName CharacterID, int32 I
 	}
 
 	OnInventoryUpdated.Broadcast();
+}
+
+void UInventoryManagerSubsystem::UnequipItemFromCharacter(FName CharacterID, EEquipPart TargetPart)
+{
+	UGuildMemberManagerSubsystem* GuildManager = GetGameInstance()->GetSubsystem<UGuildMemberManagerSubsystem>();
+	if (!GuildManager) return;
+
+	UPlayerRuntimeData* CharacterData = GuildManager->GetPlayerRuntimeData(CharacterID);
+	if (!CharacterData) return;
+
+	UItemDataAsset* OldItem = CharacterData->GetEquipItem(TargetPart);
+	EItemGrade OldGrade = CharacterData->GetEquipGrade(TargetPart);
+
+	if (OldItem)
+	{
+		if (AddItem(this, OldItem, OldGrade, 1))
+		{
+			CharacterData->SetEquipItem(TargetPart, nullptr, EItemGrade::EIG_E);
+		}
+	}
 }
 
 int32 UInventoryManagerSubsystem::GetItemCount(UItemDataAsset* TargetItemAsset) const

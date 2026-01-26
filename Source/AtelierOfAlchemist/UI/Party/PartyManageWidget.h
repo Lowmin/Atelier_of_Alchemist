@@ -5,78 +5,55 @@
 #include "../../DataAssets/ItemDataAsset.h"
 #include "PartyManageWidget.generated.h"
 
-class UPartyMemberSlot;
-class UEquipSlotWidget;
-class UInventory;
 class UPlayerRuntimeData;
+class UEquipSlotWidget;
+class UPartyMemberSlot;
+class UImage;
 class UTextBlock;
 class UHorizontalBox;
-class UImage;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API UPartyManageWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
-	void InitPartyList();
-
-	UFUNCTION()
-	void UpdateUI();
-
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UPartyMemberSlot> MemberSlotClass;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UImage> Image_Character;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UHorizontalBox> Box_PartyList;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlotWidget> Slot_Weapon;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlotWidget> Slot_Head;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlotWidget> Slot_Body;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlotWidget> Slot_Shoes;
+	TObjectPtr<UImage> Image_Character;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_CharacterName;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_Level;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_HP;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_AttackPower;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_Defense;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_Speed;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEquipSlotWidget> Slot_Weapon;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEquipSlotWidget> Slot_Head;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEquipSlotWidget> Slot_Body;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEquipSlotWidget> Slot_Shoes;
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UInventory> InventoryClass;
+	TSubclassOf<UPartyMemberSlot> MemberSlotClass;
 
-	UPROPERTY()
-	TObjectPtr<UInventory> InventoryWidget;
-
-	UPROPERTY()
-	UPlayerRuntimeData* CurrentSelectedData;
-
-	EEquipPart PendingEquipPart;
+	UFUNCTION()
+	void UpdateUI();
 
 	UFUNCTION()
 	void OnMemberSelected(UPlayerRuntimeData* Data);
@@ -84,6 +61,9 @@ protected:
 	UFUNCTION()
 	void OnEquipSlotClicked(EEquipPart Part);
 
-	UFUNCTION()
-	void OnInventoryItemSelected(int32 InvSlotIndex);
+private:
+	UPROPERTY()
+	TObjectPtr<UPlayerRuntimeData> CurrentSelectedData;
+
+	void InitPartyList();
 };

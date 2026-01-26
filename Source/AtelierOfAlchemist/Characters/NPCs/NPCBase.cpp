@@ -16,7 +16,7 @@ ANPCBase::ANPCBase()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
 
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mexh"));
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Root);
 
 	InteractRange = CreateDefaultSubobject<USphereComponent>(TEXT("InteractRange"));
@@ -32,7 +32,7 @@ ANPCBase::ANPCBase()
 void ANPCBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	InteractRange->OnComponentBeginOverlap.AddDynamic(this, &ANPCBase::OnOverlapBegin);
 	InteractRange->OnComponentEndOverlap.AddDynamic(this, &ANPCBase::OnOverlapEnd);
 }
@@ -40,7 +40,6 @@ void ANPCBase::BeginPlay()
 void ANPCBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ANPCBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -64,6 +63,7 @@ void ANPCBase::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 void ANPCBase::Interact_Implementation(APlayerCharacter* Interactor)
 {
 	UQuestManagerSubsystem* QuestManagerSubsystem = GetGameInstance()->GetSubsystem<UQuestManagerSubsystem>();
+	if (!QuestManagerSubsystem) return;
 
 	if (!DialogueTable) return;
 
@@ -72,31 +72,40 @@ void ANPCBase::Interact_Implementation(APlayerCharacter* Interactor)
 	const FDialogueData* Candidate_Quest = nullptr;
 	const FDialogueData* Candidate_Normal = nullptr;
 
-	int32 CurrnetLevel = Interactor->GetLevel();
+	int32 CurrentLevel = Interactor->GetLevel();
 
 	for (const FName& RowName : RowNames)
 	{
 		static const FString Context(TEXT("NPC Search Context"));
 		FDialogueData* Row = DialogueTable->FindRow<FDialogueData>(RowName, Context);
 
-		if (!Row) return;
+		if (!Row) continue;
 
-		if (Row->DialogueType == EDialogueType::Normal) Candidate_Normal = Row;
+		if (Row->DialogueType == EDialogueType::Normal)
+		{
+			Candidate_Normal = Row;
+		}
 		else
 		{
-			if (CurrnetLevel < Row->ReqLevel) continue;
+			if (CurrentLevel < Row->ReqLevel) continue;
 
 			if (Row->QuestCondition == EQuestCondition::NotStarted)
 			{
-				Candidate_Quest = Row;
+				if (!QuestManagerSubsystem->GetActiveQuests().Contains(Row->QuestID) && !QuestManagerSubsystem->IsQuestCompleted(Row->QuestID))
+				{
+					Candidate_Quest = Row;
+				}
 			}
 			else if (Row->QuestCondition == EQuestCondition::InProgress)
 			{
-				if (QuestManagerSubsystem->GetActiveQuests().Find(Row->QuestID) && !QuestManagerSubsystem->IsQuestReadyToCompleted(Row->QuestID)) Candidate_Quest = Row;
+				if (QuestManagerSubsystem->GetActiveQuests().Contains(Row->QuestID) && !QuestManagerSubsystem->IsQuestReadyToCompleted(Row->QuestID))
+				{
+					Candidate_Quest = Row;
+				}
 			}
 			else if (Row->QuestCondition == EQuestCondition::Completed)
 			{
-				if (QuestManagerSubsystem->GetActiveQuests().Find(Row->QuestID) && QuestManagerSubsystem->IsQuestReadyToCompleted(Row->QuestID))
+				if (QuestManagerSubsystem->GetActiveQuests().Contains(Row->QuestID) && QuestManagerSubsystem->IsQuestReadyToCompleted(Row->QuestID))
 				{
 					Candidate_Quest = Row;
 					break;
@@ -119,7 +128,8 @@ void ANPCBase::Interact_Implementation(APlayerCharacter* Interactor)
 			if (MyHUD)
 			{
 				MyHUD->OpenWidget(EWidgetType::Dialogue);
-				UDialogueWidget* Widget = Cast<UDialogueWidget>(MyHUD->GetWidget(EWidgetType::Dialogue));
+				UUserWidget* BaseWidget = MyHUD->GetWidget(EWidgetType::Dialogue);
+				UDialogueWidget* Widget = Cast<UDialogueWidget>(BaseWidget);
 
 				if (Widget)
 				{

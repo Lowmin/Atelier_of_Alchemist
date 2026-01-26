@@ -2,6 +2,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "Inventory/Inventory.h" 
 
 void AMyHUD::BeginPlay()
 {
@@ -51,6 +52,31 @@ void AMyHUD::OpenWidget(EWidgetType Type)
 	UpdateInputMode();
 }
 
+void AMyHUD::OpenInventoryForSelection(EEquipPart TargetPart, FName CharacterID)
+{
+	UUserWidget* Widget = GetOrCreateWidget(EWidgetType::Inventory);
+	UInventory* InvWidget = Cast<UInventory>(Widget);
+
+	if (!InvWidget) return;
+
+	if (!InvWidget->IsInViewport())
+	{
+		InvWidget->AddToViewport(20);
+	}
+
+	InvWidget->SetSelectionMode(true, TargetPart, CharacterID);
+	InvWidget->RefreshInventory();
+
+	APlayerController* PC = GetOwningPlayerController();
+	if (PC)
+	{
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(InvWidget->TakeWidget());
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+	}
+}
+
 void AMyHUD::CloseWidget(EWidgetType Type)
 {
 	if (CreatedWidgets.Contains(Type))
@@ -76,6 +102,7 @@ void AMyHUD::CloseAllWidgets()
 	{
 		CloseWidget(CurrentPopupType);
 	}
+	CloseWidget(EWidgetType::Inventory);
 }
 
 void AMyHUD::ToggleWidget(EWidgetType Type)
@@ -112,4 +139,9 @@ void AMyHUD::UpdateInputMode()
 UUserWidget* AMyHUD::GetWidget(EWidgetType Type)
 {
 	return GetOrCreateWidget(Type);
+}
+
+bool AMyHUD::IsAnyUIMode() const
+{
+	return CurrentPopupType != EWidgetType::None;
 }

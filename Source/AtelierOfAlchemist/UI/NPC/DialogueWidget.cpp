@@ -10,8 +10,11 @@ void UDialogueWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Button_Next->OnClicked.RemoveDynamic(this, &UDialogueWidget::ShowNextDialogue);
-	Button_Next->OnClicked.AddDynamic(this, &UDialogueWidget::ShowNextDialogue);
+	if (Button_Next)
+	{
+		Button_Next->OnClicked.RemoveDynamic(this, &UDialogueWidget::ShowNextDialogue);
+		Button_Next->OnClicked.AddDynamic(this, &UDialogueWidget::ShowNextDialogue);
+	}
 }
 
 void UDialogueWidget::UpdateDialogue(const FText& Name, const TArray<FText>& Contents, UTexture2D* Portrait, FName QuestID)
@@ -21,10 +24,15 @@ void UDialogueWidget::UpdateDialogue(const FText& Name, const TArray<FText>& Con
 
 	PendingQuestID = QuestID;
 
-	Image_Portrait->SetBrushFromTexture(Portrait);
-	Text_Name->SetText(Name);
+	if (Image_Portrait && Portrait)
+	{
+		Image_Portrait->SetBrushFromTexture(Portrait);
+	}
 
-	UE_LOG(LogTemp, Error, TEXT("1. Update Dialogue."));
+	if (Text_Name)
+	{
+		Text_Name->SetText(Name);
+	}
 
 	ShowNextDialogue();
 }
@@ -33,10 +41,16 @@ void UDialogueWidget::ShowNextDialogue()
 {
 	if (CurrentDialogues.IsValidIndex(CurrentDialogIndex))
 	{
-		Text_Dialogue->SetText(CurrentDialogues[CurrentDialogIndex]);
+		if (Text_Dialogue)
+		{
+			Text_Dialogue->SetText(CurrentDialogues[CurrentDialogIndex]);
+		}
 		CurrentDialogIndex++;
 	}
-	else DialogueEnded();
+	else
+	{
+		DialogueEnded();
+	}
 }
 
 void UDialogueWidget::DialogueEnded()
@@ -44,9 +58,14 @@ void UDialogueWidget::DialogueEnded()
 	if (PendingQuestID != NAME_None)
 	{
 		UGameInstance* GameInstance = GetGameInstance();
-		UQuestManagerSubsystem* QuestManagerSubsystem = GameInstance->GetSubsystem<UQuestManagerSubsystem>();
-
-		QuestManagerSubsystem->AcceptQuest(PendingQuestID);
+		if (GameInstance)
+		{
+			UQuestManagerSubsystem* QuestManagerSubsystem = GameInstance->GetSubsystem<UQuestManagerSubsystem>();
+			if (QuestManagerSubsystem)
+			{
+				QuestManagerSubsystem->AcceptQuest(PendingQuestID);
+			}
+		}
 		PendingQuestID = NAME_None;
 	}
 

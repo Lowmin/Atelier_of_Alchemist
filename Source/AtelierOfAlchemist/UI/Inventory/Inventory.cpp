@@ -71,10 +71,11 @@ void UInventory::RefreshInventory()
 	UpdateInventory();
 }
 
-void UInventory::SetSelectionMode(bool bIsSelection, EEquipPart InPart)
+void UInventory::SetSelectionMode(bool bIsSelection, EEquipPart InPart, FName InCharacterID)
 {
 	bIsSelectionMode = bIsSelection;
 	FilterPart = InPart;
+	TargetCharacterID = InCharacterID;
 	UpdateInventory();
 }
 
@@ -90,9 +91,41 @@ void UInventory::UpdateInventory()
 
 	int32 VisibleIndex = 0;
 
+	if (bIsSelectionMode)
+	{
+		UInventorySlot* UnequipSlot = CreateWidget<UInventorySlot>(this, InventorySlotClass);
+		if (UnequipSlot)
+		{
+			UnequipSlot->InitAsUnequipSlot();
+			UnequipSlot->SetOwningInventory(this);
+			UnequipSlot->OnSlotClicked.AddDynamic(this, &UInventory::OnSlotClicked);
+			UnequipSlot->OnSlotHovered.AddDynamic(this, &UInventory::OnItemHovered);
+
+			UGridSlot* GridSlot = InventoryGrid->AddChildToGrid(UnequipSlot, 0, 0);
+			if (GridSlot)
+			{
+				GridSlot->SetPadding(SlotPadding);
+				GridSlot->SetHorizontalAlignment(HAlign_Fill);
+				GridSlot->SetVerticalAlignment(VAlign_Fill);
+			}
+
+			VisibleIndex++;
+		}
+	}
+
 	for (int32 i = 0; i < Slots.Num(); ++i)
 	{
 		const FInventorySlotStruct& SlotData = Slots[i];
+
+		if (bIsSelectionMode)
+		{
+			if (!SlotData.ItemData) continue;
+
+			if (FilterPart != EEquipPart::None)
+			{
+				if (SlotData.ItemData->Part != FilterPart) continue;
+			}
+		}
 
 		UInventorySlot* NewSlotWidget = CreateWidget<UInventorySlot>(this, InventorySlotClass);
 		if (NewSlotWidget)
@@ -100,6 +133,7 @@ void UInventory::UpdateInventory()
 			NewSlotWidget->UpdateSlot(SlotData, i);
 			NewSlotWidget->SetOwningInventory(this);
 			NewSlotWidget->OnSlotClicked.AddDynamic(this, &UInventory::OnSlotClicked);
+			NewSlotWidget->OnSlotHovered.AddDynamic(this, &UInventory::OnItemHovered);
 
 			const int32 Row = VisibleIndex / Columns;
 			const int32 Column = VisibleIndex % Columns;
@@ -125,10 +159,25 @@ void UInventory::OnSlotClicked(int32 SlotIndex)
 	{
 		if (InventoryManager)
 		{
-			const TArray<FInventorySlotStruct>& Slots = InventoryManager->GetInventorySlot();
-			if (Slots.IsValidIndex(SlotIndex) && !Slots[SlotIndex].ItemData)
+			if (SlotIndex == -1)
 			{
-				return;
+				if (TargetCharacterID != NAME_None)
+				{
+					InventoryManager->UnequipItemFromCharacter(TargetCharacterID, FilterPart);
+				}
+			}
+			else
+			{
+				const TArray<FInventorySlotStruct>& Slots = InventoryManager->GetInventorySlot();
+				if (!Slots.IsValidIndex(SlotIndex) || !Slots[SlotIndex].ItemData)
+				{
+					return;
+				}
+
+				if (TargetCharacterID != NAME_None)
+				{
+					InventoryManager->EquipItemToCharacter(TargetCharacterID, SlotIndex, FilterPart);
+				}
 			}
 		}
 
@@ -143,6 +192,7 @@ void UInventory::OnSlotClicked(int32 SlotIndex)
 		}
 
 		bIsSelectionMode = false;
+		TargetCharacterID = NAME_None;
 	}
 }
 
@@ -157,4 +207,13 @@ void UInventory::OnCloseClicked()
 	}
 
 	bIsSelectionMode = false;
+	TargetCharacterID = NAME_None;
+}
+
+void UInventory::OnItemHovered(const FInventorySlotStruct& SlotData)
+{
+	if (ItemInfoWidget)
+	{
+		ItemInfoWidget->UpdateInfo(SlotData);
+	}
 }

@@ -5,7 +5,6 @@
 #include "../../InventoryManagerSubsystem.h"
 #include "Components/Image.h"
 #include "PartyMemberSlot.h"
-#include "../Inventory/Inventory.h"
 #include "EquipSlotWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
@@ -15,30 +14,21 @@ void UPartyManageWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (InventoryWidget)
-	{
-		InventoryWidget->OnItemSelected.RemoveDynamic(this, &UPartyManageWidget::OnInventoryItemSelected);
-		InventoryWidget->OnItemSelected.AddDynamic(this, &UPartyManageWidget::OnInventoryItemSelected);
-	}
-
 	if (Slot_Weapon)
 	{
 		Slot_Weapon->SetPartType(EEquipPart::PET_Weapon);
 		Slot_Weapon->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
 	}
-
 	if (Slot_Head)
 	{
 		Slot_Head->SetPartType(EEquipPart::PET_Head);
 		Slot_Head->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
 	}
-
 	if (Slot_Body)
 	{
 		Slot_Body->SetPartType(EEquipPart::PET_Body);
 		Slot_Body->OnSlotClicked.AddDynamic(this, &UPartyManageWidget::OnEquipSlotClicked);
 	}
-
 	if (Slot_Shoes)
 	{
 		Slot_Shoes->SetPartType(EEquipPart::PET_Shoes);
@@ -108,14 +98,14 @@ void UPartyManageWidget::OnMemberSelected(UPlayerRuntimeData* Data)
 
 void UPartyManageWidget::UpdateUI()
 {
+	UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] UpdateUI Called"));
+
 	if (!CurrentSelectedData) return;
 
 	UCharacterDataAsset* DataAsset = CurrentSelectedData->GetCharacterDataAsset();
-
 	if (!DataAsset) return;
-	
-	if (Image_Character) Image_Character->SetBrushFromTexture(DataAsset->CharacterImage.LoadSynchronous());
 
+	if (Image_Character) Image_Character->SetBrushFromTexture(DataAsset->CharacterImage.LoadSynchronous());
 	if (Text_CharacterName) Text_CharacterName->SetText(DataAsset->CharacterName);
 
 	if (Text_AttackPower)
@@ -140,7 +130,6 @@ void UPartyManageWidget::UpdateUI()
 			FText::AsNumber(CurrentHP),
 			FText::AsNumber(MaxHP)
 		);
-
 		Text_HP->SetText(HPString);
 	}
 
@@ -149,7 +138,16 @@ void UPartyManageWidget::UpdateUI()
 			if (SlotWidget)
 			{
 				UItemDataAsset* Item = CurrentSelectedData->GetEquipItem(Part);
-				SlotWidget->SetItemIcon(Item ? Item->ItemIcon : nullptr);
+				if (Item)
+				{
+					SlotWidget->SetItemIcon(Item->ItemIcon);
+					UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Part [%d] Item: %s"), (int32)Part, *Item->GetName());
+				}
+				else
+				{
+					SlotWidget->SetItemIcon(nullptr);
+					UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Part [%d] Item: None"), (int32)Part);
+				}
 			}
 		};
 
@@ -161,41 +159,24 @@ void UPartyManageWidget::UpdateUI()
 
 void UPartyManageWidget::OnEquipSlotClicked(EEquipPart Part)
 {
+	if (!CurrentSelectedData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Error: CurrentSelectedData is NULL"));
+		return;
+	}
+
+	FName CharID = CurrentSelectedData->GetCharacterID();
+	UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] EquipSlotClicked. Part: %d, CharID: %s"), (int32)Part, *CharID.ToString());
+
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		if (AMyHUD* HUDManager = Cast<AMyHUD>(PC->GetHUD()))
 		{
-			HUDManager->OpenWidget(EWidgetType::Inventory);
-
-			if (UUserWidget* Widget = HUDManager->GetWidget(EWidgetType::Inventory))
-			{
-				if (UInventory* InvWidget = Cast<UInventory>(Widget))
-				{
-					InvWidget->SetSelectionMode(true, Part);
-				}
-			}
+			HUDManager->OpenInventoryForSelection(Part, CharID);
 		}
-	}
-
-	PendingEquipPart = Part;
-}
-
-void UPartyManageWidget::OnInventoryItemSelected(int32 InvSlotIndex)
-{
-	if (!CurrentSelectedData) return;
-
-	UInventoryManagerSubsystem* InvManager = GetGameInstance()->GetSubsystem<UInventoryManagerSubsystem>();
-	if (!InvManager) return;
-
-	const TArray<FInventorySlotStruct>& Slots = InvManager->GetInventorySlot();
-
-	if (Slots.IsValidIndex(InvSlotIndex))
-	{
-		UItemDataAsset* SelectedItem = Slots[InvSlotIndex].ItemData;
-
-		if (SelectedItem)
+		else
 		{
-			CurrentSelectedData->SetEquipItem(PendingEquipPart, SelectedItem);
+			UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Error: Failed to Cast MyHUD"));
 		}
 	}
 }

@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
@@ -22,7 +20,8 @@ enum class EItemType : uint8
 {
 	EIT_Potion	UMETA(DisplayName = "Potion"),
 	EIT_Equip	UMETA(DisplayName = "Equip"),
-	EIT_Ingredient	UMETA(DisplayName = "Ingredient")
+	EIT_Ingredient	UMETA(DisplayName = "Ingredient"),
+	EIT_Boom	UMETA(DisplayName = "Boom")
 };
 
 UENUM(BlueprintType)
@@ -38,19 +37,18 @@ enum class EPotionEffectType : uint8
 UENUM(BlueprintType)
 enum class EEquipPart : uint8
 {
+	None				UMETA(DisplayName = "None"),
 	PET_Weapon			UMETA(DisplayName = "무기"),
 	PET_Head			UMETA(DisplayName = "머리"),
 	PET_Body			UMETA(DisplayName = "몸"),
 	PET_Shoes			UMETA(DisplayName = "신발")
 };
-/**
- * 
- */
+
 UCLASS()
 class ATELIEROFALCHEMIST_API UItemDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
@@ -87,7 +85,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
 	float EquipDefense;
 
-	// 레벨 제한
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
+	float EquipSpeed;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
 	int32 LevelLimit;
 

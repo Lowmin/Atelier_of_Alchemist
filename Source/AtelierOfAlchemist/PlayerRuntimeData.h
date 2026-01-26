@@ -19,9 +19,12 @@ public:
 	void Initialize(UCharacterDataAsset* NewCharacterDataAsset);
 
 	void SetCurrentHealth(float NewHealth);
-	void SetEquipItem(EEquipPart Part, UItemDataAsset* Item);
+
+	void SetEquipItem(EEquipPart Part, UItemDataAsset* Item, EItemGrade Grade = EItemGrade::EIG_E);
 
 	UItemDataAsset* GetEquipItem(EEquipPart Part) const;
+
+	EItemGrade GetEquipGrade(EEquipPart Part) const;
 
 	float GetTotalMaxHealth() const;
 	float GetTotalAttack() const;
@@ -29,6 +32,7 @@ public:
 	float GetTotalSpeed() const;
 	float GetCurrentHealth() const { return CurrentHealth; }
 	int32 GetLevel() const { return Level; }
+	FName GetCharacterID() const { return CharacterID; }
 	UCharacterDataAsset* GetCharacterDataAsset() const { return CharacterDataAsset; }
 
 	UPROPERTY(BlueprintAssignable)
@@ -43,6 +47,9 @@ protected:
 
 	UPROPERTY()
 	TMap<EEquipPart, UItemDataAsset*> EquippedItems;
+
+	UPROPERTY()
+	TMap<EEquipPart, EItemGrade> EquippedGrades;
 
 	float CurrentHealth;
 	float MaxHealth;

@@ -1,38 +1,46 @@
 ﻿#pragma once
 
-#include "Characters/NPCs/QuestDataStruct.h"
-
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "QuestManagerSubsystem.generated.h"
+
+USTRUCT(BlueprintType)
+struct FActiveQuestData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName QuestID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentStepIndex = 0;
+};
 
 UCLASS()
 class ATELIEROFALCHEMIST_API UQuestManagerSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Quest")
+	UFUNCTION(BlueprintCallable)
 	void AcceptQuest(FName QuestID);
 
-	UFUNCTION(BlueprintCallable, Category = "Quest")
-	void CompletedQuest(FName QuestID);
+	UFUNCTION(BlueprintCallable)
+	bool IsQuestCompleted(FName QuestID) const;
 
-	TMap<FName, int32> GetActiveQuests() { return ActiveQuests; };
+	UFUNCTION(BlueprintCallable)
+	bool IsQuestReadyToCompleted(FName QuestID) const;
 
-	UFUNCTION(BlueprintCallable, Category = "Quest")
-	bool IsQuestReadyToCompleted(FName QuestID);
+	UFUNCTION(BlueprintCallable)
+	const TMap<FName, FActiveQuestData>& GetActiveQuests() const { return ActiveQuests; }
 
-
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest")
-	TMap<FName, int32> ActiveQuests;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest")
-	TArray<FName> CompletedQuests;
+private:
+	UPROPERTY()
+	TMap<FName, FActiveQuestData> ActiveQuests;
 
 	UPROPERTY()
-	TObjectPtr<UDataTable> QuestDataTable;
+	TSet<FName> CompletedQuests;
 };
