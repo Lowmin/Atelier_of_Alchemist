@@ -24,6 +24,7 @@ public:
 	void RefreshInventory();
 
 	void SetSelectionMode(bool bIsSelection, EEquipPart InPart, FName InCharacterID = NAME_None);
+	void SetIngredientSelectionMode(UItemDataAsset* InTargetAsset);
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnInventoryItemSelected OnItemSelected;
@@ -73,6 +74,9 @@ protected:
 
 private:
 	bool bIsSelectionMode = false;
-	EEquipPart FilterPart = EEquipPart::PET_Weapon;
+	EEquipPart FilterPart = EEquipPart::None;
 	FName TargetCharacterID = NAME_None;
+
+	UPROPERTY()
+	UItemDataAsset* FilterItemAsset = nullptr;
 };

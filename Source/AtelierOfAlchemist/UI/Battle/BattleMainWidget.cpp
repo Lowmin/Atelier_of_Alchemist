@@ -2,6 +2,7 @@
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "Components/PanelWidget.h"
+#include "Components/Border.h"
 #include "../../Characters/Battle/BattleUnit.h"
 #include "../../DataAssets/SkillListComponent.h"
 #include "../../DataAssets/SkillDataAsset.h"
@@ -20,25 +21,51 @@ void UBattleMainWidget::NativeConstruct()
 	if (Btn_Skill) Btn_Skill->OnClicked.AddDynamic(this, &UBattleMainWidget::OnSkillClicked);
 	if (Btn_Run) Btn_Run->OnClicked.AddDynamic(this, &UBattleMainWidget::OnRunClicked);
 
-	if (SkillListScrollBox) SkillListScrollBox->SetVisibility(ESlateVisibility::Collapsed);
+	if (Border_SkillList) Border_SkillList->SetVisibility(ESlateVisibility::Collapsed);
+	if (SkillListScrollBox) SkillListScrollBox->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UBattleMainWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	if (IsDesignTime())
+	{
+		if (SkillListScrollBox && SkillSlotWidgetClass)
+		{
+			SkillListScrollBox->ClearChildren();
+
+			for (int32 i = 0; i < 4; ++i)
+			{
+				UUserWidget* Widget = CreateWidget<UUserWidget>(this, SkillSlotWidgetClass);
+				if (Widget)
+				{
+					SkillListScrollBox->AddChild(Widget);
+				}
+			}
+
+			if (Border_SkillList) Border_SkillList->SetVisibility(ESlateVisibility::Visible);
+			SkillListScrollBox->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
 }
 
 void UBattleMainWidget::ShowMainMenu(bool bVisible)
 {
 	SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 
-	if (bVisible && SkillListScrollBox)
+	if (bVisible)
 	{
-		SkillListScrollBox->SetVisibility(ESlateVisibility::Collapsed);
-		ActionMenuPanel->SetVisibility(ESlateVisibility::Visible);
+		if (Border_SkillList) Border_SkillList->SetVisibility(ESlateVisibility::Collapsed);
+		if (ActionMenuPanel) ActionMenuPanel->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void UBattleMainWidget::ShowSkillMenu(bool bVisible)
 {
-	if (SkillListScrollBox)
+	if (Border_SkillList)
 	{
-		SkillListScrollBox->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		Border_SkillList->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 }
 
@@ -59,7 +86,13 @@ void UBattleMainWidget::OnSkillClicked()
 		if (GM) InitSkillList(GM->GetCurrentUnit());
 	}
 
-	if (SkillListScrollBox->GetVisibility() == ESlateVisibility::Visible)
+	bool bIsMenuVisible = false;
+	if (Border_SkillList)
+	{
+		bIsMenuVisible = (Border_SkillList->GetVisibility() == ESlateVisibility::Visible);
+	}
+
+	if (bIsMenuVisible)
 	{
 		ShowSkillMenu(false);
 	}
@@ -99,6 +132,7 @@ void UBattleMainWidget::InitSkillList(ABattleUnit* Unit)
 
 	OwnerUnit = Unit;
 	SkillListScrollBox->ClearChildren();
+	SkillListScrollBox->SetVisibility(ESlateVisibility::Visible);
 
 	USkillListComponent* SkillComp = Unit->GetSkillComponent();
 	if (!SkillComp)

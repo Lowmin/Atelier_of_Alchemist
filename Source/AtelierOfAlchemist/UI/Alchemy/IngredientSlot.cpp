@@ -22,12 +22,14 @@ void UIngredientSlot::InitIngredientSlot(int32 InIndex, EItemGrade InGrade, int3
 	if (Text_Quantity)
 	{
 		Text_Quantity->SetText(FText::AsNumber(InQuantity));
+		Text_Quantity->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 
 	if (Text_Grade)
 	{
 		FString GradeStr = UEnum::GetDisplayValueAsText(InGrade).ToString();
 		Text_Grade->SetText(FText::FromString(GradeStr));
+		Text_Grade->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 
 	if (Image_Icon && InAsset)
@@ -46,11 +48,13 @@ void UIngredientSlot::InitRequirement(UItemDataAsset* InAsset, int32 InCount)
 	if (Text_Quantity)
 	{
 		Text_Quantity->SetText(FText::Format(FText::FromString(TEXT("x{0}")), InCount));
+		Text_Quantity->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 
 	if (Text_Grade)
 	{
-		Text_Grade->SetText(FText::FromString(TEXT("선택")));
+		Text_Grade->SetText(FText::GetEmpty());
+		Text_Grade->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	if (Image_Icon && InAsset)
@@ -69,6 +73,7 @@ void UIngredientSlot::SetSelectedMaterial(int32 InIndex, EItemGrade InGrade)
 	{
 		FString GradeStr = UEnum::GetDisplayValueAsText(InGrade).ToString();
 		Text_Grade->SetText(FText::FromString(GradeStr));
+		Text_Grade->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 }
 

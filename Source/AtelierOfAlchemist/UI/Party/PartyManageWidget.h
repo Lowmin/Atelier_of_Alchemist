@@ -11,6 +11,7 @@ class UPartyMemberSlot;
 class UImage;
 class UTextBlock;
 class UHorizontalBox;
+class UButton;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API UPartyManageWidget : public UUserWidget
@@ -23,6 +24,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UHorizontalBox> Box_PartyList;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Button_Close;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Image_Character;
@@ -60,6 +64,9 @@ protected:
 
 	UFUNCTION()
 	void OnEquipSlotClicked(EEquipPart Part);
+
+	UFUNCTION()
+	void OnCloseClicked();
 
 private:
 	UPROPERTY()

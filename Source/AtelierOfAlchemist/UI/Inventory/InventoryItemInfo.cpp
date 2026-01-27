@@ -5,6 +5,7 @@
 #include "../../InventoryManagerSubsystem.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/PanelWidget.h"
 
 void UInventoryItemInfo::UpdateInfo(const FInventorySlotStruct& SlotData)
 {
@@ -51,6 +52,32 @@ void UInventoryItemInfo::UpdateInfo(const FInventorySlotStruct& SlotData)
 		ItemDescription->SetText(ItemAsset->ItemDescription);
 		ItemDescription->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
+
+	if (ItemDataPanel)
+	{
+		ItemDataPanel->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	if (Text_Type)
+	{
+		Text_Type->SetText(UEnum::GetDisplayValueAsText(ItemAsset->ItemType));
+	}
+
+	if (ItemAsset->ItemType != EItemType::EIT_Equip) 
+	{
+		EquipStatPanel->SetVisibility(ESlateVisibility::Hidden);
+		return;
+	}
+	else
+	{
+		EquipStatPanel->SetVisibility(ESlateVisibility::Visible);
+
+		if (Text_EquipParts) Text_EquipParts->SetText(UEnum::GetDisplayValueAsText(ItemAsset->Part));
+		if (Text_HP) Text_HP->SetText(FText::AsNumber(ItemAsset->EquipMaxHealth));
+		if (Text_Atk) Text_Atk->SetText(FText::AsNumber(ItemAsset->EquipAttackPower));
+		if (Text_Def) Text_Def->SetText(FText::AsNumber(ItemAsset->EquipDefense));
+		if (Text_Spd) Text_Spd->SetText(FText::AsNumber(ItemAsset->EquipSpeed));
+	}
 }
 
 void UInventoryItemInfo::ClearInfo()
@@ -83,5 +110,10 @@ void UInventoryItemInfo::ClearInfo()
 	{
 		ItemDescription->SetText(FText());
 		ItemDescription->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (ItemDataPanel)
+	{
+		ItemDataPanel->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "BattleMainWidget.generated.h"
 
+class UBorder;
 class UButton;
 class UScrollBox;
 class ABattleUnit;
@@ -16,6 +17,7 @@ class ATELIEROFALCHEMIST_API UBattleMainWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Battle UI")
 	void ShowMainMenu(bool bVisible);
@@ -45,6 +47,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Btn_Attack;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UBorder> Border_SkillList;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Btn_Skill;

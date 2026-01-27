@@ -7,25 +7,18 @@
 
 void AAlchemyKiln::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	if (!Interactor || !MainWidgetClass || !KilnRecipes) return;
-
-	if (CachedRecipeList && CachedRecipeList->IsInViewport()) return;
+	if (!Interactor || !KilnRecipes) return;
 
 	if (APlayerController* PC = Cast<APlayerController>(Interactor->GetController()))
 	{
 		if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
 		{
+			MyHUD->OpenWidget(EWidgetType::Recipe);
 
-			UUserWidget* CreatedWidget = CreateWidget<UUserWidget>(PC, MainWidgetClass);
-			if (URecipeList* RecipeList = Cast<URecipeList>(CreatedWidget))
+			if (URecipeList* RecipeList = Cast<URecipeList>(MyHUD->GetWidget(EWidgetType::Recipe)))
 			{
 				CachedRecipeList = RecipeList;
 				RecipeList->InitAlchemyWindow(KilnRecipes);
-				RecipeList->AddToViewport(10);
-				FInputModeUIOnly InputMode;
-				InputMode.SetWidgetToFocus(RecipeList->TakeWidget());
-				PC->SetInputMode(InputMode);
-				PC->bShowMouseCursor = true;
 			}
 		}
 	}

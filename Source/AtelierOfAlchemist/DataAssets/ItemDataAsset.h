@@ -18,10 +18,9 @@ enum class EItemGrade : uint8
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	EIT_Potion	UMETA(DisplayName = "Potion"),
-	EIT_Equip	UMETA(DisplayName = "Equip"),
-	EIT_Ingredient	UMETA(DisplayName = "Ingredient"),
-	EIT_Boom	UMETA(DisplayName = "Boom")
+	EIT_Potion	UMETA(DisplayName = "포션"),
+	EIT_Equip	UMETA(DisplayName = "장비"),
+	EIT_Ingredient	UMETA(DisplayName = "소재")
 };
 
 UENUM(BlueprintType)
@@ -90,9 +89,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equip", meta = (EditCondition = "ItemType == EItemType::EIT_Equip"))
 	int32 LevelLimit;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boom", meta = (EditCondition = "ItemType == EItemType::EIT_Boom"))
-	float Damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion", meta = (EditCondition = "ItemType == EItemType::EIT_Potion"))
 	EPotionEffectType PotionType;

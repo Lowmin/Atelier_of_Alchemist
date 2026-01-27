@@ -8,11 +8,17 @@
 #include "EquipSlotWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Button.h"
 #include "../MyHUD.h"
 
 void UPartyManageWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	if (Button_Close)
+	{
+		Button_Close->OnClicked.AddDynamic(this, &UPartyManageWidget::OnCloseClicked);
+	}
 
 	if (Slot_Weapon)
 	{
@@ -98,8 +104,6 @@ void UPartyManageWidget::OnMemberSelected(UPlayerRuntimeData* Data)
 
 void UPartyManageWidget::UpdateUI()
 {
-	UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] UpdateUI Called"));
-
 	if (!CurrentSelectedData) return;
 
 	UCharacterDataAsset* DataAsset = CurrentSelectedData->GetCharacterDataAsset();
@@ -141,12 +145,10 @@ void UPartyManageWidget::UpdateUI()
 				if (Item)
 				{
 					SlotWidget->SetItemIcon(Item->ItemIcon);
-					UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Part [%d] Item: %s"), (int32)Part, *Item->GetName());
 				}
 				else
 				{
 					SlotWidget->SetItemIcon(nullptr);
-					UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Part [%d] Item: None"), (int32)Part);
 				}
 			}
 		};
@@ -159,24 +161,24 @@ void UPartyManageWidget::UpdateUI()
 
 void UPartyManageWidget::OnEquipSlotClicked(EEquipPart Part)
 {
-	if (!CurrentSelectedData)
-	{
-		UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Error: CurrentSelectedData is NULL"));
-		return;
-	}
-
-	FName CharID = CurrentSelectedData->GetCharacterID();
-	UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] EquipSlotClicked. Part: %d, CharID: %s"), (int32)Part, *CharID.ToString());
+	if (!CurrentSelectedData) return;
 
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		if (AMyHUD* HUDManager = Cast<AMyHUD>(PC->GetHUD()))
 		{
-			HUDManager->OpenInventoryForSelection(Part, CharID);
+			HUDManager->OpenInventoryForSelection(Part, CurrentSelectedData->GetCharacterID());
 		}
-		else
+	}
+}
+
+void UPartyManageWidget::OnCloseClicked()
+{
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
 		{
-			UE_LOG(LogTemp, Error, TEXT("[PartyManageWidget] Error: Failed to Cast MyHUD"));
+			MyHUD->CloseWidget(EWidgetType::PartyManage);
 		}
 	}
 }

@@ -40,4 +40,29 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemDescription;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UPanelWidget> ItemDataPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_Type;
+
+	// 아이템 타입이 장비일 경우
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UPanelWidget> EquipStatPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_EquipParts;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_HP;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_Atk;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_Def;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_Spd;
 };

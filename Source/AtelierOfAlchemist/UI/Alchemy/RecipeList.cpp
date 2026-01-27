@@ -1,13 +1,13 @@
 ﻿#include "RecipeList.h"
 #include "RecipeListSlot.h"
 #include "IngredientSlot.h"
-#include "IngredientSelectWidget.h"
 #include "../../AoAGameInstance.h"
 #include "../../InventoryManagerSubsystem.h"
 #include "../../RecipeManagerSubsystem.h"
 #include "../../AoAPlayerController.h"
 #include "../../DataAssets/GradeHelper.h"
 #include "../../UI/MyHUD.h"
+#include "../Inventory/Inventory.h"
 
 #include "Components/ScrollBox.h"
 #include "Components/HorizontalBox.h"
@@ -33,6 +33,8 @@ void URecipeList::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	bIsFocusable = true;
+
 	if (Button_Close)
 	{
 		Button_Close->OnClicked.AddDynamic(this, &URecipeList::OnCloseButtonClicked);
@@ -50,16 +52,30 @@ void URecipeList::NativePreConstruct()
 
 	if (IsDesignTime())
 	{
-		if (!ScrollBox_RecipeList || !RecipeSlotClass) return;
-
-		ScrollBox_RecipeList->ClearChildren();
-
-		for (int32 i = 0; i < PreviewItemCount; ++i)
+		if (ScrollBox_RecipeList && RecipeSlotClass)
 		{
-			UUserWidget* Widget = CreateWidget<UUserWidget>(this, RecipeSlotClass);
-			if (Widget)
+			ScrollBox_RecipeList->ClearChildren();
+			for (int32 i = 0; i < PreviewItemCount; ++i)
 			{
-				ScrollBox_RecipeList->AddChild(Widget);
+				UUserWidget* Widget = CreateWidget<UUserWidget>(this, RecipeSlotClass);
+				if (Widget)
+				{
+					ScrollBox_RecipeList->AddChild(Widget);
+				}
+			}
+		}
+
+		if (Box_IngredientSlots && IngredientSlotClass)
+		{
+			Box_IngredientSlots->ClearChildren();
+			for (int32 i = 0; i < PreviewIngredientCount; ++i)
+			{
+				UIngredientSlot* Widget = CreateWidget<UIngredientSlot>(this, IngredientSlotClass);
+				if (Widget)
+				{
+					Widget->InitRequirement(nullptr, 1);
+					Box_IngredientSlots->AddChild(Widget);
+				}
 			}
 		}
 	}
@@ -71,8 +87,8 @@ void URecipeList::RefreshRecipeList()
 
 	ScrollBox_RecipeList->ClearChildren();
 
-	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
-	URecipeManagerSubsystem* RecipeManager = GameInst ? GameInst->GetSubsystem<URecipeManagerSubsystem>() : nullptr;
+	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(GetGameInstance());
+	URecipeManagerSubsystem* RecipeManager = GameInstance ? GameInstance->GetSubsystem<URecipeManagerSubsystem>() : nullptr;
 
 	if (!RecipeData) return;
 
@@ -97,8 +113,8 @@ void URecipeList::HandleRecipeSelected(const FAlchemyRecipe& InRecipe)
 {
 	SelectedRecipe = InRecipe;
 
-	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
-	URecipeManagerSubsystem* RecipeSubsystem = GameInst->GetSubsystem<URecipeManagerSubsystem>();
+	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(GetGameInstance());
+	URecipeManagerSubsystem* RecipeSubsystem = GameInstance->GetSubsystem<URecipeManagerSubsystem>();
 
 	bool bIsKnown = RecipeSubsystem->IsRecipeUnlocked(InRecipe.RecipeID);
 
@@ -107,11 +123,9 @@ void URecipeList::HandleRecipeSelected(const FAlchemyRecipe& InRecipe)
 		if (Image_SelectedIcon)
 		{
 			Image_SelectedIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-
-			UTexture2D* IconTex = InRecipe.Icon;
-			if (IconTex)
+			if (InRecipe.Icon)
 			{
-				Image_SelectedIcon->SetBrushFromTexture(IconTex);
+				Image_SelectedIcon->SetBrushFromTexture(InRecipe.Icon);
 			}
 		}
 
@@ -127,17 +141,11 @@ void URecipeList::HandleRecipeSelected(const FAlchemyRecipe& InRecipe)
 
 void URecipeList::OnCloseButtonClicked()
 {
-	if (APlayerController* PC = GetOwningPlayer())
+	if (APlayerController* PlayerController = GetOwningPlayer())
 	{
-		if (AMyHUD* MyHUD = Cast<AMyHUD>(PC->GetHUD()))
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
 		{
-			MyHUD->CloseAllWidgets();
-		}
-		else
-		{
-			RemoveFromParent();
-			PC->SetInputMode(FInputModeGameOnly());
-			PC->bShowMouseCursor = false;
+			MyHUD->CloseWidget(EWidgetType::Recipe);
 		}
 	}
 }
@@ -158,9 +166,7 @@ void URecipeList::CreateIngredientSlots(const FAlchemyRecipe& Recipe)
 		if (NewSlot)
 		{
 			NewSlot->InitRequirement(ItemAsset, Count);
-
 			NewSlot->OnRequestPopup.AddDynamic(this, &URecipeList::OnRequireSlotClicked);
-
 			Box_IngredientSlots->AddChild(NewSlot);
 			CreatedSlots.Add(NewSlot);
 		}
@@ -174,29 +180,51 @@ void URecipeList::OnRequireSlotClicked(UIngredientSlot* SlotWidget)
 	CurrentEditingSlot = SlotWidget;
 	UItemDataAsset* TargetItem = SlotWidget->GetRequiredAsset();
 
-	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
-	UInventoryManagerSubsystem* InvSys = GameInst->GetSubsystem<UInventoryManagerSubsystem>();
-
-	TArray<FInventorySearchResult> FoundItems = InvSys->FindItemsByAsset(TargetItem);
-
-	if (PopupClass)
+	if (APlayerController* PlayerController = GetOwningPlayer())
 	{
-		UIngredientSelectWidget* Popup = CreateWidget<UIngredientSelectWidget>(this, PopupClass);
-		if (Popup)
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
 		{
-			Popup->InitPopup(FoundItems, TargetItem);
-			Popup->OnIngredientPicked.AddDynamic(this, &URecipeList::OnMaterialSelectedFromPopup);
-			Popup->AddToViewport(100);
+			MyHUD->OpenInventoryForIngredient(TargetItem);
+
+			if (UInventory* InventoryWidget = Cast<UInventory>(MyHUD->GetWidget(EWidgetType::Inventory)))
+			{
+				InventoryWidget->OnItemSelected.RemoveDynamic(this, &URecipeList::OnIngredientPickedFromInventory);
+				InventoryWidget->OnItemSelected.AddDynamic(this, &URecipeList::OnIngredientPickedFromInventory);
+			}
 		}
 	}
 }
 
-void URecipeList::OnMaterialSelectedFromPopup(int32 InventoryIndex, EItemGrade Grade)
+void URecipeList::OnIngredientPickedFromInventory(int32 SlotIndex)
 {
-	if (CurrentEditingSlot)
+	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(GetGameInstance());
+	UInventoryManagerSubsystem* InventoryManager = GameInstance ? GameInstance->GetSubsystem<UInventoryManagerSubsystem>() : nullptr;
+
+	if (InventoryManager && CurrentEditingSlot)
 	{
-		CurrentEditingSlot->SetSelectedMaterial(InventoryIndex, Grade);
-		UpdateCraftingState();
+		const TArray<FInventorySlotStruct>& Slots = InventoryManager->GetInventorySlot();
+
+		if (Slots.IsValidIndex(SlotIndex))
+		{
+			const FInventorySlotStruct& SlotData = Slots[SlotIndex];
+
+			if (SlotData.ItemData == CurrentEditingSlot->GetRequiredAsset())
+			{
+				CurrentEditingSlot->SetSelectedMaterial(SlotIndex, SlotData.Grade);
+				UpdateCraftingState();
+			}
+		}
+	}
+
+	if (APlayerController* PlayerController = GetOwningPlayer())
+	{
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
+		{
+			if (UInventory* InventoryWidget = Cast<UInventory>(MyHUD->GetWidget(EWidgetType::Inventory)))
+			{
+				InventoryWidget->OnItemSelected.RemoveDynamic(this, &URecipeList::OnIngredientPickedFromInventory);
+			}
+		}
 	}
 
 	CurrentEditingSlot = nullptr;
@@ -208,11 +236,11 @@ void URecipeList::UpdateCraftingState()
 	int32 SelectedCount = 0;
 	bool bAllSelected = true;
 
-	for (UIngredientSlot* IngSlot : CreatedSlots)
+	for (UIngredientSlot* IngredientSlot : CreatedSlots)
 	{
-		if (IngSlot && IngSlot->IsSelected())
+		if (IngredientSlot && IngredientSlot->IsSelected())
 		{
-			TotalScore += AlchemyMath::GetGradeScore(IngSlot->GetSelectedGrade());
+			TotalScore += AlchemyMath::GetGradeScore(IngredientSlot->GetSelectedGrade());
 			SelectedCount++;
 		}
 		else
@@ -224,7 +252,6 @@ void URecipeList::UpdateCraftingState()
 	if (bAllSelected && SelectedCount > 0)
 	{
 		Button_Craft->SetIsEnabled(true);
-
 		int32 AvgScore = TotalScore / SelectedCount;
 		EItemGrade ResultGrade = AlchemyMath::GetGradeFromScore(AvgScore);
 
@@ -246,26 +273,26 @@ void URecipeList::UpdateCraftingState()
 
 void URecipeList::OnCraftButtonClicked()
 {
-	UAoAGameInstance* GameInst = Cast<UAoAGameInstance>(GetGameInstance());
-	if (!GameInst) return;
+	UAoAGameInstance* GameInstance = Cast<UAoAGameInstance>(GetGameInstance());
+	if (!GameInstance) return;
 
-	UInventoryManagerSubsystem* InvSys = GameInst->GetSubsystem<UInventoryManagerSubsystem>();
-	if (!InvSys) return;
+	UInventoryManagerSubsystem* InventoryManager = GameInstance->GetSubsystem<UInventoryManagerSubsystem>();
+	if (!InventoryManager) return;
 
 	int32 TotalScore = 0;
 	int32 Count = 0;
 
-	for (UIngredientSlot* IngSlot : CreatedSlots)
+	for (UIngredientSlot* IngredientSlot : CreatedSlots)
 	{
-		if (IngSlot)
+		if (IngredientSlot)
 		{
-			TotalScore += AlchemyMath::GetGradeScore(IngSlot->GetSelectedGrade());
+			TotalScore += AlchemyMath::GetGradeScore(IngredientSlot->GetSelectedGrade());
 			Count++;
 
-			int32 SlotIndex = IngSlot->GetSelectedInventoryIndex();
+			int32 SlotIndex = IngredientSlot->GetSelectedInventoryIndex();
 			if (SlotIndex >= 0)
 			{
-				InvSys->RemoveItemByIndex(this, SlotIndex, IngSlot->GetRequiredCount());
+				InventoryManager->RemoveItemByIndex(this, SlotIndex, IngredientSlot->GetRequiredCount());
 			}
 		}
 	}
@@ -276,8 +303,7 @@ void URecipeList::OnCraftButtonClicked()
 		FinalGrade = AlchemyMath::GetGradeFromScore(TotalScore / Count);
 	}
 
-	InvSys->AddItem(this, SelectedRecipe.ResultItem, FinalGrade, SelectedRecipe.ResultCount);
-
+	InventoryManager->AddItem(this, SelectedRecipe.ResultItem, FinalGrade, SelectedRecipe.ResultCount);
 	CreateIngredientSlots(SelectedRecipe);
 	UpdateCraftingState();
 }

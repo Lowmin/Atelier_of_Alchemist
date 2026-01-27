@@ -89,8 +89,8 @@ void UInventorySlot::InitAsUnequipSlot()
 
 	if (Text_Grade)
 	{
-		Text_Grade->SetText(FText::FromString(TEXT("해제")));
-		Text_Grade->SetVisibility(ESlateVisibility::Visible);
+		Text_Grade->SetText(FText::GetEmpty());
+		Text_Grade->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 

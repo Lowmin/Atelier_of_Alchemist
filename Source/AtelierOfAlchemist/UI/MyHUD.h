@@ -45,6 +45,9 @@ public:
 	void OpenInventoryForSelection(EEquipPart TargetPart, FName CharacterID);
 
 	UFUNCTION(BlueprintCallable)
+	void OpenInventoryForIngredient(UItemDataAsset* TargetItem);
+
+	UFUNCTION(BlueprintCallable)
 	bool IsAnyUIMode() const;
 
 protected:
@@ -52,10 +55,11 @@ protected:
 	TMap<EWidgetType, TSubclassOf<UUserWidget>> WidgetClasses;
 
 	UPROPERTY()
-	TMap<EWidgetType, UUserWidget*> CreatedWidgets;
+	TMap<EWidgetType, TObjectPtr<UUserWidget>> CreatedWidgets;
 
 	EWidgetType CurrentPopupType = EWidgetType::None;
 
 	UUserWidget* GetOrCreateWidget(EWidgetType Type);
 	void UpdateInputMode();
+	int32 GetWidgetZOrder(EWidgetType Type) const;
 };

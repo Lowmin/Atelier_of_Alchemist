@@ -6,18 +6,13 @@
 #include "../../DataAssets/ItemDataAsset.h"
 #include "RecipeList.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRecipeSelected, TSoftObjectPtr<URecipeDataAsset>, RecipePtr);
-
-class UImage;
-class UTextBlock;
-class UButton;
 class UScrollBox;
-class URecipeListSlot;
-class URecipeManagerSubsystem;
-class URecipeDataAsset;
 class UHorizontalBox;
+class UButton;
+class UTextBlock;
+class UImage;
+class URecipeListSlot;
 class UIngredientSlot;
-class UIngredientSelectWidget;
 
 UCLASS()
 class ATELIEROFALCHEMIST_API URecipeList : public UUserWidget
@@ -33,16 +28,16 @@ protected:
 	virtual void NativePreConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Button_Close;
+	TObjectPtr<UScrollBox> ScrollBox_RecipeList;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UScrollBox> ScrollBox_RecipeList;
+	TObjectPtr<UHorizontalBox> Box_IngredientSlots;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_Craft;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UUserWidget> RecipeSlotClass;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Button_Close;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Image_SelectedIcon;
@@ -51,19 +46,36 @@ protected:
 	TObjectPtr<UTextBlock> Text_SelectedName;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UHorizontalBox> Box_IngredientSlots;
-
-	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_ResultGrade;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> RecipeSlotClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UIngredientSlot> IngredientSlotClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UIngredientSelectWidget> PopupClass;
-
-	UPROPERTY(EditAnywhere, Category = "Design Preview")
+	UPROPERTY(EditAnywhere, Category = "Design")
 	int32 PreviewItemCount = 5;
+
+	UPROPERTY(EditAnywhere, Category = "Design")
+	int32 PreviewIngredientCount = 3;
+
+	UFUNCTION()
+	void OnCloseButtonClicked();
+
+	UFUNCTION()
+	void OnCraftButtonClicked();
+
+	void RefreshRecipeList();
+	void HandleRecipeSelected(const FAlchemyRecipe& InRecipe);
+	void CreateIngredientSlots(const FAlchemyRecipe& Recipe);
+	void UpdateCraftingState();
+
+	UFUNCTION()
+	void OnRequireSlotClicked(UIngredientSlot* SlotWidget);
+
+	UFUNCTION()
+	void OnIngredientPickedFromInventory(int32 SlotIndex);
 
 private:
 	UPROPERTY()
@@ -71,28 +83,9 @@ private:
 
 	FAlchemyRecipe SelectedRecipe;
 
-	UFUNCTION()
-	void OnCloseButtonClicked();
-
-	void RefreshRecipeList();
-	void HandleRecipeSelected(const FAlchemyRecipe& InRecipe);
-
 	UPROPERTY()
 	TArray<UIngredientSlot*> CreatedSlots;
 
 	UPROPERTY()
 	UIngredientSlot* CurrentEditingSlot;
-
-	void CreateIngredientSlots(const FAlchemyRecipe& Recipe);
-
-	void UpdateCraftingState();
-
-	UFUNCTION()
-	void OnCraftButtonClicked();
-
-	UFUNCTION()
-	void OnRequireSlotClicked(UIngredientSlot* SlotWidget);
-
-	UFUNCTION()
-	void OnMaterialSelectedFromPopup(int32 InventoryIndex, EItemGrade Grade);
 };
