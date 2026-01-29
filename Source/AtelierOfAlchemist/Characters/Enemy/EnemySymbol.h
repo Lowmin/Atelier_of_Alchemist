@@ -32,7 +32,7 @@ class ATELIEROFALCHEMIST_API AEnemySymbol : public AActor
 public:
 	AEnemySymbol();
 
-	// [추가] 에디터에서 적 파티를 직접 설정할 배열 변수
+	// 에디터에서 적 파티를 직접 설정할 배열 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 	TArray<FEnemySpawnInfo> EnemyParty;
 
