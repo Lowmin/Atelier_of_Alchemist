@@ -30,8 +30,8 @@ ABattleUnit::ABattleUnit()
 	WeaponMesh->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
 	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
 
-	PendingDamage = 0.0f;
-	ActionState = EUnitActionState::Idle;
+	DefaultLocation = GetActorLocation();
+	CombatState = EUnitCombatState::Idle;
 }
 
 void ABattleUnit::InitializeAsPlayerUnit(UPlayerRuntimeData* RuntimeData)
@@ -69,36 +69,43 @@ void ABattleUnit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (ActionState == EUnitActionState::MoveToTarget)
+	switch (CombatState)
+	{
+	case EUnitCombatState::Idle:
+		break;
+	case EUnitCombatState::Approach:
 	{
 		FVector CurrentLoc = GetActorLocation();
-		FVector NewLoc = FMath::VInterpConstantTo(CurrentLoc, MoveDestination, DeltaTime, 600.0f);
+		// VInterpTo에 비해 이동속도가 일정하므로 턴제 게임의 템포를 살리기 좋아 채택
+		FVector NewLoc = FMath::VInterpTo(CurrentLoc, TargetLoc, DeltaTime, 10.0f);
 
 		SetActorLocation(NewLoc);
 
-		FVector Direction = (MoveDestination - CurrentLoc).GetSafeNormal();
+		FVector Direction = (TargetLoc - CurrentLoc).GetSafeNormal();
 		if (!Direction.IsNearlyZero())
 		{
 			FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
 			TargetRot.Pitch = 0.0f;
-			TargetRot.Roll = 0.0f;
+			TargetRot.Yaw = 0.0f;
 			SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 15.0f));
 		}
 
-		if (NewLoc.Equals(MoveDestination, 1.0f))
+		if (NewLoc.Equals(TargetLoc, 1.0f))
 		{
-			ActionState = EUnitActionState::Attacking;
-			PlayAttackMontage();
+			SetCombatState(EUnitCombatState::Attacking);
 		}
+		break;
 	}
-	else if (ActionState == EUnitActionState::ReturnToPos)
+	case EUnitCombatState::Attacking:
+		break;
+	case EUnitCombatState::ReturnToPos:
 	{
 		FVector CurrentLoc = GetActorLocation();
-		FVector NewLoc = FMath::VInterpConstantTo(CurrentLoc, OriginalLocation, DeltaTime, 600.0f);
+		FVector NewLoc = FMath::VInterpTo(CurrentLoc, DefaultLoc, DeltaTime, 600.0f);
 
 		SetActorLocation(NewLoc);
 
-		FVector Direction = (OriginalLocation - CurrentLoc).GetSafeNormal();
+		FVector Direction = (DefaultLoc - CurrentLoc).GetSafeNormal();
 		if (!Direction.IsNearlyZero())
 		{
 			FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
@@ -107,12 +114,13 @@ void ABattleUnit::Tick(float DeltaTime)
 			SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 15.0f));
 		}
 
-		if (NewLoc.Equals(OriginalLocation, 1.0f))
+		// 이동 오차범위
+		if (NewLoc.Equals(DefaultLoc, 1.0f))
 		{
-			SetActorLocation(OriginalLocation);
-			SetActorRotation(OriginalRotation);
+			SetActorLocation(DefaultLoc);
+			SetActorRotation(DefaultRot);
 
-			ActionState = EUnitActionState::Idle;
+			CombatState = EUnitCombatState::Idle;
 
 			ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
 			if (BattleGameMode)
@@ -120,181 +128,48 @@ void ABattleUnit::Tick(float DeltaTime)
 				BattleGameMode->ProcessNextTurn();
 			}
 		}
+		break;
+	}
 	}
 }
 
-void ABattleUnit::SetTargetSelected(bool bIsSelected)
+void ABattleUnit::SetCombatState(EUnitCombatState NewCombatState)
 {
-	if (TargetMarkerWidget)
+	CombatState = NewCombatState;
+}
+
+float ABattleUnit::CalculateDamage(ABattleUnit* Target, USkillDataAsset* Skill)
+{
+	float MyAtk = StatComponent->GetAttackPower();
+	float TargetDef = Target->GetStatComponent()->GetDefense();
+	float SkillRatio = Skill->Power;
+	float FinalDamage = (MyAtk * SkillRatio) - TargetDef;
+
+	// 방어력이 최종 데미지보다 높아도 데미지 1 보장
+	return FMath::Max(FinalDamage, 1.0f);
+}
+
+bool ABattleUnit::MoveToTarget(FVector TargetLoc, float DeltaTime)
+{
+	FVector CurrentLoc = GetActorLocation();
+	FVector NewLoc = FMath::VInterpConstantTo(CurrentLoc, TargetLoc, DeltaTime, MoveSpeed);
+	SetActorLocation(NewLoc);
+
+	FVector Direction = (TargetLoc - CurrentLoc).GetSafeNormal();
+	if (!Direction.IsNearlyZero())
 	{
-		TargetMarkerWidget->SetVisibility(bIsSelected);
+		FRotator TargetRot = FRotationMatrix::MakeFromX(Direction).Rotator();
+		TargetRot.Pitch = 0.0f;
+		TargetRot.Yaw = 0.0f;
+		FRotator NewRot = FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 15.0f);
+
+		SetActorRotation(NewRot);
 	}
+
+	return NewLoc.Equals(TargetLoc, 10.0f);
 }
 
-void ABattleUnit::StartAttack(ABattleUnit* Target, float FinalDamage, USkillDataAsset* SkillAsset)
+void ABattleUnit::AnimNotify_OnHit()
 {
-	if (!Target || !SkillAsset) return;
-
-	PendingTarget = Target;
-	PendingDamage = FinalDamage;
-	CurrentSkill = SkillAsset;
-	OriginalLocation = GetActorLocation();
-	OriginalRotation = GetActorRotation();
-
-	if (SkillAsset->SkillType == ESkillType::Melee)
-	{
-		FVector TargetLoc = Target->GetActorLocation();
-		TargetLoc.Z = GetActorLocation().Z;
-
-		FVector Direction = (TargetLoc - GetActorLocation()).GetSafeNormal();
-
-		float MyRadius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-		float TargetRadius = Target->GetCapsuleComponent()->GetScaledCapsuleRadius();
-		float StopDist = MyRadius + TargetRadius + 50.0f;
-
-		MoveDestination = TargetLoc - (Direction * StopDist);
-
-		ActionState = EUnitActionState::MoveToTarget;
-	}
-	else
-	{
-		ActionState = EUnitActionState::Attacking;
-		PlayAttackMontage();
-	}
-}
-
-void ABattleUnit::OnAttackHit()
-{
-	if (PendingTarget && PendingTarget->IsValidLowLevel())
-	{
-		PendingTarget->TakeDamage(PendingDamage, FDamageEvent(), GetController(), this);
-		UE_LOG(LogTemp, Warning, TEXT("Attack! %f Damage"), PendingDamage);
-	}
-}
-
-void ABattleUnit::OnDodgeBegin()
-{
-	bIsDodge = true;
-}
-
-void ABattleUnit::OnDodgeEnd()
-{
-	bIsDodge = false;
-}
-
-void ABattleUnit::OnAttackAnimationEnd(UAnimMontage* Montage, bool bInterrupted)
-{
-	if (CurrentSkill && CurrentSkill->SkillType == ESkillType::Melee)
-	{
-		ActionState = EUnitActionState::ReturnToPos;
-	}
-	else
-	{
-		ActionState = EUnitActionState::Idle;
-		ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
-		if (BattleGameMode)
-		{
-			BattleGameMode->ProcessNextTurn();
-		}
-	}
-}
-
-float ABattleUnit::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	if (!StatComponent) return 0.0f;
-	if (bIsDodge) return 0.0f;
-
-	float ActualDamage = StatComponent->ApplyDamage(DamageAmount);
 	
-	UAnimMontage* HitMontage = CachedCharacterDataAsset->HitMontage.LoadSynchronous();
-	if (!HitMontage) return ActualDamage;
-	PlayAnimMontage(HitMontage);
-
-	UE_LOG(LogTemp, Warning, TEXT("[%s] Took %.1f Damage! Left HP: %.1f"), *GetName(), ActualDamage, StatComponent->GetCurrentHealth());
-
-	if (StatComponent->GetCurrentHealth() <= 0)
-	{
-		Die();
-	}
-
-	return ActualDamage;
-}
-
-void ABattleUnit::Die()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Die: %s"), *GetName());
-
-	ActionState = EUnitActionState::Die;
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ABattleGameMode* BattleGameMode = Cast<ABattleGameMode>(GetWorld()->GetAuthGameMode());
-}
-
-void ABattleUnit::Dodge()
-{
-	UAnimMontage* DodgeMontage = CachedCharacterDataAsset->DodgeMontage.LoadSynchronous();
-	if (!DodgeMontage) return;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance) return;
-
-	OnDodgeBegin();
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted)
-		{
-			this->OnDodgeEnd();
-		});
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
-}
-
-void ABattleUnit::PlayAttackMontage()
-{
-	if (!CurrentSkill || CurrentSkill->SkillMontage.IsNull())
-	{
-		OnAttackHit();
-		OnAttackAnimationEnd(nullptr, false);
-		return;
-	}
-
-	UAnimMontage* Montage = CurrentSkill->SkillMontage.LoadSynchronous();
-	if (Montage)
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			AnimInstance->Montage_Play(Montage);
-
-			FOnMontageEnded EndDelegate;
-			EndDelegate.BindUObject(this, &ABattleUnit::OnAttackAnimationEnd);
-			AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
-			return;
-		}
-	}
-
-	OnAttackHit();
-	OnAttackAnimationEnd(nullptr, false);
-}
-
-void ABattleUnit::PreloadAssetsFromSkills()
-{
-	if (!SkillComponent) return;
-
-	PreloadedAssets.Empty();
-
-	const TArray<TObjectPtr<USkillDataAsset>>& MySkills = SkillComponent->GetSkillList();
-
-	for (const auto& Skill : MySkills)
-	{
-		if (!Skill) continue;
-
-		if (!Skill->SkillMontage.IsNull())
-		{
-			PreloadedAssets.Add(Skill->SkillMontage.LoadSynchronous());
-		}
-
-		if (!Skill->ProjectileClass.IsNull())
-		{
-			PreloadedAssets.Add(Skill->ProjectileClass.LoadSynchronous());
-		}
-	}
 }

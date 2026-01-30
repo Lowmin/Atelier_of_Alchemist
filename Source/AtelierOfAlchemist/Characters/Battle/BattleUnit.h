@@ -12,14 +12,28 @@ class UWidgetComponent;
 class UPlayerRuntimeData;
 class USkillDataAsset;
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnUnitTurnFinished, ABattleUnit*, Unit);
+
+struct FBattleContext
+{
+	UPROPERTY()
+	ABattleUnit* Target;
+
+	UPROPERTY()
+	class USkillDataAsset* Skill;
+
+	FVector DefaultLoc;
+	FRotator DefaultRot;
+};
+
 UENUM(BlueprintType)
-enum class EUnitActionState : uint8
+enum class EUnitCombatState : uint8
 {
 	Idle,
-	MoveToTarget,
+	Approach,
 	Attacking,
 	ReturnToPos,
-	Die
+	Dead
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -35,25 +49,11 @@ public:
 	void InitializeAsPlayerUnit(UPlayerRuntimeData* RuntimeData);
 	void InitializeAsEnemyUnit(UEnemyDataAsset* DataAsset, int32 Level);
 
-	void SetTargetSelected(bool bIsSelected);
-	void StartAttack(ABattleUnit* Target, float FinalDamage, USkillDataAsset* SkillAsset);
-	void Die();
-
-	void Dodge();
-
 	UFUNCTION(BlueprintCallable)
-	void OnAttackHit();
+	void AnimNotify_OnHit();
 
-	UFUNCTION(BlueprintCallable)
-	void OnDodgeBegin();
-
-	UFUNCTION(BlueprintCallable)
-	void OnDodgeEnd();
-
-	UFUNCTION(BlueprintCallable)
-	EUnitActionState GetUnitActionState() { return ActionState; }
-
-	USkillListComponent* GetSkillComponent() { return SkillComponent; }
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move")
+	float MoveSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkillListComponent> SkillComponent;
@@ -74,25 +74,14 @@ public:
 	TObjectPtr<class UCameraComponent> UnitCamera;
 
 protected:
-	UFUNCTION()
-	void OnAttackAnimationEnd(UAnimMontage* Montage, bool bInterrupted);
+	EUnitCombatState CombatState;
+	void SetCombatState(EUnitCombatState NewCombatState);
 
-	void PlayAttackMontage();
-	void PreloadAssetsFromSkills();
+	FVector DefaultLoc;
+	FRotator DefaultRot;
+	FVector TargetLoc;
 
-	UPROPERTY()
-	TObjectPtr<ABattleUnit> PendingTarget;
-
-	UPROPERTY()
-	TObjectPtr<USkillDataAsset> CurrentSkill;
-
-	FVector MoveDestination;
-	float PendingDamage;
-	FVector OriginalLocation;
-	FRotator OriginalRotation;
-	EUnitActionState ActionState;
-
-	TArray<UObject*> PreloadedAssets;
-	UCharacterDataAsset* CachedCharacterDataAsset;
-	bool bIsDodge = false;
+	ABattleUnit* TargetUnit;
+	float CalculateDamage(ABattleUnit* Target, USkillDataAsset* Skill);
+	bool MoveToTarget(FVector TargetLoc, float DeltaTime);
 };
